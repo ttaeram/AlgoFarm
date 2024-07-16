@@ -7,7 +7,6 @@ pipeline {
                 checkout scm
             }
         }
-
         stage('Build Backend') {
             steps {
                 dir('back') {
@@ -16,37 +15,32 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy Backend') {
+        stage('Build and Deploy Backend') {
             steps {
                 script {
                     dir('back') {
-                        def jarFile = sh(script: "ls build/libs | grep 'SNAPSHOT.jar' | head -n 1", returnStdout: true).trim()
-                        def runningPid = sh(script: "pgrep -f $jarFile || echo ''", returnStdout: true).trim()
-
-                        if (runningPid) {
-                            sh "kill $runningPid"
-                            sleep 5 // 프로세스가 완전히 종료되기를 기다립니다
-                        }
-
-                        sh "nohup java -jar build/libs/$jarFile > ../nohup.out 2>&1 &"
+                        // 도커 이미지 빌드
+                	sh 'docker build -t jenkins-test .'
+                
+                	// 기존 컨테이너 중지 및 제거
+                	sh 'docker stop jenkins-test || true'
+                	sh 'docker rm jenkins-test || true'
+                
+                	// 새 컨테이너 실행
+                	sh 'docker run -d --name jenkins-test -p 8081:8081 jenkins-test'
                     }
                 }
             }
         }
-
         stage('Verify Backend') {
             steps {
                 script {
-                    dir('back') {
-                        def jarFile = sh(script: "ls build/libs | grep 'SNAPSHOT.jar' | head -n 1", returnStdout: true).trim()
-                        def isRunning = sh(script: "pgrep -f $jarFile", returnStatus: true) == 0
-
-                        if (isRunning) {
-                            echo "Backend application is running successfully."
-                        } else {
-                            error "Backend application failed to start."
-                        }
+                    // 컨테이너가 실행 중인지 확인
+                    def isRunning = sh(script: "docker ps -q -f name=my-spring-app", returnStatus: true) == 0
+                    if (isRunning) {
+                        echo "Backend application is running successfully."
+                    } else {
+                        error "Backend application failed to start."
                     }
                 }
             }
