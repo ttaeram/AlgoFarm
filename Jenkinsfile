@@ -6,6 +6,12 @@ pipeline {
                 cleanWs()
             }
         }
+        stage('Git Setup') {
+            steps {
+                sh 'git config --global --add safe.directory /var/jenkins_home/workspace/SpringBootPipe'
+                sh 'chown -R jenkins:jenkins .'
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout scm
