@@ -84,14 +84,18 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished'
-	    cleanWs()
+        node {
+                echo 'Pipeline finished'
+                cleanWs()
+            }
         }
         success {
             echo 'Successfully deployed'
         }
         failure {
-            echo 'Deployment failed'
+            node {
+                echo 'Deployment failed'
+            }
         }
     }
 }
