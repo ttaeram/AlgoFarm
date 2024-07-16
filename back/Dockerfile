@@ -11,7 +11,7 @@ FROM openjdk:17-slim
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 JAR 파일을 복사
-COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
+COPY --from=build /home/gradle/src/build/libs/your-app.jar app.jar
 
 # 애플리케이션 프로파일 설정 (옵션)
 ENV SPRING_PROFILES_ACTIVE=production
