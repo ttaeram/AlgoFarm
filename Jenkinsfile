@@ -1,9 +1,5 @@
 pipeline {
     agent any
-    environment {
-        GIT_URL = 'https://lab.ssafy.com/s11-webmobile1-sub2/S11P12A302.git'
-        GIT_CREDENTIALS_ID = 'asdf'  // 실제 크리덴셜 ID로 변경
-    }
     stages {
         stage('Cleanup Workspace') {
             steps {
