@@ -19,8 +19,8 @@ public class ChatController {
     }
 
     /**
-     * 채팅방에 입장하는 API, 그룹 가입할 때 자동 호출?
-     * @param chatroomId
+     * 채팅방에 입장하는 API, 그룹 가입할 때 자동 호출
+     * @param chatroomId 채팅방 ID(=그룹 아이디)
      * @return ResponseEntity<String>
      */
     @PostMapping("/{chatroomId}/join")
@@ -29,8 +29,26 @@ public class ChatController {
         return ResponseEntity.ok("Joined chatroomId " + chatroomId);
     }
 
+    /**
+     * 과거 채팅을 가져오는 API
+     * @param chatroomId 채팅방 ID(= 그룹 아이디)
+     * @return 최근 30일간 채팅 리스트
+     */
     @GetMapping("/{chatroomId}/all")
     public ResponseEntity<List<ChatMessage>> getAll(@PathVariable String chatroomId) {
         return ResponseEntity.ok(chatService.getAllChatMessages(Long.parseLong(chatroomId)));
+    }
+
+    /**
+     * 채팅을 전송하는 API
+     * @param chatroomId 채팅방 ID(= 그룹 아이디)
+     * @param chatMessage 채팅 내용.
+     * @return ResponseEntity<String>
+     */
+    @PostMapping("/{chatroomId}/send")
+    public ResponseEntity<String> send(@PathVariable String chatroomId, @RequestBody ChatMessage chatMessage) {
+        messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessage);
+        chatService.saveChatMessage(chatMessage);
+        return ResponseEntity.ok("Sent chatroomId " + chatroomId);
     }
 }

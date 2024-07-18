@@ -17,4 +17,8 @@ public class ChatService {
     public List<ChatMessage> getAllChatMessages(long groupId) {
         return chatMessageRepository.findByGroupId(groupId);
     }
+
+    public void saveChatMessage(ChatMessage chatMessage) {
+        chatMessageRepository.save(chatMessage);
+    }
 }
