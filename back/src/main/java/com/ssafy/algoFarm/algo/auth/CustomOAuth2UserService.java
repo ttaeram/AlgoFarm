@@ -1,8 +1,8 @@
-package org.example.algo.auth;
+package com.ssafy.algoFarm.algo.auth;
 
-import org.example.algo.user.User;
-import org.example.algo.user.UserProfile;
-import org.example.algo.user.UserRepository;
+import com.ssafy.algoFarm.algo.user.UserProfile;
+import com.ssafy.algoFarm.algo.user.UserRepository;
+import com.ssafy.algoFarm.algo.user.entity.User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;

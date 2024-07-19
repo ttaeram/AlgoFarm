@@ -1,4 +1,4 @@
-package org.example.algo.user;
+package com.ssafy.algoFarm.algo.user;
 
 public record UserProfile(String oAuthId, String name, String email) {
     // 레코드를 사용하여 불변 데이터 객체를 생성합니다.
