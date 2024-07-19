@@ -3,13 +3,13 @@
   "name": "Your Extension Name",
   "version": "1.0",
   "description": "Your extension description",
+  "key": "nhnfofalogllmdmccolnleoflakkgihf",
   "action": {
     "default_popup": "popup.html"
   },
   "permissions": ["identity"],
   "background": {
-    "service_worker": "static/js/background.js",
-    "key": "dmhokakakkchffkbcdpajfgijelhmbnj"
+    "service_worker": "static/js/background.js"
 
   },
   "oauth2": {
