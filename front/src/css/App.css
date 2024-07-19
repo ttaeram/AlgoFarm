@@ -1,0 +1,45 @@
+.App {
+  text-align: center;
+  width: 300px;
+  padding: 20px;
+}
+body {
+  min-width: 300px;
+  min-height: 200px;
+}
+
+.google-login-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.google-login-button img {
+  width: 191px;
+  height: 46px;
+}
+.App-header {
+  background-color: #282c34;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.login-button {
+  background-color: #4285F4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.login-button:hover {
+  background-color: #357AE8;
+}
