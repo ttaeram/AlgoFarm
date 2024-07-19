@@ -1,6 +1,6 @@
 package org.example.algo.auth;
 
-import org.example.algo.user.UserRepository;
+import com.ssafy.algoFarm.algo.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
