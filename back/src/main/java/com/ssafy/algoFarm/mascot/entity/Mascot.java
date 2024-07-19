@@ -1,0 +1,26 @@
+package com.ssafy.algoFarm.mascot.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Getter
+@NoArgsConstructor
+public class Mascot {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long mascotId;
+
+    private String name;
+
+    private String profileUrl;
+
+    @OneToMany(mappedBy = "mascot")
+    private List<Mascot> mascots;
+
+    @OneToMany(mappedBy = "mascot")
+    private List<MascotMotion> mascotMotions;
+}

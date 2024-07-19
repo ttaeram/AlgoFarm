@@ -1,4 +1,4 @@
-package org.example.algo.test;
+package com.ssafy.algoFarm.algo.test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

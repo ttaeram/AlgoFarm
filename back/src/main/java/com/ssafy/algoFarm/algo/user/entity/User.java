@@ -1,9 +1,12 @@
-package org.example.algo.user;
+package com.ssafy.algoFarm.algo.user.entity;
 
+import com.ssafy.algoFarm.chat.entity.Message;
+import com.ssafy.algoFarm.group.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -12,9 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,4 +50,12 @@ public class User {
 
     @Column(name = "provider")
     private String provider;
+
+    @OneToMany(mappedBy = "user")
+    private List<Message> messages;
+
+    @OneToMany(mappedBy = "user")
+    private List<Member> members;
+
+
 }
