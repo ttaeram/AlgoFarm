@@ -47,6 +47,8 @@ public class ChatController {
      */
     @PostMapping("/{chatroomId}/send")
     public ResponseEntity<String> send(@PathVariable String chatroomId, @RequestBody ChatMessage chatMessage) {
+        System.out.println(chatMessage.toString());
+
         messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessage);
         chatService.saveChatMessage(chatMessage);
         return ResponseEntity.ok("Sent chatroomId " + chatroomId);
