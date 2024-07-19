@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Your Extension Name",
+  "version": "1.0",
+  "description": "Your extension description",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["identity"],
+  "background": {
+    "service_worker": "static/js/background.js"
+  },
+  "oauth2": {
+    "client_id": "791103562299-ebih2865pdmhgde8enq8ha96chi898da.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  }
+}
