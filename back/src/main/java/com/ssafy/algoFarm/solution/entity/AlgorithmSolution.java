@@ -16,8 +16,8 @@ public class AlgorithmSolution {
     private int AlgorithmSolutionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private User users;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     //문제제목
     private String problemTitle;

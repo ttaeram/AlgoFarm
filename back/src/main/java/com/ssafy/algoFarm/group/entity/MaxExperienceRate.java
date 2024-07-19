@@ -13,4 +13,6 @@ public class MaxExperienceRate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "rate_id")
     private Long id;
+
+    private Integer rate;
 }

@@ -13,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "study_group")
 @NoArgsConstructor
 public class Group {
     @Id
@@ -20,11 +21,11 @@ public class Group {
     private Long groupId;
 
     @ManyToOne
-    @JoinColumn(name="moscot_id")
+    @JoinColumn(name="mascot_id")
     private Mascot mascot;
 
     @CreationTimestamp
-    private LocalDateTime creatAt;
+    private LocalDateTime createdAt;
 
     //현재 참가 인원
     @ColumnDefault("0")

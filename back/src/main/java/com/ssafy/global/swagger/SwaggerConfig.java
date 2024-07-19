@@ -1,4 +1,4 @@
-package com.ssafy.algoFarm.algo.swagger;
+package com.ssafy.global.swagger;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

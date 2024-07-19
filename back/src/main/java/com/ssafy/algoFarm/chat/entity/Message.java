@@ -28,6 +28,6 @@ public class Message {
 
     private LocalDateTime createAt;
 
-    //컬럼추가
+    private String nickname;
 
 }

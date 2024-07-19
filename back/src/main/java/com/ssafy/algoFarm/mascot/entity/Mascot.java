@@ -1,5 +1,6 @@
 package com.ssafy.algoFarm.mascot.entity;
 
+import com.ssafy.algoFarm.group.entity.Group;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class Mascot {
     private String profileUrl;
 
     @OneToMany(mappedBy = "mascot")
-    private List<Mascot> mascots;
+    private List<Group> mascots;
 
     @OneToMany(mappedBy = "mascot")
     private List<MascotMotion> mascotMotions;

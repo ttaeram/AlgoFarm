@@ -2,6 +2,7 @@ package com.ssafy.algoFarm.algo.user.entity;
 
 import com.ssafy.algoFarm.chat.entity.Message;
 import com.ssafy.algoFarm.group.entity.Member;
+import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -56,6 +57,9 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Member> members;
+    
+    @OneToMany(mappedBy = "user")
+    private List<AlgorithmSolution> solutions;
 
 
 }
