@@ -8,7 +8,9 @@
   },
   "permissions": ["identity"],
   "background": {
-    "service_worker": "static/js/background.js"
+    "service_worker": "static/js/background.js",
+    "key": "dmhokakakkchffkbcdpajfgijelhmbnj"
+
   },
   "oauth2": {
     "client_id": "791103562299-ebih2865pdmhgde8enq8ha96chi898da.apps.googleusercontent.com",
