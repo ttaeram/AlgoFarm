@@ -1,5 +1,7 @@
-package org.example.algo.chat;
+package com.ssafy.algoFarm.chat;
 
+import com.ssafy.algoFarm.chat.entity.ChatMessage;
+import com.ssafy.algoFarm.chat.repository.ChatMessageRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

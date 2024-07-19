@@ -1,4 +1,4 @@
-package org.example.algo.chat;
+package com.ssafy.algoFarm.chat.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

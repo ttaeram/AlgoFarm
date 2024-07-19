@@ -1,5 +1,6 @@
-package org.example.algo.chat;
+package com.ssafy.algoFarm.chat;
 
+import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;

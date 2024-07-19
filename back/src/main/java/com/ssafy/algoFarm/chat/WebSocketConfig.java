@@ -1,4 +1,4 @@
-package org.example.algo.chat;
+package com.ssafy.algoFarm.chat;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
