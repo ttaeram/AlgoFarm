@@ -1,7 +1,7 @@
 import React from 'react';
 import Popup from './components/Popup';
 
-const App: React.FC = () => {
+const App = () => {
     return (
         <div className="App">
             <Popup />

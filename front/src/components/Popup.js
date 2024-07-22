@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { signIn, signOut, getServerUserInfo, UserInfo, exchangeTokenForJwt } from '../services/auth';
+import { signIn, signOut, getServerUserInfo, exchangeTokenForJwt } from '../services/auth';
 
-const Popup: React.FC = () => {
-    const [user, setUser] = useState<UserInfo | null>(null);
-    const [jwt, setJwt] = useState<string | null>(null);
+const Popup = () => {
+    const [user, setUser] = useState(null);
+    const [jwt, setJwt] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSignIn = async () => {
