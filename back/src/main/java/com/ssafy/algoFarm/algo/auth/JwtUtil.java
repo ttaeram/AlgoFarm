@@ -1,4 +1,4 @@
-package org.example.algo.auth;
+package com.ssafy.algoFarm.algo.auth;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;

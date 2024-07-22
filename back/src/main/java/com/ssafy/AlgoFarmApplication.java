@@ -1,13 +1,11 @@
-package org.example.algo;
+package com.ssafy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JenkinsTestApplication {
-
+public class AlgoFarmApplication {
     public static void main(String[] args) {
-        SpringApplication.run(JenkinsTestApplication.class, args);
+        SpringApplication.run(AlgoFarmApplication.class, args);
     }
-
 }

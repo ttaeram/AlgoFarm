@@ -1,22 +1,24 @@
-package org.example.algo.user;
+package com.ssafy.algoFarm.algo.user.entity;
 
+import com.ssafy.algoFarm.chat.entity.ChatMessage;
+import com.ssafy.algoFarm.group.entity.Member;
+import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
-@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "oauth_id")
@@ -49,4 +51,15 @@ public class User {
 
     @Column(name = "provider")
     private String provider;
+
+    @OneToMany(mappedBy = "user")
+    private List<ChatMessage> messages;
+
+    @OneToMany(mappedBy = "user")
+    private List<Member> members;
+    
+    @OneToMany(mappedBy = "user")
+    private List<AlgorithmSolution> solutions;
+
+
 }

@@ -1,4 +1,4 @@
-package org.example.algo.auth;
+package com.ssafy.algoFarm.algo.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

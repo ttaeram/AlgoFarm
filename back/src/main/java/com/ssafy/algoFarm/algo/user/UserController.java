@@ -1,6 +1,7 @@
-package org.example.algo.user;
+package com.ssafy.algoFarm.algo.user;
 
-import org.example.algo.auth.CustomOAuth2User;
+import com.ssafy.algoFarm.algo.user.entity.User;
+import com.ssafy.algoFarm.algo.auth.CustomOAuth2User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

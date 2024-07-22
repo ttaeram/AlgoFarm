@@ -1,8 +1,8 @@
-package org.example.algo.auth;
+package com.ssafy.algoFarm.algo.auth;
 
-import org.example.algo.user.User;
-import org.example.algo.user.UserProfile;
-import org.example.algo.user.UserRepository;
+import com.ssafy.algoFarm.algo.user.UserProfile;
+import com.ssafy.algoFarm.algo.user.UserRepository;
+import com.ssafy.algoFarm.algo.user.entity.User;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,31 +46,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         return new CustomOAuth2User(oAuth2User, user);
     }
-    public OAuth2User loadUserByToken(String token) {
-        // Google의 userinfo 엔드포인트 URL
-        String userInfoEndpointUri = "https://www.googleapis.com/oauth2/v3/userinfo";
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        HttpEntity<String> entity = new HttpEntity<>("", headers);
-
-        ResponseEntity<Map> response = restTemplate.exchange(userInfoEndpointUri, HttpMethod.GET, entity, Map.class);
-        Map<String, Object> userAttributes = response.getBody();
-
-        UserProfile userProfile = extractUserProfile("google", userAttributes);
-        User user = saveOrUpdateUser(userProfile);
-        //System.out.println("user = " + user);
-        return new CustomOAuth2User(new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                userAttributes, "sub"), user);
-    }
     private UserProfile extractUserProfile(String registrationId, Map<String, Object> attributes) {
         if ("google".equals(registrationId)) {
             return new UserProfile(
                     (String) attributes.get("sub"),
                     (String) attributes.get("name"),
-                    (String) attributes.get("email")
+                    (String) attributes.get("email"),
+                    attributes  // 전체 attributes 맵 전달
             );
         }
         throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + registrationId);
@@ -102,5 +85,34 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                             .build();
                     return userRepository.save(newUser);
                 });
+    }
+    public OAuth2User loadUserByToken(String token) {
+        UserProfile userProfile = getUserInfoFromGoogle(token);
+        User user = saveOrUpdateUser(userProfile);
+        return new CustomOAuth2User(new DefaultOAuth2User(
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
+                userProfile.getAttributes(),
+                "sub"), user);
+    }
+    private UserProfile getUserInfoFromGoogle(String token) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                HttpMethod.GET,
+                entity,
+                Map.class
+        );
+
+        Map<String, Object> attributes = response.getBody();
+        return new UserProfile(
+                (String) attributes.get("sub"),
+                (String) attributes.get("name"),
+                (String) attributes.get("email"),
+                attributes  // 원본 속성 맵을 저장
+        );
     }
 }
