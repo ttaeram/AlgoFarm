@@ -49,7 +49,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // slf4j 의존성
-    implementation 'org.slf4j:slf4j-api:1.7.25'
+    //implementation 'org.slf4j:slf4j-api:1.7.25'
 
 }
 
