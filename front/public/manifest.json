@@ -9,10 +9,10 @@
   },
   "permissions": [
     "identity",
-    "http://localhost:8080/"
+    "http://i11a302.p.ssafy.io:8080"
   ],
   "host_permissions": [
-    "http://localhost:8080/"
+    "http://i11a302.p.ssafy.io:8080"
   ],
   "background": {
     "service_worker": "static/js/background.js"
