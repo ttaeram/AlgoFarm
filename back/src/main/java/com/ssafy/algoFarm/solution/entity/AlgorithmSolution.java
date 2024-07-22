@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 public class AlgorithmSolution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int AlgorithmSolutionId;
+    @Column(name = "algorithm_solution_id")
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

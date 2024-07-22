@@ -1,4 +1,4 @@
-package com.ssafy.algoFarm.chat;
+package com.ssafy.algoFarm.chat.service;
 
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.chat.repository.ChatMessageRepository;
