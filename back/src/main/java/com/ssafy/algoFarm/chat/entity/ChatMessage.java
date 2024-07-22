@@ -1,25 +1,34 @@
 package com.ssafy.algoFarm.chat.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.ssafy.algoFarm.group.entity.Group;
+import com.ssafy.algoFarm.algo.user.entity.User;
+import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
-@ToString
+@NoArgsConstructor
 public class ChatMessage {
     @Id
-    @GeneratedValue
-    private long messageId;
-    private long userId;
-    private long groupId;
-    private String nickname;
-    private Timestamp date;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "message_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
+
     private String content;
+
+    private LocalDateTime createAt;
+
+    private String nickname;
+
 }
