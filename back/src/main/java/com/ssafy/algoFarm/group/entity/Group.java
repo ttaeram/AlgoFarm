@@ -5,6 +5,7 @@ import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -60,4 +61,17 @@ public class Group {
 
     @OneToMany(mappedBy = "group")
     private List<Member> members;
+
+    public void setMascot(Mascot mascot){
+        if(this.mascot != null){
+            this.mascot.getGroups().remove(this);
+        }
+        this.mascot = mascot;
+        mascot.getGroups().add(this);
+    }
+
+    //그룹 생성시 사용
+    public void setName(String name){
+        this.name = name;
+    }
 }

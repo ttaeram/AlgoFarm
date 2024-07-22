@@ -23,4 +23,12 @@ public class MascotMotion {
 
     private Integer accessLevel;
 
+    public void setMascot(Mascot mascot) {
+        if(mascot != null){
+            this.mascot.getMascotMotions().remove(this);
+        }
+        this.mascot = mascot;
+        mascot.getMascotMotions().add(this);
+    }
+
 }

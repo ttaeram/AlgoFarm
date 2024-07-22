@@ -38,4 +38,27 @@ public class Member {
     @ColumnDefault("false")
     private Boolean isLeader;
 
+    public void setUser(User user){
+        if(this.user != null){
+            this.user.getMembers().remove(this);
+        }
+        this.user = user;
+        user.getMembers().add(this);
+    }
+
+    public void setGroup(Group group){
+        if(this.group != null){
+            this.group.getMembers().remove(this);
+        }
+        this.group = group;
+        group.getMembers().add(this);
+    }
+
+    public void setIsLeader(Boolean isLeader) {
+        this.isLeader = isLeader;
+    }
+
+    public void setNickname(String nickname){
+        this.nickname = nickname;
+    }
 }
