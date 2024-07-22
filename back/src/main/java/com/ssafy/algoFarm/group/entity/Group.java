@@ -10,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -57,10 +58,10 @@ public class Group {
     private Integer level;
 
     @OneToMany(mappedBy = "group")
-    private List<ChatMessage> messages;
+    private List<ChatMessage> messages = new ArrayList<>();
 
     @OneToMany(mappedBy = "group")
-    private List<Member> members;
+    private List<Member> members = new ArrayList<>();
 
     public void setMascot(Mascot mascot){
         if(this.mascot != null){
