@@ -3,6 +3,7 @@ package com.ssafy.algoFarm.algo.auth;
 import com.ssafy.algoFarm.algo.user.UserProfile;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.algo.auth.ErrorResponse;
 import org.example.algo.auth.GoogleTokenRequest;
 import org.example.algo.auth.JwtResponse;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Auth API", description = "Sample API for demonstration")
 public class AuthController {
 
     @Autowired
