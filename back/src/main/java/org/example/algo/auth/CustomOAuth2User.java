@@ -1,5 +1,6 @@
 package org.example.algo.auth;
 
+import lombok.ToString;
 import org.example.algo.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -7,6 +8,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.util.Collection;
 import java.util.Map;
 
+@ToString
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuth2User oauth2User;

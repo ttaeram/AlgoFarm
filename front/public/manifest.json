@@ -7,7 +7,13 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["identity"],
+  "permissions": [
+    "identity",
+    "http://localhost:8080/"
+  ],
+  "host_permissions": [
+    "http://localhost:8080/"
+  ],
   "background": {
     "service_worker": "static/js/background.js"
 

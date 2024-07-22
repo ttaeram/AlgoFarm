@@ -18,6 +18,7 @@ public class UserController {
         UserProfile userProfile = new UserProfile(user.getOAuthId(), user.getName(), user.getEmail());
         return ResponseEntity.ok(userProfile);
     }
+
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> adminOnly() {
