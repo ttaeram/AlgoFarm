@@ -3,6 +3,8 @@ package com.ssafy.algoFarm.algo.auth;
 import com.ssafy.algoFarm.algo.user.UserProfile;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.algo.auth.ErrorResponse;
 import org.example.algo.auth.GoogleTokenRequest;
@@ -12,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -119,5 +124,32 @@ public class AuthController {
         }
         logger.warn("Invalid token received");
         return ResponseEntity.badRequest().body(new ErrorResponse("invalid_token", "The provided token is invalid"));
+    }
+    @GetMapping("/test")
+    @Operation(summary = "인증 테스트", description = "현재 사용자의 인증 상태를 확인합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> testAuth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            String email = null;
+
+            if (principal instanceof UserDetails) {
+                email = ((UserDetails)principal).getUsername();
+            } else if (principal instanceof OAuth2User) {
+                email = ((OAuth2User) principal).getAttribute("email");
+            } else if (principal instanceof String) {
+                // JWT 토큰을 사용하는 경우, principal이 문자열(일반적으로 subject)일 수 있습니다.
+                email = (String) principal;
+            }
+
+            if (email != null) {
+                return ResponseEntity.ok("인증된 사용자입니다. 이메일: " + email);
+            } else {
+                return ResponseEntity.ok("인증된 사용자입니다. 이메일을 찾을 수 없습니다.");
+            }
+        } else {
+            return ResponseEntity.status(401).body("인증되지 않은 사용자입니다.");
+        }
     }
 }
