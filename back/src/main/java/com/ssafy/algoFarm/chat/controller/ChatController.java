@@ -1,5 +1,6 @@
-package com.ssafy.algoFarm.chat;
+package com.ssafy.algoFarm.chat.controller;
 
+import com.ssafy.algoFarm.chat.service.ChatService;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;

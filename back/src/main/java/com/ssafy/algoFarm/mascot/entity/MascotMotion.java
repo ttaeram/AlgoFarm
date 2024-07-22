@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 public class MascotMotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long mascotMotionId;
+    @Column(name="mascot_motion_id")
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="mascot_id")

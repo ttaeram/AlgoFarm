@@ -1,6 +1,6 @@
 package com.ssafy.algoFarm.group.entity;
 
-import com.ssafy.algoFarm.chat.entity.Message;
+import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,7 +18,8 @@ import java.util.List;
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long groupId;
+    @Column(name = "group_id")
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="mascot_id")
@@ -55,7 +56,7 @@ public class Group {
     private Integer level;
 
     @OneToMany(mappedBy = "group")
-    private List<Message> messages;
+    private List<ChatMessage> messages;
 
     @OneToMany(mappedBy = "group")
     private List<Member> members;

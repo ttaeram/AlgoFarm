@@ -13,7 +13,8 @@ import java.util.List;
 public class Mascot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long mascotId;
+    @Column(name = "mascot_id")
+    private Long id;
 
     private String name;
 

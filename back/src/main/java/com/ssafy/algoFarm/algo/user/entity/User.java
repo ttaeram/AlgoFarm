@@ -1,6 +1,6 @@
 package com.ssafy.algoFarm.algo.user.entity;
 
-import com.ssafy.algoFarm.chat.entity.Message;
+import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +18,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "oauth_id")
@@ -53,7 +53,7 @@ public class User {
     private String provider;
 
     @OneToMany(mappedBy = "user")
-    private List<Message> messages;
+    private List<ChatMessage> messages;
 
     @OneToMany(mappedBy = "user")
     private List<Member> members;
