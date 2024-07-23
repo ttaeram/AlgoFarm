@@ -1,17 +1,30 @@
 package com.ssafy.algoFarm.group.controller;
 
+import com.ssafy.algoFarm.algo.user.UserInfo;
 import com.ssafy.algoFarm.group.dto.request.CreateGroupReqDto;
 import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
 import com.ssafy.algoFarm.group.service.GroupService;
 import com.ssafy.global.response.DataResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,5 +52,29 @@ public class GroupController {
         log.info("response={}",response);
         return new ResponseEntity<>(DataResponse.of(HttpStatus.OK,"그룹이 생성되었습니다.", response), HttpStatus.OK);
     }
+
+    @GetMapping("api/user/group")
+    @Operation(summary = "Get user's group")
+    @ApiResponse(responseCode = "200", description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = Long.class)))
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<?>> getUserGroups(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Long> groupIds = groupService.findUserGroupIds(email, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("groupIds", groupIds.getContent());
+        response.put("currentPage", groupIds.getNumber());
+        response.put("totalItems", groupIds.getTotalElements());
+        response.put("totalPages", groupIds.getTotalPages());
+
+        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK, "사용자의 그룹을 찾았습니다.", response), HttpStatus.OK);
+    }
+
 
 }

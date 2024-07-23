@@ -9,12 +9,19 @@ import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.group.repository.MemberRepository;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import com.ssafy.algoFarm.mascot.repository.MascotRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -62,5 +69,36 @@ public class GroupService {
         newGroup.countUpCurrentNum();//현재 참가인원을 증가시킨다.
 
         return new CreateGroupResDto(groupId,groupName,inviteCode);
+    }
+
+    public Page<Long> findUserGroupIds(String email, Pageable pageable) {
+        Page<Member> memberPage = memberRepository.findByUserEmail(email, pageable);
+        List<Long> groupIds = memberPage.getContent().stream()
+                .map(member -> member.getGroup().getId())
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(groupIds, pageable, memberPage.getTotalElements());
+    }
+
+    @Transactional
+    public void addUserToGroup(String email, Long groupId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Group not found with id: " + groupId));
+
+        if (memberRepository.existsByUserAndGroup(user, group)) {
+            throw new IllegalStateException("User is already a member of this group");
+        }
+
+        Member member = new Member();
+        member.setUser(user);
+        member.setGroup(group);
+        memberRepository.save(member);
+    }
+
+
+    public long getUserGroupsCount(String email) {
+        return memberRepository.countByUserEmail(email);
     }
 }
