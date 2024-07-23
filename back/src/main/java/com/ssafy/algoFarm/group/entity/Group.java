@@ -31,28 +31,26 @@ public class Group {
     private LocalDateTime createdAt;
 
     //현재 참가 인원
-    @ColumnDefault("0")
-    private Integer currentNum;
+    private Integer currentNum = 0;
 
     //최대 참가 인원
-    @ColumnDefault("10")
-    private Integer MaxNum;
+    private Integer MaxNum = 10;
 
     //그룹명
     private String name;
 
-    private String description;
+    private String description="";
 
     //초대코드
     private String code;
 
     //현재 경험치
     @ColumnDefault("0")
-    private Long currentExp;
+    private Long currentExp = 0L;
 
     //최대 경험치 -> 현재경험치가 최대 경험치가 되면 레벨업한다.
     @ColumnDefault("100")
-    private Long maxExp;
+    private Long maxExp = 100L;
 
     @ColumnDefault("1")
     private Integer level;
@@ -74,5 +72,14 @@ public class Group {
     //그룹 생성시 사용
     public void setName(String name){
         this.name = name;
+    }
+
+    public void countUpCurrentNum(){
+        //TODO 최대 참가 인원을 초과한 경우 예외처리 해줘야함.
+        this.currentNum++;
+    }
+
+    public void setCode(String code){
+        this.code = code;
     }
 }
