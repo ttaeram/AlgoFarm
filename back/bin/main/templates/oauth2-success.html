@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth 로그인 성공</title>
+    <style>
+        #tokenDisplay {
+            word-break: break-all;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f8f8f8;
+            margin: 20px 0;
+        }
+        #copyButton, #swaggerButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>로그인 성공!</h1>
+<p>아래의 토큰을 복사한 후, Swagger UI로 이동하여 사용하세요.</p>
+<div id="tokenDisplay"></div>
+<button id="copyButton">토큰 선택</button>
+<button id="swaggerButton">Swagger UI로 이동</button>
+
+<script>
+    let token;
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        token = urlParams.get('token');
+
+        if (token) {
+            document.getElementById('tokenDisplay').textContent = token;
+        } else {
+            console.error("토큰을 찾을 수 없습니다.");
+            document.getElementById('tokenDisplay').textContent = "토큰을 찾을 수 없습니다.";
+            document.getElementById('copyButton').disabled = true;
+        }
+    };
+
+    document.getElementById('copyButton').addEventListener('click', function() {
+        if (token) {
+            const range = document.createRange();
+            range.selectNodeContents(document.getElementById('tokenDisplay'));
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            alert('토큰이 선택되었습니다. Ctrl+C 또는 Cmd+C를 눌러 복사하세요.');
+        }
+    });
+
+    document.getElementById('swaggerButton').addEventListener('click', function() {
+        window.location.href = '/swagger-ui/index.html';
+    });
+</script>
+</body>
+</html>
