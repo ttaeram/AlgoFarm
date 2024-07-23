@@ -1,4 +1,4 @@
-package org.example.algo.user;
+package com.ssafy.algoFarm.algo.user;
 
 import lombok.*;
 
