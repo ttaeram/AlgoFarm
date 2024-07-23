@@ -1,15 +1,17 @@
-// src/services/auth.ts
-export interface UserInfo {
-    oAuthId: string;
-    name: string;
-    email: string;
-}
+/**
+ * @typedef {Object} UserInfo
+ * @property {string} oAuthId
+ * @property {string} name
+ * @property {string} email
+ */
 
-const SERVER_URL = 'http://localhost:8080';
+const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
 
-
-//구글로부터 엑세스 토큰 받아오는 함수
-export function signIn(): Promise<string> {
+/**
+ * 구글로부터 엑세스 토큰 받아오는 함수
+ * @returns {Promise<string>}
+ */
+export function signIn() {
     console.log('signIn function called at:', new Date().toISOString());
     return new Promise((resolve, reject) => {
         chrome.identity.getAuthToken({ interactive: true }, (token) => {
@@ -28,19 +30,27 @@ export function signIn(): Promise<string> {
     });
 }
 
-
-export function getUserInfo(token: string): Promise<UserInfo> {
+/**
+ * 사용자 정보를 받아오는 함수
+ * @param {string} token 
+ * @returns {Promise<UserInfo>}
+ */
+export function getUserInfo(token) {
     return fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
         headers: { Authorization: `Bearer ${token}` }
     }).then(response => {
         if (!response.ok) {
             throw new Error('Failed to fetch user info');
         }
-        return response.json() as Promise<UserInfo>;
+        return response.json();
     });
 }
 
-export function signOut(): Promise<void> {
+/**
+ * 로그아웃 함수
+ * @returns {Promise<void>}
+ */
+export function signOut() {
     return new Promise((resolve, reject) => {
         chrome.identity.clearAllCachedAuthTokens(() => {
             if (chrome.runtime.lastError) {
@@ -51,8 +61,13 @@ export function signOut(): Promise<void> {
         });
     });
 }
-// 구글 토큰을 우리 서버에 보내서 우리 서버의 엑세스 토큰을 받는 함수
-export async function exchangeTokenForJwt(token: string): Promise<string> {
+
+/**
+ * 구글 토큰을 우리 서버에 보내서 우리 서버의 엑세스 토큰을 받는 함수
+ * @param {string} token
+ * @returns {Promise<string>}
+ */
+export async function exchangeTokenForJwt(token) {
     try {
         const response = await fetch(`${SERVER_URL}/auth/google`, {
             method: 'POST',
@@ -76,7 +91,12 @@ export async function exchangeTokenForJwt(token: string): Promise<string> {
     }
 }
 
-export async function getServerUserInfo(jwt: string): Promise<UserInfo> {
+/**
+ * 서버에서 사용자 정보를 받아오는 함수
+ * @param {string} jwt 
+ * @returns {Promise<UserInfo>}
+ */
+export async function getServerUserInfo(jwt) {
     try {
         const response = await fetch(`${SERVER_URL}/auth/userinfo`, {
             method: 'GET',
@@ -91,7 +111,7 @@ export async function getServerUserInfo(jwt: string): Promise<UserInfo> {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return response.json() as Promise<UserInfo>;
+        return response.json();
     } catch (error) {
         console.error('Error in getServerUserInfo:', error);
         throw error;

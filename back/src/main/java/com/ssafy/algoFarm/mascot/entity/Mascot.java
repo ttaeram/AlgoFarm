@@ -21,7 +21,7 @@ public class Mascot {
     private String profileUrl;
 
     @OneToMany(mappedBy = "mascot")
-    private List<Group> mascots;
+    private List<Group> groups;
 
     @OneToMany(mappedBy = "mascot")
     private List<MascotMotion> mascotMotions;

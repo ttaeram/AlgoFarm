@@ -68,5 +68,12 @@ public class AlgorithmSolution {
     //제출시간
     private LocalDateTime dateTime;
 
+    public void setUser(User user){
+        if(this.user != null){
+            this.user.getSolutions().remove(this);
+        }
+        this.user = user;
+        user.getSolutions().add(this);
+    }
 
 }
