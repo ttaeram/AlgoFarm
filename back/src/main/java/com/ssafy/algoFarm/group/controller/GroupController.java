@@ -15,9 +15,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,18 +40,16 @@ public class GroupController {
     @Operation(summary = "user가 group을 생성하는 api", description = "user가 group을 생성합니다.")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DataResponse<CreateGroupResDto>> createGroup(@RequestBody CreateGroupReqDto request,
-                                                                       @Parameter(hidden = true) @CurrentUser User user){
+                                                                       @Parameter(hidden = true) @CurrentUser User user) {
         Long userPk = user.getId();
         String email = user.getEmail();
-        //email에서 앞부분 추출
-        int index = email.indexOf("@");
-        String nickname = email.substring(0,index);
-        log.info("nickname={}",nickname);
 
-        //TODO 정책, 한명당 하나의 그룹만 참여할 수 있다. -> 검증 로직 구현해야함.
-        CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName());
-        log.info("response={}",response);
-        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK,"그룹이 생성되었습니다.", response), HttpStatus.OK);
+        try {
+            CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName());
+            return ResponseEntity.ok(DataResponse.of(HttpStatus.OK, "그룹이 생성되었습니다.", response));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(DataResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), null));
+        }
     }
 
     /**
@@ -83,6 +87,22 @@ public class GroupController {
         groupService.leaveGroup(userPk, request.groupId());
 
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK,"스터디 그룹 탈퇴에 성공하셨습니다."),HttpStatus.OK);
+    }
+    @GetMapping("api/user/groups")
+    @Operation(summary = "사용자가 속한 그룹 목록 조회", description = "현재 사용자가 속한 그룹의 ID 목록을 페이지네이션하여 반환합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<Page<Long>>> getUserGroups(
+            @Parameter(hidden = true) @CurrentUser User user,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        String email = user.getEmail();
+        Page<Long> groupIds = groupService.findUserGroupIds(email, pageable);
+
+        if (groupIds.isEmpty()) {
+            return ResponseEntity.ok(DataResponse.of(HttpStatus.OK, "사용자가 속한 그룹이 없습니다.", groupIds));
+        } else {
+            return ResponseEntity.ok(DataResponse.of(HttpStatus.OK, "사용자의 그룹을 찾았습니다.", groupIds));
+        }
     }
 
 }

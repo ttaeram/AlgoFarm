@@ -3,13 +3,9 @@ package com.ssafy.algoFarm.group.entity;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Value;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,8 +13,11 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "study_group")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -107,19 +106,18 @@ public class Group {
         public static class TestBuilder {
             public Group build() {
                 TestGroup testGroup = buildTestGroup();
-                Group group = new Group();
-                if (testGroup.id != null) {
-                    ReflectionTestUtils.setField(group, "id", testGroup.id);
-                }
-                group.setName(testGroup.name);
-                group.setCode(testGroup.code);
-                group.setMascot(testGroup.mascot);
-                ReflectionTestUtils.setField(group, "currentNum", testGroup.currentNum);
-                ReflectionTestUtils.setField(group, "MaxNum", testGroup.maxNum);
-                ReflectionTestUtils.setField(group, "description", testGroup.description);
-                ReflectionTestUtils.setField(group, "currentExp", testGroup.currentExp);
-                ReflectionTestUtils.setField(group, "maxExp", testGroup.maxExp);
-                ReflectionTestUtils.setField(group, "level", testGroup.level);
+                Group group = Group.builder()
+                        .id(testGroup.id)
+                        .name(testGroup.name)
+                        .code(testGroup.code)
+                        .mascot(testGroup.mascot)
+                        .currentNum(testGroup.currentNum)
+                        .MaxNum(testGroup.maxNum)
+                        .description(testGroup.description)
+                        .currentExp(testGroup.currentExp)
+                        .maxExp(testGroup.maxExp)
+                        .level(testGroup.level)
+                        .build();
                 return group;
             }
         }
