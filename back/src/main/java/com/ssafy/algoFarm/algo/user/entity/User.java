@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -53,13 +54,13 @@ public class User {
     private String provider;
 
     @OneToMany(mappedBy = "user")
-    private List<ChatMessage> messages;
+    private List<ChatMessage> messages = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Member> members;
+    private List<Member> members = new ArrayList<>();
     
     @OneToMany(mappedBy = "user")
-    private List<AlgorithmSolution> solutions;
+    private List<AlgorithmSolution> solutions = new ArrayList<>();
 
 
 }
