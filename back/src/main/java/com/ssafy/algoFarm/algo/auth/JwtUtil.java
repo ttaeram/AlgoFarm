@@ -1,5 +1,6 @@
 package com.ssafy.algoFarm.algo.auth;
 
+import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import java.security.KeyFactory;
@@ -15,13 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 
 import java.io.InputStream;
@@ -78,20 +72,19 @@ public class JwtUtil {
     }
 
     public String generateToken(String email) {
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("email", email);  // 이메일을 클레임에 추가
-
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime tokenValidity = now.plusSeconds(accessTokenExpiresIn);
 
-        return Jwts.builder()
-                .setClaims(claims)
+        String token = Jwts.builder()
+                .setSubject(email)
+                .claim("email", email)
                 .setIssuedAt(Date.from(now.toInstant()))
                 .setExpiration(Date.from(tokenValidity.toInstant()))
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
+        log.debug("Generated token: {}", token);
+        return token;
     }
-
 
     public boolean validateToken(String token) {
         try {
@@ -105,7 +98,9 @@ public class JwtUtil {
         } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token -> Message: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty -> Message: {}", e.getMessage());
+            log.error("JWT claims string is empty or only contains whitespace -> Message: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("JWT validation error -> Message: {}", e.getMessage());
         }
 
         return false;
@@ -114,15 +109,18 @@ public class JwtUtil {
     public Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token is expired -> Message: {}", e.getMessage());
+            return e.getClaims();
+        } catch (JwtException e) {
             log.error("Failed to parse JWT token: {}", e.getMessage());
-            throw e;
+            return null;
         }
     }
 
     public String getEmailFromToken(String token) {
         Claims claims = parseClaims(token);
-        return claims.get("email", String.class);
+        return claims != null ? claims.get("email", String.class) : null;
     }
 
     public String getIdFromToken(String token) {

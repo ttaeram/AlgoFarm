@@ -1,16 +1,15 @@
 package com.ssafy.algoFarm.algo.auth;
 
-import jakarta.servlet.http.Cookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
 
@@ -24,19 +23,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String email = oAuth2User.getAttribute("email");
         String token = jwtUtil.generateToken(email);
 
-        // JWT를 쿠키에 저장
-        response.addCookie(createCookie("jwt", token));
-
-        // Swagger UI로 리다이렉트
-        getRedirectStrategy().sendRedirect(request, response, "/swagger-ui/index.html");
-    }
-
-    private Cookie createCookie(String name, String value) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // HTTPS에서만 사용
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); // 24시간
-        return cookie;
+        // JWT를 응답 본문에 JSON 형식으로 반환
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"token\":\"" + token + "\"}");
     }
 }
