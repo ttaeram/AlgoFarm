@@ -7,6 +7,7 @@ import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -33,6 +34,7 @@ public class ChatController {
      */
     @PostMapping("/{chatroomId}/join")
     @Operation(summary="Enter Chatroom", description="API used to include a user in a chat room")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<String> join(@PathVariable String chatroomId, @RequestBody ChatMessage chatMessage) {
         messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessage);
         return ResponseEntity.ok("Joined chatroomId " + chatroomId);
@@ -45,6 +47,7 @@ public class ChatController {
      */
     @GetMapping("/{chatroomId}/all")
     @Operation(summary="Getting Chatlist", description = "API to get chat lists for a certain chat room")
+    @SecurityRequirement(name = "bearerAuth")
     public DataResponse<List<ChatMessageResDTO>> getAll(@PathVariable Long chatroomId) {
         return DataResponse.of(HttpStatus.OK, "Chat Logs of "+chatroomId, chatService.getAllChatMessages(chatroomId));
     }
@@ -57,6 +60,7 @@ public class ChatController {
      */
     @PostMapping("/{chatroomId}/send")
     @Operation(summary = "Send message on chatroom", description = "API to send chat for a certain chat room")
+    @SecurityRequirement(name = "bearerAuth")
     public MessageResponse send(@PathVariable Long chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO) {
         messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessageReqDTO.getContent());
         chatMessageReqDTO.setGroupId(chatroomId);
