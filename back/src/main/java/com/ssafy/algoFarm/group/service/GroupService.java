@@ -3,6 +3,7 @@ package com.ssafy.algoFarm.group.service;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
+import com.ssafy.algoFarm.group.dto.response.JoinGroupResDto;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
@@ -62,5 +63,38 @@ public class GroupService {
         newGroup.countUpCurrentNum();//현재 참가인원을 증가시킨다.
 
         return new CreateGroupResDto(groupId,groupName,inviteCode);
+    }
+
+    /**
+     * 초대코드를 통해 그룹에 가입하는 로직
+     * @param code 초대코드
+     * @return JoinGroupResDto(그룹id, 그룹명)
+     */
+    public JoinGroupResDto joinGroup( Long userPk, String nickname, String code) {
+        Group group = groupRepository.findByCode(code).orElseThrow();
+        return new JoinGroupResDto(group.getId(), group.getName());
+    }
+
+    /**
+     * 그룹탈퇴를 위한 메서드
+     * @param userPk user고유 pk
+     * @param groupId 탈퇴할 그룹id
+     */
+    public void leaveGroup(Long userPk, Long groupId) {
+        //그룹의 마지막 멤버인 경우, 그룹을 삭제한다.
+        //TODO 그룹이 없는 경우 예외처리 해야함.
+        Group group = groupRepository.findById(groupId).orElseThrow();
+        if(group.getMembers().size() == 1){
+            groupRepository.delete(group);
+        }
+
+
+        //그룹장의 경우 가입일이 다른 파티원에게 그룹장의 권한을 넘긴다.
+        Member member = memberRepository.findById(userPk).orElseThrow();
+        if(member.getIsLeader()){
+            group.getMembers();
+        }
+        //그룹을 탈퇴한다.
+
     }
 }
