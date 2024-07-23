@@ -45,8 +45,8 @@ public class ChatController {
      */
     @GetMapping("/{chatroomId}/all")
     @Operation(summary="Getting Chatlist", description = "API to get chat lists for a certain chat room")
-    public DataResponse<List<ChatMessageResDTO>> getAll(@PathVariable String chatroomId) {
-        return DataResponse.of(HttpStatus.OK, "Chat Logs of "+chatroomId, chatService.getAllChatMessages(Long.parseLong(chatroomId)));
+    public DataResponse<List<ChatMessageResDTO>> getAll(@PathVariable Long chatroomId) {
+        return DataResponse.of(HttpStatus.OK, "Chat Logs of "+chatroomId, chatService.getAllChatMessages(chatroomId));
     }
 
     /**
@@ -57,8 +57,9 @@ public class ChatController {
      */
     @PostMapping("/{chatroomId}/send")
     @Operation(summary = "Send message on chatroom", description = "API to send chat for a certain chat room")
-    public MessageResponse send(@PathVariable String chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO) {
+    public MessageResponse send(@PathVariable Long chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO) {
         messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessageReqDTO.getContent());
+        chatMessageReqDTO.setGroupId(chatroomId);
         chatService.saveChatMessage(chatMessageReqDTO);
         return MessageResponse.of(HttpStatus.OK, "Sent chatroomId " + chatroomId);
     }

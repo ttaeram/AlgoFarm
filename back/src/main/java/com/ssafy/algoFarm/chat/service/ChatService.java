@@ -8,6 +8,7 @@ import com.ssafy.algoFarm.chat.entity.ChatMessageResDTO;
 import com.ssafy.algoFarm.chat.repository.ChatMessageRepository;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 
 
 @Service
+@Transactional
 public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
