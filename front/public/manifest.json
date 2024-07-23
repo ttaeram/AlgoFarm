@@ -8,15 +8,13 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "identity",
-    "http://i11a302.p.ssafy.io:8080"
+    "identity"
   ],
   "host_permissions": [
-    "http://i11a302.p.ssafy.io:8080"
+    "http://i11a302.p.ssafy.io:8080/*"
   ],
   "background": {
     "service_worker": "static/js/background.js"
-
   },
   "oauth2": {
     "client_id": "791103562299-ebih2865pdmhgde8enq8ha96chi898da.apps.googleusercontent.com",
