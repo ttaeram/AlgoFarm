@@ -98,7 +98,8 @@ public class GroupService {
         }
 
         //그룹장의 경우 가입일이 빠른 다른 파티원에게 그룹장의 권한을 넘긴다.
-        Member member = memberRepository.findByUserId(userPk).orElseThrow();
+        log.info("userPk={}",userPk);
+        Member member = memberRepository.findByUserIdAndGroupId(userPk,groupId).orElseThrow();
         if(member.getIsLeader()){
             List<Member> members = group.getMembers();
             members.sort((m1, m2) -> m1.getJoinAt().compareTo(m2.getJoinAt()));
