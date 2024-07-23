@@ -55,10 +55,10 @@ public class Group {
     @ColumnDefault("1")
     private Integer level = 1;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members = new ArrayList<>();
 
     public void setMascot(Mascot mascot){

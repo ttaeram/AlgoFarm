@@ -55,6 +55,7 @@ public class GroupService {
         member.setUser(participant);
         member.setNickname(nickname);
         member.setIsLeader(true); //그룹장 표기
+        member.setGroup(newGroup);
         memberRepository.save(member);
 
 
