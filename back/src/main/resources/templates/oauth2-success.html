@@ -3,33 +3,14 @@
 <head>
     <title>OAuth 로그인 성공</title>
     <style>
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 2px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1;
-            left: 50%;
-            bottom: 30px;
+        #tokenDisplay {
+            word-break: break-all;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f8f8f8;
+            margin: 20px 0;
         }
-
-        #toast.show {
-            visibility: visible;
-            -webkit-animation: fadein 0.5s;
-            animation: fadein 0.5s;
-        }
-
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-
-        #copyButton {
+        #copyButton, #swaggerButton {
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 16px;
@@ -39,9 +20,10 @@
 </head>
 <body>
 <h1>로그인 성공!</h1>
-<p>아래 버튼을 클릭하여 토큰을 복사한 후, Swagger UI로 이동합니다.</p>
-<button id="copyButton">토큰 복사</button>
-<div id="toast">토큰이 클립보드에 복사되었습니다.</div>
+<p>아래의 토큰을 복사한 후, Swagger UI로 이동하여 사용하세요.</p>
+<div id="tokenDisplay"></div>
+<button id="copyButton">토큰 선택</button>
+<button id="swaggerButton">Swagger UI로 이동</button>
 
 <script>
     let token;
@@ -50,60 +32,29 @@
         const urlParams = new URLSearchParams(window.location.search);
         token = urlParams.get('token');
 
-        if (!token) {
+        if (token) {
+            document.getElementById('tokenDisplay').textContent = token;
+        } else {
             console.error("토큰을 찾을 수 없습니다.");
+            document.getElementById('tokenDisplay').textContent = "토큰을 찾을 수 없습니다.";
             document.getElementById('copyButton').disabled = true;
-            document.getElementById('copyButton').textContent = "토큰 없음";
         }
     };
 
-    function copyToClipboard(text) {
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-        } else {
-            let textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                return document.execCommand('copy');
-            } catch (err) {
-                console.error('클립보드 복사 실패:', err);
-                return false;
-            } finally {
-                document.body.removeChild(textArea);
-            }
-        }
-    }
-
     document.getElementById('copyButton').addEventListener('click', function() {
         if (token) {
-            copyToClipboard(token)
-                .then(function() {
-                    console.log('토큰이 클립보드에 복사되었습니다.');
-                    showToast();
-                    setTimeout(function() {
-                        window.location.href = '/swagger-ui/index.html';
-                    }, 3000);
-                })
-                .catch(function(err) {
-                    console.error('클립보드 복사 실패:', err);
-                    alert('토큰 복사에 실패했습니다. Swagger UI로 이동합니다.');
-                    window.location.href = '/swagger-ui/index.html';
-                });
-        } else {
-            alert('복사할 토큰이 없습니다. Swagger UI로 이동합니다.');
-            window.location.href = '/swagger-ui/index.html';
+            const range = document.createRange();
+            range.selectNodeContents(document.getElementById('tokenDisplay'));
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            alert('토큰이 선택되었습니다. Ctrl+C 또는 Cmd+C를 눌러 복사하세요.');
         }
     });
 
-    function showToast() {
-        var toast = document.getElementById("toast");
-        toast.className = "show";
-        setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
-    }
+    document.getElementById('swaggerButton').addEventListener('click', function() {
+        window.location.href = '/swagger-ui/index.html';
+    });
 </script>
 </body>
 </html>
