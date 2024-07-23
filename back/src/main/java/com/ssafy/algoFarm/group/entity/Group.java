@@ -3,11 +3,13 @@ package com.ssafy.algoFarm.group.entity;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Value;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -81,5 +83,45 @@ public class Group {
 
     public void setCode(String code){
         this.code = code;
+    }
+
+
+    @Value
+    @Builder(builderClassName = "TestBuilder", buildMethodName = "buildTestGroup")
+    public static class TestGroup {
+        Long id;
+        String name;
+        String code;
+        Mascot mascot;
+        @Builder.Default Integer currentNum = 0;
+        @Builder.Default Integer maxNum = 10;
+        @Builder.Default String description = "";
+        @Builder.Default Long currentExp = 0L;
+        @Builder.Default Long maxExp = 100L;
+        @Builder.Default Integer level = 1;
+
+        public static class TestBuilder {
+            public Group build() {
+                TestGroup testGroup = buildTestGroup();
+                Group group = new Group();
+                if (testGroup.id != null) {
+                    ReflectionTestUtils.setField(group, "id", testGroup.id);
+                }
+                group.setName(testGroup.name);
+                group.setCode(testGroup.code);
+                group.setMascot(testGroup.mascot);
+                ReflectionTestUtils.setField(group, "currentNum", testGroup.currentNum);
+                ReflectionTestUtils.setField(group, "MaxNum", testGroup.maxNum);
+                ReflectionTestUtils.setField(group, "description", testGroup.description);
+                ReflectionTestUtils.setField(group, "currentExp", testGroup.currentExp);
+                ReflectionTestUtils.setField(group, "maxExp", testGroup.maxExp);
+                ReflectionTestUtils.setField(group, "level", testGroup.level);
+                return group;
+            }
+        }
+    }
+
+    public static TestGroup.TestBuilder testBuilder() {
+        return TestGroup.builder();
     }
 }

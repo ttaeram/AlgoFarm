@@ -1,8 +1,11 @@
 package com.ssafy.algoFarm.group.controller;
 
 import com.ssafy.algoFarm.algo.user.UserInfo;
+import com.ssafy.algoFarm.algo.user.UserRepository;
+import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.group.dto.request.CreateGroupReqDto;
 import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
+import com.ssafy.algoFarm.group.repository.MemberRepository;
 import com.ssafy.algoFarm.group.service.GroupService;
 import com.ssafy.global.response.DataResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -32,25 +36,37 @@ import java.util.Optional;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 새로운 그룹을 생성하는 api
      * @return createGroupResDto(그룹 id를 가지고 있는)
      */
     @PostMapping("api/groups")
-    public ResponseEntity<DataResponse<CreateGroupResDto>> createGroup(@RequestBody CreateGroupReqDto request){
-        //TODO securityContextHolder의 customUserDto에서 user의 pk, email을 가져와야함.
-        Long userPk = 1L;
-        String email = "email@gmial.com";
-        //email에서 앞부분 추출
-        int index = email.indexOf("@");
-        String nickname = email.substring(0,index);
-        log.info("nickname={}",nickname);
+    @Operation(summary = "Create a new group")
+    @ApiResponse(responseCode = "200", description = "Group created successfully")
+    @ApiResponse(responseCode = "400", description = "User already in a group")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<CreateGroupResDto>> createGroup(@RequestBody CreateGroupReqDto request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-        //TODO 정책, 한명당 하나의 그룹만 참여할 수 있다. -> 검증 로직 구현해야함.
-        CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName());
-        log.info("response={}",response);
-        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK,"그룹이 생성되었습니다.", response), HttpStatus.OK);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        // email에서 앞부분 추출하여 nickname으로 사용
+        String nickname = email.substring(0, email.indexOf("@"));
+        log.info("nickname={}", nickname);
+
+        // 사용자가 이미 그룹에 속해 있는지 확인
+        if (memberRepository.existsByUserId(user.getId())) {
+            throw new IllegalStateException("User is already a member of a group");
+        }
+
+        CreateGroupResDto response = groupService.createGroup(user.getId(), nickname, request.groupName());
+        log.info("response={}", response);
+        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK, "그룹이 생성되었습니다.", response), HttpStatus.OK);
     }
 
     @GetMapping("api/user/group")
