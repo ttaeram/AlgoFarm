@@ -79,6 +79,10 @@ public class Group {
         this.currentNum++;
     }
 
+    public void countDownCurrentNum(){
+        this.currentNum--;
+    }
+
     public void setCode(String code){
         this.code = code;
     }
