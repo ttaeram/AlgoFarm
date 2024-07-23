@@ -12,18 +12,13 @@ const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
  * @returns {Promise<string>}
  */
 export function signIn() {
-    console.log('signIn function called at:', new Date().toISOString());
     return new Promise((resolve, reject) => {
         chrome.identity.getAuthToken({ interactive: true }, (token) => {
-            console.log('getAuthToken callback triggered at:', new Date().toISOString());
             if (chrome.runtime.lastError) {
-                console.error('Chrome identity error:', chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
             } else if (token) {
-                console.log('Received access token:', token);
                 resolve(token);
             } else {
-                console.error('Failed to get auth token');
                 reject(new Error('Failed to get auth token'));
             }
         });
@@ -79,14 +74,12 @@ export async function exchangeTokenForJwt(token) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Server response:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
         return data.jwt;
     } catch (error) {
-        console.error('Error in exchangeTokenForJwt:', error);
         throw error;
     }
 }
@@ -107,13 +100,11 @@ export async function getServerUserInfo(jwt) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Server response:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         return response.json();
     } catch (error) {
-        console.error('Error in getServerUserInfo:', error);
         throw error;
     }
 }

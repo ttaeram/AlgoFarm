@@ -1,12 +1,15 @@
 import React from 'react';
 import Popup from './components/Popup';
+import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
-    return (
-        <div className="App">
-            <Popup />
-        </div>
-    );
+  return (
+    <AuthProvider>
+      <div className="App">
+        <Popup />
+      </div>
+    </AuthProvider>
+  );
 };
 
 export default App;
