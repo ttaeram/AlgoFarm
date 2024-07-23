@@ -23,6 +23,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Successful operation",
             content = @Content(schema = @Schema(implementation = UserInfo.class)))
     @SecurityRequirement(name = "bearerAuth")
+
     public ResponseEntity<UserInfo> getCurrentUser(@Parameter(hidden = true) @CurrentUser User user) {
 
         UserInfo userInfo = UserInfo.builder()
@@ -33,11 +34,5 @@ public class UserController {
                 .build();
 
         return ResponseEntity.ok(userInfo);
-    }
-
-    @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> adminOnly() {
-        return ResponseEntity.ok("Admin access granted");
     }
 }
