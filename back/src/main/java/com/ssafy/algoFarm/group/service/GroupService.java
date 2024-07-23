@@ -12,14 +12,16 @@ import com.ssafy.algoFarm.mascot.entity.Mascot;
 import com.ssafy.algoFarm.mascot.repository.MascotRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class GroupService {
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
@@ -48,8 +50,6 @@ public class GroupService {
         groupRepository.save(newGroup);
         Long groupId = newGroup.getId();
 
-
-
         //해당 그룹에 생성자를 가입시킨다.
         User participant = userRepository.findById(userPk).get();
         Member member = new Member();
@@ -59,9 +59,7 @@ public class GroupService {
         member.setGroup(newGroup);
         memberRepository.save(member);
 
-
         newGroup.countUpCurrentNum();//현재 참가인원을 증가시킨다.
-
         return new CreateGroupResDto(groupId,groupName,inviteCode);
     }
 
@@ -71,7 +69,17 @@ public class GroupService {
      * @return JoinGroupResDto(그룹id, 그룹명)
      */
     public JoinGroupResDto joinGroup( Long userPk, String nickname, String code) {
+
         Group group = groupRepository.findByCode(code).orElseThrow();
+
+        User participant = userRepository.findById(userPk).get();
+        Member newMember = new Member();
+        newMember.setUser(participant);
+        newMember.setNickname(nickname);
+        newMember.setGroup(group);
+        memberRepository.save(newMember);
+        group.countUpCurrentNum();
+
         return new JoinGroupResDto(group.getId(), group.getName());
     }
 
@@ -86,15 +94,29 @@ public class GroupService {
         Group group = groupRepository.findById(groupId).orElseThrow();
         if(group.getMembers().size() == 1){
             groupRepository.delete(group);
+            return;
         }
 
-
-        //그룹장의 경우 가입일이 다른 파티원에게 그룹장의 권한을 넘긴다.
-        Member member = memberRepository.findById(userPk).orElseThrow();
+        //그룹장의 경우 가입일이 빠른 다른 파티원에게 그룹장의 권한을 넘긴다.
+        Member member = memberRepository.findByUserId(userPk).orElseThrow();
         if(member.getIsLeader()){
-            group.getMembers();
-        }
-        //그룹을 탈퇴한다.
+            List<Member> members = group.getMembers();
+            members.sort((m1, m2) -> m1.getJoinAt().compareTo(m2.getJoinAt()));
 
+            for(int i = 0;  i < group.getMembers().size(); i++){
+                if(!members.get(i).equals(member)){
+                    members.get(i).setIsLeader(true);
+                    break;
+                }
+            }
+        }
+        //group에서 현재인원 -1, 관계제거
+        group.countDownCurrentNum();
+        group.getMembers().remove(member);
+        //user에서 관계제거
+        userRepository.findById(userPk).orElseThrow().getMembers().remove(member);
+        log.info("member={},{}",member.getId(),member.getJoinAt());
+        //member테이블에서 삭제(그룹 탈퇴)
+        memberRepository.delete(member);
     }
 }

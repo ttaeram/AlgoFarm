@@ -8,6 +8,7 @@ import com.ssafy.algoFarm.group.dto.response.JoinGroupResDto;
 import com.ssafy.algoFarm.group.service.GroupService;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,12 +22,12 @@ import org.springframework.web.bind.annotation.*;
 public class GroupController {
 
     private final GroupService groupService;
-
     /**
      * 새로운 그룹을 생성하는 api
      * @return createGroupResDto(그룹 id를 가지고 있는)
      */
     @PostMapping("api/groups")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DataResponse<CreateGroupResDto>> createGroup(@RequestBody CreateGroupReqDto request){
         //TODO securityContextHolder의 customUserDto에서 user의 pk, email을 가져와야함.
         Long userPk = 1L;
@@ -46,9 +47,10 @@ public class GroupController {
      * 사용자가 그룹에 참가하는 api
      */
     @PostMapping("api/groups/members")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DataResponse<JoinGroupResDto>> joinGroup(@RequestBody JoinGroupReqDto request){
         //TODO securityContextHolder의 customUserDto에서 user의 pk, email을 가져와야함.
-        Long userPk = 1L;
+        Long userPk = 3L;
         String email = "email@gmial.com";
 
         //email에서 앞부분 추출
@@ -61,6 +63,7 @@ public class GroupController {
     }
 
     @DeleteMapping("api/groups/members")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse> leaveGroup(@RequestBody LeaveGroupReqDto request){
         //TODO securityContextHolder의 customUserDto에서 user의 pk, email을 가져와야함.
         Long userPk = 1L;
@@ -70,9 +73,9 @@ public class GroupController {
         int index = email.indexOf("@");
         String nickname = email.substring(0,index);
         log.info("nickname={}",nickname);
-        groupService.leaveGroup(userPk,request.groupId());
+        groupService.leaveGroup(userPk, request.groupId());
 
-        return null;
+        return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK,"스터디 그룹 탈퇴에 성공하셨습니다."),HttpStatus.OK);
     }
 
 }
