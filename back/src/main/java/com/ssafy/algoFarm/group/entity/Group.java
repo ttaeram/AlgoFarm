@@ -53,7 +53,7 @@ public class Group {
     private Long maxExp = 100L;
 
     @ColumnDefault("1")
-    private Integer level;
+    private Integer level = 1;
 
     @OneToMany(mappedBy = "group")
     private List<ChatMessage> messages = new ArrayList<>();
