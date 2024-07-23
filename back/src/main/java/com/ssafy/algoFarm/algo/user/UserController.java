@@ -1,41 +1,38 @@
 package com.ssafy.algoFarm.algo.user;
 
 import com.ssafy.algoFarm.algo.user.entity.User;
-import com.ssafy.algoFarm.algo.auth.CustomOAuth2User;
+import com.ssafy.algoFarm.algo.auth.CurrentUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class UserController {
 
-    @GetMapping("/user")
-    public ResponseEntity<UserProfile> getCurrentUser(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        User user = customOAuth2User.getUser();
+    @GetMapping("/me")
+    @Operation(summary = "Get current user information")
+    @ApiResponse(responseCode = "200", description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = UserInfo.class)))
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<UserInfo> getCurrentUser(@Parameter(hidden = true) @CurrentUser User user) {
 
-        // User 엔티티의 정보를 사용하여 attributes 맵 생성
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("sub", user.getOAuthId());
-        attributes.put("name", user.getName());
-        attributes.put("email", user.getEmail());
-        attributes.put("provider", user.getProvider());
-        attributes.put("email_verified", user.getIsEmailVerified());
+        UserInfo userInfo = UserInfo.builder()
+                .id(user.getOAuthId())
+                .email(user.getEmail())
+                .verified_email(user.getIsEmailVerified())
+                .name(user.getName())
+                .build();
 
-        UserProfile userProfile = new UserProfile(
-                user.getOAuthId(),
-                user.getName(),
-                user.getEmail(),
-                attributes
-        );
-
-        return ResponseEntity.ok(userProfile);
+        return ResponseEntity.ok(userInfo);
     }
 
     @GetMapping("/admin")

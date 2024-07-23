@@ -28,46 +28,81 @@
             from {bottom: 0; opacity: 0;}
             to {bottom: 30px; opacity: 1;}
         }
+
+        #copyButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 <h1>로그인 성공!</h1>
-<p>잠시 후 Swagger UI로 이동합니다...</p>
+<p>아래 버튼을 클릭하여 토큰을 복사한 후, Swagger UI로 이동합니다.</p>
+<button id="copyButton">토큰 복사</button>
 <div id="toast">토큰이 클립보드에 복사되었습니다.</div>
 
 <script>
+    let token;
+
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+        token = urlParams.get('token');
 
-        if (token) {
-            // 클립보드에 토큰 복사
-            navigator.clipboard.writeText(token).then(function() {
-                console.log('토큰이 클립보드에 복사되었습니다.');
-                showToast();
-                // 2초 후 Swagger UI로 리다이렉트
-                setTimeout(function() {
-                    window.location.href = '/swagger-ui/index.html';
-                }, 2000);
-            }).catch(function(err) {
-                console.error('클립보드 복사 실패:', err);
-                // 클립보드 복사 실패 시에도 Swagger UI로 리다이렉트
-                setTimeout(function() {
-                    window.location.href = '/swagger-ui/index.html';
-                }, 2000);
-            });
-        } else {
+        if (!token) {
             console.error("토큰을 찾을 수 없습니다.");
-            // 토큰이 없어도 Swagger UI로 리다이렉트
-            setTimeout(function() {
-                window.location.href = '/swagger-ui/index.html';
-            }, 2000);
+            document.getElementById('copyButton').disabled = true;
+            document.getElementById('copyButton').textContent = "토큰 없음";
         }
     };
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        } else {
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                return document.execCommand('copy');
+            } catch (err) {
+                console.error('클립보드 복사 실패:', err);
+                return false;
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+    }
+
+    document.getElementById('copyButton').addEventListener('click', function() {
+        if (token) {
+            copyToClipboard(token)
+                .then(function() {
+                    console.log('토큰이 클립보드에 복사되었습니다.');
+                    showToast();
+                    setTimeout(function() {
+                        window.location.href = '/swagger-ui/index.html';
+                    }, 3000);
+                })
+                .catch(function(err) {
+                    console.error('클립보드 복사 실패:', err);
+                    alert('토큰 복사에 실패했습니다. Swagger UI로 이동합니다.');
+                    window.location.href = '/swagger-ui/index.html';
+                });
+        } else {
+            alert('복사할 토큰이 없습니다. Swagger UI로 이동합니다.');
+            window.location.href = '/swagger-ui/index.html';
+        }
+    });
 
     function showToast() {
         var toast = document.getElementById("toast");
         toast.className = "show";
+        setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
     }
 </script>
 </body>
