@@ -1,5 +1,6 @@
 package com.ssafy.algoFarm.chat.controller;
 
+import com.ssafy.algoFarm.chat.entity.ChatMessageDTO;
 import com.ssafy.algoFarm.chat.service.ChatService;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +41,7 @@ public class ChatController {
      */
     @GetMapping("/{chatroomId}/all")
     @Operation(summary="Getting Chatlist", description = "API to get chat lists for a certain chat room")
-    public ResponseEntity<List<ChatMessage>> getAll(@PathVariable String chatroomId) {
+    public ResponseEntity<List<ChatMessageDTO>> getAll(@PathVariable String chatroomId) {
         return ResponseEntity.ok(chatService.getAllChatMessages(Long.parseLong(chatroomId)));
     }
 
