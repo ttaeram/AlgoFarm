@@ -7,7 +7,13 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["identity"],
+  "permissions": [
+    "identity",
+    "http://i11a302.p.ssafy.io:8080"
+  ],
+  "host_permissions": [
+    "http://i11a302.p.ssafy.io:8080"
+  ],
   "background": {
     "service_worker": "static/js/background.js"
 
