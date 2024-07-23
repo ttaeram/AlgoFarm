@@ -1,9 +1,13 @@
 package com.ssafy.algoFarm.chat.controller;
 
-import com.ssafy.algoFarm.chat.entity.ChatMessageDTO;
+import com.ssafy.algoFarm.chat.entity.ChatMessageReqDTO;
+import com.ssafy.algoFarm.chat.entity.ChatMessageResDTO;
 import com.ssafy.algoFarm.chat.service.ChatService;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
+import com.ssafy.global.response.DataResponse;
+import com.ssafy.global.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -41,23 +45,21 @@ public class ChatController {
      */
     @GetMapping("/{chatroomId}/all")
     @Operation(summary="Getting Chatlist", description = "API to get chat lists for a certain chat room")
-    public ResponseEntity<List<ChatMessageDTO>> getAll(@PathVariable String chatroomId) {
-        return ResponseEntity.ok(chatService.getAllChatMessages(Long.parseLong(chatroomId)));
+    public DataResponse<List<ChatMessageResDTO>> getAll(@PathVariable String chatroomId) {
+        return DataResponse.of(HttpStatus.OK, "Chat Logs of "+chatroomId, chatService.getAllChatMessages(Long.parseLong(chatroomId)));
     }
 
     /**
      * 채팅을 전송하는 API
      * @param chatroomId 채팅방 ID(= 그룹 아이디)
-     * @param chatMessage 채팅 내용.
+     * @param chatMessageReqDTO 채팅 내용.
      * @return ResponseEntity<String>
      */
     @PostMapping("/{chatroomId}/send")
     @Operation(summary = "Send message on chatroom", description = "API to send chat for a certain chat room")
-    public ResponseEntity<String> send(@PathVariable String chatroomId, @RequestBody ChatMessage chatMessage) {
-        System.out.println(chatMessage.toString());
-
-        messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessage);
-        chatService.saveChatMessage(chatMessage);
-        return ResponseEntity.ok("Sent chatroomId " + chatroomId);
+    public MessageResponse send(@PathVariable String chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO) {
+        messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessageReqDTO.getContent());
+        chatService.saveChatMessage(chatMessageReqDTO);
+        return MessageResponse.of(HttpStatus.OK, "Sent chatroomId " + chatroomId);
     }
 }
