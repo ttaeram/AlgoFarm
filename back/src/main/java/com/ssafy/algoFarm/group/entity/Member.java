@@ -29,6 +29,7 @@ public class Member {
     private Long id;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -42,8 +43,7 @@ public class Member {
     @CreationTimestamp
     private LocalDateTime joinAt;
 
-    @ColumnDefault("false")
-    private Boolean isLeader;
+    private Boolean isLeader = false;
 
     public void setUser(User user){
         if(this.user != null){
