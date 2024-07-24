@@ -1,24 +1,27 @@
 package com.ssafy.algoFarm.algo.auth;
 
 import io.jsonwebtoken.*;
-import jakarta.annotation.PostConstruct;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.sql.Date;
-import java.time.ZonedDateTime;
-import java.util.Base64;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.security.Keys;
-
-import java.io.InputStream;
+import jakarta.annotation.PostConstruct;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -31,105 +34,151 @@ public class JwtUtil {
     private Resource publicKeyResource;
 
     @Value("${jwt.expiration}")
-    private long accessTokenExpiresIn;
+    private long expirationTime;
 
     private RSAPrivateKey privateKey;
     private RSAPublicKey publicKey;
 
+    /**
+     * 애플리케이션 시작 시 RSA 키 쌍을 초기화합니다.
+     * @throws JwtException 키 파싱 중 오류가 발생한 경우
+     */
     @PostConstruct
-    public void init() throws Exception {
-        privateKey = parsePrivateKey(readResourceContent(privateKeyResource));
-        publicKey = parsePublicKey(readResourceContent(publicKeyResource));
-    }
-
-    private String readResourceContent(Resource resource) throws Exception {
-        try (InputStream inputStream = resource.getInputStream()) {
-            byte[] bytes = inputStream.readAllBytes();
-            return new String(bytes);
+    public void init() {
+        try {
+            privateKey = parsePrivateKey(privateKeyResource);
+            publicKey = parsePublicKey(publicKeyResource);
+        } catch (Exception e) {
+            throw new JwtException("Failed to initialize JWT keys", e);
         }
     }
 
-    private RSAPrivateKey parsePrivateKey(String key) throws Exception {
-        String privateKeyContent = key
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        PKCS8EncodedKeySpec keySpecPKCS8 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent));
-        return (RSAPrivateKey) kf.generatePrivate(keySpecPKCS8);
+    /**
+     * PEM 형식의 개인 키를 파싱합니다.
+     * @param resource 개인 키 리소스
+     * @return RSA 개인 키
+     * @throws IOException 키 파일 읽기 실패 시
+     * @throws NoSuchAlgorithmException RSA 알고리즘을 사용할 수 없는 경우
+     * @throws InvalidKeySpecException 잘못된 키 형식
+     */
+    private RSAPrivateKey parsePrivateKey(Resource resource) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String privateKeyPEM = readPEMContent(resource);
+        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
     }
 
-    private RSAPublicKey parsePublicKey(String key) throws Exception {
-        String publicKeyContent = key
-                .replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s", "");
-
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
-        return (RSAPublicKey) kf.generatePublic(keySpecX509);
+    /**
+     * PEM 형식의 공개 키를 파싱합니다.
+     * @param resource 공개 키 리소스
+     * @return RSA 공개 키
+     * @throws IOException 키 파일 읽기 실패 시
+     * @throws NoSuchAlgorithmException RSA 알고리즘을 사용할 수 없는 경우
+     * @throws InvalidKeySpecException 잘못된 키 형식
+     */
+    private RSAPublicKey parsePublicKey(Resource resource) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String publicKeyPEM = readPEMContent(resource);
+        byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
     }
 
-    public String generateToken(String email) {
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(accessTokenExpiresIn);
+    /**
+     * PEM 파일의 내용을 읽어 헤더와 푸터를 제거합니다.
+     * @param resource PEM 파일 리소스
+     * @return PEM 내용 (Base64 인코딩된 키)
+     * @throws IOException 파일 읽기 실패 시
+     */
+    private String readPEMContent(Resource resource) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
+            return reader.lines()
+                    .filter(line -> !line.startsWith("-----BEGIN") && !line.startsWith("-----END"))
+                    .collect(Collectors.joining());
+        }
+    }
 
-        String token = Jwts.builder()
+    /**
+     * JWT 토큰을 생성합니다.
+     * @param email 사용자 이메일
+     * @param additionalClaims 추가적인 클레임 (선택적)
+     * @return 생성된 JWT 토큰
+     */
+    public String generateToken(String email, Map<String, Object> additionalClaims) {
+        JwtBuilder builder = Jwts.builder()
                 .setSubject(email)
-                .claim("email", email)
-                .setIssuedAt(Date.from(now.toInstant()))
-                .setExpiration(Date.from(tokenValidity.toInstant()))
-                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime));
+
+        // 추가 클레임이 있다면 토큰에 포함
+        if (additionalClaims != null) {
+            additionalClaims.forEach(builder::claim);
+        }
+
+        return builder.signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
-        log.debug("Generated token: {}", token);
-        return token;
     }
 
+    /**
+     * JWT 토큰의 유효성을 검증합니다.
+     * @param token 검증할 JWT 토큰
+     * @return 토큰의 유효성 여부
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token);
-            log.info("JWT token is valid");
             return true;
-        } catch (io.jsonwebtoken.security.SignatureException | MalformedJwtException e) {
-            log.error("Invalid JWT signature -> Message: {}", e.getMessage());
+        } catch (SignatureException e) {
+            log.error("Invalid JWT signature: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token -> Message: {}", e.getMessage());
+            log.error("JWT token is expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token -> Message: {}", e.getMessage());
+            log.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty or only contains whitespace -> Message: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("JWT validation error -> Message: {}", e.getMessage());
+            log.error("JWT claims string is empty: {}", e.getMessage());
         }
-
         return false;
     }
 
-    public Claims parseClaims(String token) {
+    /**
+     * JWT 토큰에서 이메일을 추출합니다.
+     * @param token JWT 토큰
+     * @return 토큰에서 추출한 이메일
+     * @throws JwtException 토큰 파싱 중 오류 발생 시
+     */
+    public String getEmailFromToken(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException e) {
-            log.warn("JWT token is expired -> Message: {}", e.getMessage());
-            return e.getClaims();
+            return Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
         } catch (JwtException e) {
-            log.error("Failed to parse JWT token: {}", e.getMessage());
-            return null;
+            throw new JwtException("Failed to extract email from token", e);
         }
     }
 
-    public String getEmailFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims != null ? claims.get("email", String.class) : null;
-    }
-
-    public String getIdFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims.get("id", String.class);
-    }
-
-    public String getRoleFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims.get("role", String.class);
+    /**
+     * JWT 토큰에서 특정 클레임을 추출합니다.
+     * @param token JWT 토큰
+     * @param claimName 추출할 클레임의 이름
+     * @return 추출된 클레임 값
+     * @throws JwtException 토큰 파싱 중 오류 발생 시
+     */
+    public Object getClaimFromToken(String token, String claimName) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get(claimName);
+        } catch (JwtException e) {
+            throw new JwtException("Failed to extract claim from token", e);
+        }
     }
 }

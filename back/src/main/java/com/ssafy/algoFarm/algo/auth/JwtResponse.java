@@ -1,4 +1,4 @@
-package org.example.algo.auth;
+package com.ssafy.algoFarm.algo.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

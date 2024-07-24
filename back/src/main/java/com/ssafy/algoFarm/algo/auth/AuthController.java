@@ -4,23 +4,12 @@ import com.ssafy.algoFarm.algo.user.UserProfile;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.algo.auth.ErrorResponse;
-import org.example.algo.auth.GoogleTokenRequest;
-import org.example.algo.auth.JwtResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +18,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 인증 관련 API를 처리하는 컨트롤러 클래스입니다.
+ */
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Auth API", description = "Sample API for demonstration")
+@Tag(name = "Auth API", description = "인증 관련 API")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -41,41 +35,25 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private ClientRegistrationRepository clientRegistrationRepository;
-
-    private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService;
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
 
-    @Autowired
-    public AuthController(OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService, ClientRegistrationRepository clientRegistrationRepository) {
-        this.oauth2UserService = oauth2UserService;
-        this.clientRegistrationRepository = clientRegistrationRepository;
-    }
-
+    /**
+     * Google 토큰을 사용하여 인증을 수행합니다.
+     *
+     * @param request Google 토큰 요청 객체
+     * @return JWT 토큰 또는 에러 응답
+     */
     @PostMapping("/google")
+    @Operation(summary = "Google 토큰 인증", description = "Google 토큰을 사용하여 인증을 수행하고 JWT 토큰을 반환합니다.")
     public ResponseEntity<?> authenticateWithGoogle(@RequestBody GoogleTokenRequest request) {
         try {
             logger.info("Received token: " + request.getToken());
 
-            // Google의 client registration을 가져옵니다.
-            ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("google");
+            OAuth2User oauth2User = customOAuth2UserService.loadUserByToken(request.getToken(), "google");
 
-            if (clientRegistration == null) {
-                logger.error("Google client registration not found");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new ErrorResponse("configuration_error", "Google OAuth configuration not found"));
-            }
-
-            // OAuth2User 객체를 직접 로드합니다.
-            OAuth2User oauth2User = customOAuth2UserService.loadUserByToken(request.getToken());
-
-            // CustomOAuth2User에서 User 객체를 가져옵니다.
             User user = ((CustomOAuth2User) oauth2User).getUser();
 
-            String jwt = jwtUtil.generateToken(user.getEmail());
+            String jwt = jwtUtil.generateToken(user.getEmail(),null);
             logger.info("Generated JWT for user: {}", user.getEmail());
 
             return ResponseEntity.ok(new JwtResponse(jwt));
@@ -90,7 +68,14 @@ public class AuthController {
         }
     }
 
+    /**
+     * 인증된 사용자의 정보를 조회합니다.
+     *
+     * @param token JWT 토큰
+     * @return 사용자 정보 또는 에러 응답
+     */
     @GetMapping("/userinfo")
+    @Operation(summary = "사용자 정보 조회", description = "인증된 사용자의 정보를 조회합니다.")
     public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String token) {
         logger.info("Received request for user info with token: " + token);
         String jwt = token.replace("Bearer ", "");
@@ -107,7 +92,6 @@ public class AuthController {
                 attributes.put("email", user.getEmail());
                 attributes.put("provider", user.getProvider());
                 attributes.put("email_verified", user.getIsEmailVerified());
-                // 필요한 경우 여기에 추가 속성을 넣을 수 있습니다.
 
                 UserProfile userProfile = new UserProfile(
                         user.getOAuthId(),
@@ -120,9 +104,9 @@ public class AuthController {
                 return ResponseEntity.ok(userProfile);
             }
             logger.warn("User not found for email: " + email);
-            return ResponseEntity.badRequest().body(new ErrorResponse("user_not_found", "User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("user_not_found", "User not found"));
         }
         logger.warn("Invalid token received");
-        return ResponseEntity.badRequest().body(new ErrorResponse("invalid_token", "The provided token is invalid"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("invalid_token", "The provided token is invalid"));
     }
 }

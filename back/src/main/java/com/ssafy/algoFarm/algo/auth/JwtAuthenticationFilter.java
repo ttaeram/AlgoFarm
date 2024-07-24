@@ -1,67 +1,89 @@
 package com.ssafy.algoFarm.algo.auth;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.util.StringUtils;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * JWT 인증을 처리하는 필터
+ * 모든 요청에 대해 JWT 토큰을 확인하고 유효한 경우 인증 정보를 설정합니다.
+ */
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    /**
+     * JwtAuthenticationFilter 생성자
+     *
+     * @param jwtUtil JWT 유틸리티 클래스
+     * @param userDetailsService 사용자 상세 정보 서비스
+     */
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String token = extractJwtFromRequest(request);
-
-        // 로깅 추가
-        logger.debug("Request URL: {}", request.getRequestURL());
-        logger.debug("Authorization Header: {}", request.getHeader("Authorization"));
-        logger.debug("Extracted Token: {}", token);
-
-        if (StringUtils.hasText(token)) {
-            try {
-                if (jwtUtil.validateToken(token)) {
-                    String email = jwtUtil.getEmailFromToken(token);
-                    if (email != null) {
-                        UserDetails userDetails = new User(email, "", new ArrayList<>());
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                userDetails, token, userDetails.getAuthorities()); // token을 credentials로 저장
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
-                }else {
-                    logger.warn("Invalid JWT token");
-                }
-            } catch (Exception e) {
-                System.out.println("JWT validation error: " + e.getMessage());
+        try {
+            String jwt = getJwtFromRequest(request);
+            if (StringUtils.hasText(jwt) && jwtUtil.validateToken(jwt)) {
+                String email = jwtUtil.getEmailFromToken(jwt);
+                CustomOAuth2User userDetails = (CustomOAuth2User) userDetailsService.loadUserByUsername(email);
+                OAuth2AuthenticationToken authentication = new OAuth2AuthenticationToken(
+                        userDetails, userDetails.getAuthorities(), userDetails.getUser().getProvider());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        } catch (Exception e) {
+            log.error("Cannot set user authentication: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private String extractJwtFromRequest(HttpServletRequest request) {
+    /**
+     * HTTP 요청에서 JWT 토큰을 추출합니다.
+     *
+     * @param request HTTP 요청
+     * @return 추출된 JWT 토큰, 없으면 null
+     */
+    private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        logger.warn("No JWT token found in request headers");
         return null;
+    }
+
+    /**
+     * 특정 요청에 대해 이 필터를 적용하지 않아야 하는지 결정합니다.
+     *
+     * @param request 현재 요청
+     * @return true이면 이 필터를 건너뜁니다.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // JWT 인증이 필요 없는 경로들을 여기서 정의합니다.
+        return path.startsWith("/auth") || path.equals("/") || path.equals("/home") || path.startsWith("/oauth2");
     }
 }
