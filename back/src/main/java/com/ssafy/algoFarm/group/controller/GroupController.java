@@ -3,12 +3,10 @@ package com.ssafy.algoFarm.group.controller;
 import com.ssafy.algoFarm.algo.auth.CurrentUser;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.group.dto.request.CreateGroupReqDto;
+import com.ssafy.algoFarm.group.dto.request.EditGroupReqDto;
 import com.ssafy.algoFarm.group.dto.request.JoinGroupReqDto;
 import com.ssafy.algoFarm.group.dto.request.LeaveGroupReqDto;
-import com.ssafy.algoFarm.group.dto.response.CodeResDto;
-import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
-import com.ssafy.algoFarm.group.dto.response.GroupInfoDto;
-import com.ssafy.algoFarm.group.dto.response.JoinGroupResDto;
+import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.service.GroupService;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
@@ -29,6 +27,15 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    @PatchMapping("api/groups")
+    @Operation(summary = "그룹명을 수정하는 api")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<EditGroupResDto>> editGroup(
+            @RequestBody EditGroupReqDto request,
+            @Parameter(hidden = true) @CurrentUser User user){
+        EditGroupResDto response = groupService.editGroupName(request.groupId(), request.newGroupName());
+        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK,"그룹명 변경에 성공했습니다.",response),HttpStatus.OK);
+    }
 
     @GetMapping("api/groups/code/{groupId}")
     @Operation(summary = "스터디그룹 초대 코드를 조회하는 api")

@@ -2,10 +2,7 @@ package com.ssafy.algoFarm.group.service;
 
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
-import com.ssafy.algoFarm.group.dto.response.CodeResDto;
-import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
-import com.ssafy.algoFarm.group.dto.response.GroupInfoDto;
-import com.ssafy.algoFarm.group.dto.response.JoinGroupResDto;
+import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
@@ -153,8 +150,27 @@ public class GroupService {
         return groupInfoDto;
     }
 
+    /**
+     * 초대코드를 조회하는 메서드
+     * @param groupId
+     * @return 초대코드를 담은 resDto
+     */
     public CodeResDto getInviteCode(Long groupId) {
         Group group =groupRepository.findById(groupId).orElseThrow();
         return new CodeResDto(group.getCode());
+    }
+
+    /**
+     * 그룹명을 변경하는 메서드
+     * @param groupId 그룹 고유id
+     * @param newGroupName 새로운 그룹명
+     * @return 변경전 그룹명과, 변경이후의 그룹명을 담은 dto
+     */
+    public EditGroupResDto editGroupName(Long groupId, String newGroupName) {
+        Group group = groupRepository.findById(groupId).orElseThrow();
+        String originalName = group.getName();
+        group.setName(newGroupName);
+        groupRepository.save(group);
+        return new EditGroupResDto(groupId, originalName, newGroupName);
     }
 }
