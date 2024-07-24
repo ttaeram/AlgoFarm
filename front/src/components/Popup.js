@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signIn, getServerUserInfo, exchangeTokenForJwt, signOut } from '../services/auth';
 import { useAuth } from '../context/AuthContext';
-import SelectGroup from '../pages/SelectGroup';
 import './Popup.css';
 
 const Popup = () => {
-  const { user, setIsLogined, setUser, setJwt, isLogined, signOut: contextSignOut } = useAuth();
+  const { user, setIsLogined, setUser, setJwt, isLogined, groupId, setGroupId, signOut: contextSignOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSignIn = async () => {
     if (isLoading) {
@@ -22,10 +23,30 @@ const Popup = () => {
       setUser(userInfo);
       setIsLogined(true);  // 로그인 성공 시 설정
 
+      // 그룹 ID 조회 로직 추가
+      const groupIdResponse = await fetchGroupId(serverJwt); // 서버로부터 그룹 ID를 조회하는 API 호출
+      setGroupId(groupIdResponse);
+
     } catch (error) {
       console.error('Sign in error:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchGroupId = async (jwt) => {
+    try {
+      const response = await fetch('http://i11a302.p.ssafy.io:8080/api/user/groups', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      const data = await response.json();
+      return data[0];
+    } catch (error) {
+      console.error('Failed to fetch group ID:', error);
+      return '-1';
     }
   };
 
@@ -39,25 +60,19 @@ const Popup = () => {
   };
 
   useEffect(() => {
-    if (!isLogined) {
-      setUser(null);
-      setJwt(null);
+    if (isLogined) {
+      if (groupId && groupId !== '-1') {
+        navigate('/my-page/group-info');
+      } else {
+        navigate('/select-group');
+      }
     }
-  }, [isLogined, setUser, setJwt]);
-
-  // 사용자가 그룹에 속해있는지 확인하는 함수
-  const isUserInGroup = () => {
-    return user && user.groupId;  // 사용자 정보에 groupId가 있는지 확인
-  };
+  }, [isLogined, groupId, navigate]);
 
   return (
     <div>
       {isLogined && user ? (
-        isUserInGroup() ? (
-          console.log("groupPage")  // 그룹에 속해있으면 그룹 메인 페이지로 이동
-        ) : (
-          <SelectGroup />  // 그룹에 속해있지 않으면 그룹 선택 페이지로 이동
-        )
+        <div className="loading">로딩 중...</div> // 로딩 상태를 표시
       ) : (
         <div className="login">
           <h1 className="title">알고팜</h1>
