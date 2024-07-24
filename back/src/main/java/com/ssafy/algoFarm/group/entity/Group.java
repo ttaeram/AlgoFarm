@@ -3,9 +3,7 @@ package com.ssafy.algoFarm.group.entity;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,8 +13,11 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "study_group")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

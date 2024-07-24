@@ -15,9 +15,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -81,6 +87,7 @@ public class GroupController {
         return new ResponseEntity<>(DataResponse.of(HttpStatus.OK, "그룹이 생성되었습니다.", response), HttpStatus.OK);
     }
 
+
     /**
      * 사용자가 그룹에 참가하는 api
      */
@@ -116,6 +123,34 @@ public class GroupController {
         groupService.leaveGroup(userPk, request.groupId());
 
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "스터디 그룹 탈퇴에 성공하셨습니다."), HttpStatus.OK);
+    }
+
+    /**
+     * 현재 사용자가 속한 모든 그룹의 ID 목록을 조회합니다.
+     * 사용자가 속한 그룹이 없는 경우, -1을 포함하는 리스트를 반환합니다.
+     *
+     * @param user 그룹 목록을 조회할 현재 사용자 객체
+     * @return 사용자가 속한 그룹의 ID 목록. 그룹이 없으면 -1을 포함하는 리스트 반환
+     * @throws IllegalArgumentException user 파라미터가 null인 경우
+     */
+    @GetMapping("api/user/groups")
+    @Operation(summary = "사용자가 속한 그룹 목록 조회", description = "현재 사용자가 속한 모든 그룹의 ID 목록을 반환합니다. 그룹이 없으면 -1을 포함하는 리스트를 반환합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<List<Long>>> getUserGroups(
+            @Parameter(hidden = true) @CurrentUser User user) {
+
+        List<Long> groupIds = groupService.getUserGroupIds(user);
+
+        String message = groupIds.get(0) == -1L
+                ? "사용자가 속한 그룹이 없습니다."
+                : "사용자의 그룹 ID 목록을 성공적으로 조회했습니다.";
+
+        DataResponse<List<Long>> response = DataResponse.of(
+                HttpStatus.OK,
+                message,
+                groupIds
+        );
+        return ResponseEntity.ok(response);
     }
 
 }
