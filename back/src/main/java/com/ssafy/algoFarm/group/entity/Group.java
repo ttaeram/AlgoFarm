@@ -17,7 +17,6 @@ import java.util.List;
 @Table(name = "study_group")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
