@@ -8,7 +8,9 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "identity"
+    "identity",
+    "storage",
+    "activeTab"
   ],
   "host_permissions": [
     "http://i11a302.p.ssafy.io:8080/*"
