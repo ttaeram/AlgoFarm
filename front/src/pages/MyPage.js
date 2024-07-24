@@ -7,8 +7,8 @@ import MemberInfo from './myPages/MemberInfo';
 import CharInfo from './myPages/CharInfo';
 import Settings from './myPages/Settings';
 import Chat from './myPages/Chat';
+import GroupLeaveButton from '../components/GroupLeaveButton';
 import './MyPage.css';
-import BackButton from '../components/BackButton';  // 뒤로가기 버튼 import
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -29,7 +29,6 @@ const MyPage = () => {
       <div className="topSection">
         <div className="headers">
           <div className="groupName">그룹명</div>
-          <button className="logoutButton" onClick={handleLogout}>로그아웃</button>
         </div>
         <div className="characterBox">
           <div className="character">캐릭터 150px*150px</div>
@@ -48,7 +47,8 @@ const MyPage = () => {
         💬
       </div>
       {isChatOpen && <Chat onClose={toggleChat} />}
-      <BackButton />  {/* 뒤로가기 버튼 추가 */}
+      <GroupLeaveButton />
+      <button className="logoutButton" onClick={handleLogout}>로그아웃</button>
     </div>
   );
 }

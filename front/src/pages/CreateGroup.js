@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { jwt, useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';  // BackButton 컴포넌트 import
 import './CreateGroup.css';
 import { useNavigate } from 'react-router-dom';
@@ -6,13 +7,14 @@ import { useNavigate } from 'react-router-dom';
 function CreateGroup() {
   const [groupName, setGroupName] = useState('');
   const [showWarning, setShowWarning] = useState(false);
+  const { jwt, setGroupId } = useAuth();
   const navigate = useNavigate();  // useNavigate 훅을 사용
 
   const handleInputChange = (e) => {
     setGroupName(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!groupName.trim()) {
       setShowWarning(true);
@@ -20,9 +22,30 @@ function CreateGroup() {
         setShowWarning(false);
       }, 3000); // 3초 후에 문구 숨기기
     } else {
-      // 그룹 생성 로직 추가
-      console.log('그룹 생성');
-      navigate('/my-page/group-info');  // 그룹 생성이 성공하면 MyPage로 이동
+      try {
+        const response = await fetch('http://i11a302.p.ssafy.io:8080/api/groups', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`
+          },
+          body: JSON.stringify({ groupName })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create group');
+        }
+
+        const data = await response.json();
+        setGroupId(data.data.groupId); // 그룹 ID를 설정
+        navigate('/my-page/group-info');  // 그룹 생성이 성공하면 MyPage로 이동
+      } catch (error) {
+        console.error('Error creating group:', error);
+        setShowWarning(true);
+        setTimeout(() => {
+          setShowWarning(false);
+        }, 3000); // 3초 후에 문구 숨기기
+      }
     }
   };
 
