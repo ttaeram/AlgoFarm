@@ -3,9 +3,7 @@ package com.ssafy.algoFarm.group.entity;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,8 +13,11 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "study_group")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -85,5 +86,44 @@ public class Group {
 
     public void setCode(String code){
         this.code = code;
+    }
+
+
+    @Value
+    @Builder(builderClassName = "TestBuilder", buildMethodName = "buildTestGroup")
+    public static class TestGroup {
+        Long id;
+        String name;
+        String code;
+        Mascot mascot;
+        @Builder.Default Integer currentNum = 0;
+        @Builder.Default Integer maxNum = 10;
+        @Builder.Default String description = "";
+        @Builder.Default Long currentExp = 0L;
+        @Builder.Default Long maxExp = 100L;
+        @Builder.Default Integer level = 1;
+
+        public static class TestBuilder {
+            public Group build() {
+                TestGroup testGroup = buildTestGroup();
+                Group group = Group.builder()
+                        .id(testGroup.id)
+                        .name(testGroup.name)
+                        .code(testGroup.code)
+                        .mascot(testGroup.mascot)
+                        .currentNum(testGroup.currentNum)
+                        .MaxNum(testGroup.maxNum)
+                        .description(testGroup.description)
+                        .currentExp(testGroup.currentExp)
+                        .maxExp(testGroup.maxExp)
+                        .level(testGroup.level)
+                        .build();
+                return group;
+            }
+        }
+    }
+
+    public static TestGroup.TestBuilder testBuilder() {
+        return TestGroup.builder();
     }
 }
