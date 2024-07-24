@@ -2,8 +2,7 @@ package com.ssafy.algoFarm.group.service;
 
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
-import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
-import com.ssafy.algoFarm.group.dto.response.JoinGroupResDto;
+import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
@@ -130,6 +129,61 @@ public class GroupService {
         //member테이블에서 삭제(그룹 탈퇴)
         memberRepository.delete(member);
     }
+
+    /**
+     * 그룹정보를 반환하는 pk
+     * @param userId 유저테이블의 pk
+     * @return GroupInfoDto(그룹 id,그룹 이름, 현재 경험치, 최대 경험치)
+     */
+    public GroupInfoDto getGroup(Long userId, Long groupId) {
+        //그룹아이디를 가져온다.
+        Group group = groupRepository.findById(groupId).orElseThrow();
+
+        //반환해야할 정보
+        Boolean isLeader = false;
+        for(Member member : group.getMembers()){
+            if(member.getUser().getId() == userId){
+                isLeader = member.getIsLeader();
+            }
+        }
+
+        String name = group.getName();
+        String description = group.getDescription();
+        Long currentExp = group.getCurrentExp();
+        Long maxExp = group.getMaxExp();
+        Integer level = group.getLevel();
+
+
+        GroupInfoDto groupInfoDto = new GroupInfoDto(groupId,name, description, currentExp,maxExp,level, isLeader);
+        //그룹의 현재 유저가 그룹장인지 확인한다.
+        //필요한 정보들을 가져온다.
+        return groupInfoDto;
+    }
+
+    /**
+     * 초대코드를 조회하는 메서드
+     * @param groupId
+     * @return 초대코드를 담은 resDto
+     */
+    public CodeResDto getInviteCode(Long groupId) {
+        Group group =groupRepository.findById(groupId).orElseThrow();
+        return new CodeResDto(group.getCode());
+    }
+
+    /**
+     * 그룹명을 변경하는 메서드
+     * @param groupId 그룹 고유id
+     * @param newGroupName 새로운 그룹명
+     * @return 변경전 그룹명과, 변경이후의 그룹명을 담은 dto
+     */
+    public EditGroupResDto editGroupName(Long groupId, String newGroupName) {
+        Group group = groupRepository.findById(groupId).orElseThrow();
+        String originalName = group.getName();
+        group.setName(newGroupName);
+        groupRepository.save(group);
+        return new EditGroupResDto(groupId, originalName, newGroupName);
+    }
+
     public List<Long> getUserGroupIds(User user) {
         List<Long> groupIds = memberRepository.findGroupIdsByUser(user);
         if (groupIds.isEmpty()) {
