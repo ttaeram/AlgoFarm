@@ -100,4 +100,9 @@ Thumbs.db
 
 # 환경 설정 파일
 .env
+# Gradle 관련 디렉토리와 파일들
+.gradle/
+**/*.bin
+**/*.lock
+**/*.probe
 

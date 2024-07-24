@@ -40,17 +40,20 @@ public class GroupController {
     @Operation(summary = "user가 group을 생성하는 api", description = "user가 group을 생성합니다.")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DataResponse<CreateGroupResDto>> createGroup(@RequestBody CreateGroupReqDto request,
-                                                                       @Parameter(hidden = true) @CurrentUser User user) {
+                                                                       @Parameter(hidden = true) @CurrentUser User user){
         Long userPk = user.getId();
         String email = user.getEmail();
+        //email에서 앞부분 추출
+        int index = email.indexOf("@");
+        String nickname = email.substring(0,index);
+        log.info("nickname={}",nickname);
 
-        try {
-            CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName());
-            return ResponseEntity.ok(DataResponse.of(HttpStatus.OK, "그룹이 생성되었습니다.", response));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(DataResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), null));
-        }
+        //TODO 정책, 한명당 하나의 그룹만 참여할 수 있다. -> 검증 로직 구현해야함.
+        CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName());
+        log.info("response={}",response);
+        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK,"그룹이 생성되었습니다.", response), HttpStatus.OK);
     }
+
 
     /**
      * 사용자가 그룹에 참가하는 api
@@ -88,21 +91,34 @@ public class GroupController {
 
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK,"스터디 그룹 탈퇴에 성공하셨습니다."),HttpStatus.OK);
     }
+    /**
+     * 현재 사용자가 속한 모든 그룹의 ID 목록을 조회합니다.
+     * 사용자가 속한 그룹이 없는 경우, -1을 포함하는 리스트를 반환합니다.
+     *
+     * @param user 그룹 목록을 조회할 현재 사용자 객체
+     * @return 사용자가 속한 그룹의 ID 목록. 그룹이 없으면 -1을 포함하는 리스트 반환
+     * @throws IllegalArgumentException user 파라미터가 null인 경우
+     */
+
     @GetMapping("api/user/groups")
-    @Operation(summary = "사용자가 속한 그룹 목록 조회", description = "현재 사용자가 속한 그룹의 ID 목록을 페이지네이션하여 반환합니다.")
+    @Operation(summary = "사용자가 속한 그룹 목록 조회", description = "현재 사용자가 속한 모든 그룹의 ID 목록을 반환합니다. 그룹이 없으면 -1을 포함하는 리스트를 반환합니다.")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<DataResponse<Page<Long>>> getUserGroups(
-            @Parameter(hidden = true) @CurrentUser User user,
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<DataResponse<List<Long>>> getUserGroups(
+            @Parameter(hidden = true) @CurrentUser User user) {
 
-        String email = user.getEmail();
-        Page<Long> groupIds = groupService.findUserGroupIds(email, pageable);
+        List<Long> groupIds = groupService.getUserGroupIds(user);
 
-        if (groupIds.isEmpty()) {
-            return ResponseEntity.ok(DataResponse.of(HttpStatus.OK, "사용자가 속한 그룹이 없습니다.", groupIds));
-        } else {
-            return ResponseEntity.ok(DataResponse.of(HttpStatus.OK, "사용자의 그룹을 찾았습니다.", groupIds));
-        }
+        String message = groupIds.get(0) == -1L
+                ? "사용자가 속한 그룹이 없습니다."
+                : "사용자의 그룹 ID 목록을 성공적으로 조회했습니다.";
+
+        DataResponse<List<Long>> response = DataResponse.of(
+                HttpStatus.OK,
+                message,
+                groupIds
+        );
+
+        return ResponseEntity.ok(response);
     }
 
 }

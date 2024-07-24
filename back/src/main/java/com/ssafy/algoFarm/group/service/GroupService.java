@@ -130,33 +130,13 @@ public class GroupService {
         //member테이블에서 삭제(그룹 탈퇴)
         memberRepository.delete(member);
     }
-
-    public Page<Long> findUserGroupIds(String email, Pageable pageable) {
-        Page<Member> memberPage = memberRepository.findByUserEmail(email, pageable);
-        List<Long> groupIds = memberPage.getContent().stream()
-                .map(member -> member.getGroup().getId())
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(groupIds, pageable, memberPage.getTotalElements());
-    }
-
-    @Transactional
-    public void addUserToGroup(String email, Long groupId) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new EntityNotFoundException("Group not found with id: " + groupId));
-
-        if (memberRepository.existsByUserAndGroup(user, group)) {
-            throw new IllegalStateException("User is already a member of this group");
+    public List<Long> getUserGroupIds(User user) {
+        List<Long> groupIds = memberRepository.findGroupIdsByUser(user);
+        if (groupIds.isEmpty()) {
+            return List.of(-1L);
         }
-
-        Member member = new Member();
-        member.setUser(user);
-        member.setGroup(group);
-        memberRepository.save(member);
+        return groupIds;
     }
-
 
     public long getUserGroupsCount(String email) {
         return memberRepository.countByUserEmail(email);
