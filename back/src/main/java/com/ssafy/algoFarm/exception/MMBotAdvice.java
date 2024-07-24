@@ -26,7 +26,20 @@ public class MMBotAdvice {
         conn.setDoOutput(true);
 
         Map<String, String> message = new HashMap<>();
-        message.put("text", e.toString());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("### ").append(e.toString()).append("\n\n\n").append("```\n");
+
+        StackTraceElement[] steList = e.getStackTrace();
+
+        for(StackTraceElement ste : steList) {
+            if(ste.toString().contains("com.ssafy")){
+                sb.append("[ !!! ] ");
+            }
+            sb.append(ste.toString()).append("\n");
+        }
+        sb.append("\n```");
+        message.put("text", sb.toString());
 
         String jsonString = new Gson().toJson(message);
 
