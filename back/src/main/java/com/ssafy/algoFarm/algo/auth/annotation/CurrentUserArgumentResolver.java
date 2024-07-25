@@ -1,12 +1,12 @@
-package com.ssafy.algoFarm.algo.auth;
+package com.ssafy.algoFarm.algo.auth.annotation;
 
+import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
 
 @Component
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
-
     private static final Logger logger = LoggerFactory.getLogger(CurrentUserArgumentResolver.class);
-
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
@@ -38,15 +36,11 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            logger.error("User not authenticated");
-            throw new BadCredentialsException("User not authenticated");
-        }
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        String token = jwtUtil.extractTokenFromRequest(request);
 
-        String token = (String) authentication.getCredentials();
         if (token == null || token.isEmpty()) {
-            logger.error("No token found in authentication");
+            logger.error("No token found in request");
             throw new BadCredentialsException("No token found");
         }
 
