@@ -7,6 +7,7 @@ import com.ssafy.algoFarm.group.dto.request.EditGroupReqDto;
 import com.ssafy.algoFarm.group.dto.request.JoinGroupReqDto;
 import com.ssafy.algoFarm.group.dto.request.LeaveGroupReqDto;
 import com.ssafy.algoFarm.group.dto.response.*;
+import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.service.GroupService;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
@@ -121,16 +122,40 @@ public class GroupController {
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "스터디 그룹 탈퇴에 성공하셨습니다."), HttpStatus.OK);
     }
 
+    /**
+     * userId로 들어온 user를 그룹에서 강퇴합니다.
+     * @param groupId
+     * @param userPk
+     * @return 그룹원 강퇴 성공에 대한 메시지, 강퇴 실패 시 강퇴 실패 메시지
+     */
     @DeleteMapping("api/groups/{groupId}/members/{userId}")
     @Operation(summary = "그룹장이 그룹원을 강퇴시키는 api")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse> leaveGroupMembers(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userPk) {
         // TODO: 요청을 보낸 유저가 그룹장이 아니라면 예외처리
         log.info("groupId={}, userId={}", groupId, userPk);
-        groupService.leaveGroup(userPk, groupId);
+        try {
+            groupService.leaveGroup(userPk, groupId);
+        }catch(Exception e) {
+            return new ResponseEntity<>(MessageResponse.of(HttpStatus.NOT_FOUND, "그룹원 강퇴에 실패했습니다."), HttpStatus.NOT_FOUND);
+        }
 
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "그룹원 강퇴에 성공하셨습니다."), HttpStatus.OK);
     }
+
+    @GetMapping("api/groups/{groupId}/memberList")
+    @Operation(summary = "그룹원 목록을 리턴하는 api")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<List<GroupMemberDto>>> getMemberList(@PathVariable("groupId") Long groupId){
+        log.info("groupId={}", groupId);
+        try {
+            List<GroupMemberDto> memberDtoList = groupService.getMemberList(groupId);
+            return new ResponseEntity<>(DataResponse.of(HttpStatus.OK, "멤버리스트 조회에 성공했습니다.", memberDtoList), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(DataResponse.of(HttpStatus.BAD_REQUEST, "멤버리스트 조회에 실패했습니다.", null), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     /**
      * 현재 사용자가 속한 모든 그룹의 ID 목록을 조회합니다.
