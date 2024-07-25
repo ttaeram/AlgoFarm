@@ -19,6 +19,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     long countByUserEmail(String email);
     boolean existsByUserAndGroup(User user, Group group);
     boolean existsByUserId(Long id);
+    List<Member> findAllByGroupId(Long groupId);
 
     @Query("SELECT m.group.id FROM Member m WHERE m.user = :user")
     List<Long> findGroupIdsByUser(@Param("user") User user);
