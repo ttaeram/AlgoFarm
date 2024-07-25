@@ -121,6 +121,17 @@ public class GroupController {
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "스터디 그룹 탈퇴에 성공하셨습니다."), HttpStatus.OK);
     }
 
+    @DeleteMapping("api/groups/{groupId}/members/{userId}")
+    @Operation(summary = "그룹장이 그룹원을 강퇴시키는 api")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<MessageResponse> leaveGroupMembers(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userPk) {
+        // TODO: 요청을 보낸 유저가 그룹장이 아니라면 예외처리
+        log.info("groupId={}, userId={}", groupId, userPk);
+        groupService.leaveGroup(userPk, groupId);
+
+        return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "그룹원 강퇴에 성공하셨습니다."), HttpStatus.OK);
+    }
+
     /**
      * 현재 사용자가 속한 모든 그룹의 ID 목록을 조회합니다.
      * 사용자가 속한 그룹이 없는 경우, -1을 포함하는 리스트를 반환합니다.
