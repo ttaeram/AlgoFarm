@@ -1,60 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>OAuth 로그인 성공</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 성공</title>
     <style>
-        #tokenDisplay {
-            word-break: break-all;
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f8f8f8;
-            margin: 20px 0;
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        #copyButton, #swaggerButton {
-            margin-top: 20px;
+        h1 {
+            color: #4CAF50;
+        }
+        #tokenDisplay {
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            cursor: text;
+            user-select: all;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
             padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
             font-size: 16px;
+            margin: 4px 2px;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #copyInstructions {
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 <h1>로그인 성공!</h1>
+
 <p>아래의 토큰을 복사한 후, Swagger UI로 이동하여 사용하세요.</p>
-<div id="tokenDisplay"></div>
-<button id="copyButton">토큰 선택</button>
-<button id="swaggerButton">Swagger UI로 이동</button>
 
-<script>
-    let token;
+<div id="tokenDisplay" onclick="selectToken()"></div>
 
-    window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        token = urlParams.get('token');
+<div id="copyInstructions">토큰을 선택하려면 클릭하세요. 그 후 Ctrl+C (Mac의 경우 Cmd+C)를 눌러 복사할 수 있습니다.</div>
 
-        if (token) {
-            document.getElementById('tokenDisplay').textContent = token;
-        } else {
-            console.error("토큰을 찾을 수 없습니다.");
-            document.getElementById('tokenDisplay').textContent = "토큰을 찾을 수 없습니다.";
-            document.getElementById('copyButton').disabled = true;
-        }
-    };
+<button onclick="location.href='/swagger-ui/index.html'">Swagger UI로 이동</button>
 
-    document.getElementById('copyButton').addEventListener('click', function() {
-        if (token) {
-            const range = document.createRange();
-            range.selectNodeContents(document.getElementById('tokenDisplay'));
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-            alert('토큰이 선택되었습니다. Ctrl+C 또는 Cmd+C를 눌러 복사하세요.');
-        }
-    });
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var token = /*[[${token}]]*/ 'default';
+    document.getElementById('tokenDisplay').textContent = token;
 
-    document.getElementById('swaggerButton').addEventListener('click', function() {
-        window.location.href = '/swagger-ui/index.html';
-    });
+    function selectToken() {
+        var tokenText = document.getElementById('tokenDisplay');
+        var range = document.createRange();
+        range.selectNodeContents(tokenText);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+    /*]]>*/
 </script>
 </body>
 </html>
