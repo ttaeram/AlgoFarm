@@ -1,16 +1,25 @@
 package com.ssafy.algoFarm.solution.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ssafy.algoFarm.algo.user.entity.User;
+import com.ssafy.algoFarm.solution.dto.AlgorithmSolutionDTO;
+import com.ssafy.algoFarm.solution.util.StringListConverter;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
+@Table(name = "algorithm_solution", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "problem_id"})
+})
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AlgorithmSolution {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "algorithm_solution_id")
@@ -21,24 +30,28 @@ public class AlgorithmSolution {
     private User user;
 
     //문제제목
-    private String problemTitle;
+    private String title;
 
     //문제레벨
-    private String problemLevel;
+    private String level;
 
     //사용언어
+    @Setter
     private String language;
 
     //실행결과
+    @Setter
     private String result;
 
     //문제경로
-    private String problemDirectory;
+    private String directory;
 
     //문제태그-> 태그가 하나인가? 여러개면 분리필요
-    private String problemTags;
+    @Convert(converter = StringListConverter.class)
+    private List<String> problemTags;
 
     //문제설명
+    @Setter
     private String problemDescription;
 
     //문제입력
@@ -47,7 +60,13 @@ public class AlgorithmSolution {
     //문제출력
     private String problemOutput;
 
+    @Setter
+    private Long codeLength;
+
     //제출코드
+    @Setter
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String code;
 
     //문제id
@@ -57,16 +76,20 @@ public class AlgorithmSolution {
     private Long bojId;
 
     //메모리사용량
+    @Setter
     private Long memory;
 
     //실행시간
+    @Setter
     private Long runtime;
 
     //점수
-    private Long bojScore;
+    @Setter
+    private Long score;
 
     //제출시간
-    private LocalDateTime dateTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    private LocalDateTime currentDatetTime;
 
     public void setUser(User user){
         if(this.user != null){
@@ -76,4 +99,48 @@ public class AlgorithmSolution {
         user.getSolutions().add(this);
     }
 
+    public static AlgorithmSolutionDTO toDto(AlgorithmSolution algorithmSolution) {
+        return AlgorithmSolutionDTO.builder()
+                .directory(algorithmSolution.getDirectory())
+                .code(algorithmSolution.getCode())
+                .codeLength(algorithmSolution.getCodeLength())
+                .language(algorithmSolution.getLanguage())
+                .level(algorithmSolution.getLevel())
+                .memory(algorithmSolution.getMemory())
+                .problemId(algorithmSolution.getProblemId())
+                .problemDescription(algorithmSolution.getProblemDescription())
+                .problemInput(algorithmSolution.getProblemInput())
+                .problemOutput(algorithmSolution.getProblemOutput())
+                .problemTags(algorithmSolution.getProblemTags())
+                .result(algorithmSolution.getResult())
+                .runtime(algorithmSolution.getRuntime())
+                .title(algorithmSolution.getTitle())
+                .score(algorithmSolution.getScore())
+                .currentDateTime(algorithmSolution.getCurrentDatetTime())
+                .build();
+    }
+
+    // 엔티티로 변환하는 메서드
+    public static AlgorithmSolution toEntity(AlgorithmSolutionDTO algorithmSolutionDTO) {
+        return AlgorithmSolution.builder()
+                .directory(algorithmSolutionDTO.getDirectory())
+                .code(algorithmSolutionDTO.getCode())
+                .codeLength(algorithmSolutionDTO.getCodeLength())
+                .language(algorithmSolutionDTO.getLanguage())
+                .level(algorithmSolutionDTO.getLevel())
+                .memory(algorithmSolutionDTO.getMemory())
+                .problemId(algorithmSolutionDTO.getProblemId())
+                .problemDescription(algorithmSolutionDTO.getProblemDescription())
+                .problemInput(algorithmSolutionDTO.getProblemInput())
+                .problemOutput(algorithmSolutionDTO.getProblemOutput())
+                .problemTags(algorithmSolutionDTO.getProblemTags())
+                .result(algorithmSolutionDTO.getResult())
+                .runtime(algorithmSolutionDTO.getRuntime())
+                .title(algorithmSolutionDTO.getTitle())
+                .score(algorithmSolutionDTO.getScore())
+                .currentDatetTime(algorithmSolutionDTO.getCurrentDateTime())
+                .build();
+
+
+}
 }
