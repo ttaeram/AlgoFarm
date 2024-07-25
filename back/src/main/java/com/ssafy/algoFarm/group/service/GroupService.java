@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -190,6 +191,28 @@ public class GroupService {
             return List.of(-1L);
         }
         return groupIds;
+    }
+
+    /**
+     * 파라미터에 해당하는 그룹에 속한 유저의 리스트를 반환하는 메서드
+     * @param groupId 그룹아이디
+     * @return 그룹에 속한 유저의 리스트
+     */
+    public List<GroupMemberDto> getMemberList(Long groupId){
+        List<Member> memberList = memberRepository.findAllByGroupId(groupId);
+        List<GroupMemberDto> memberDtoList = new ArrayList<>();
+        if(memberList.isEmpty()){
+            throw new EntityNotFoundException();
+        }
+        for(Member member : memberList){
+            GroupMemberDto groupMemberDto = new GroupMemberDto();
+            groupMemberDto.setMemberId(member.getId());
+            groupMemberDto.setUserId(member.getUser().getId());
+            groupMemberDto.setNickname(member.getNickname());
+            groupMemberDto.setIsLeader(member.getIsLeader());
+            memberDtoList.add(groupMemberDto);
+        }
+        return memberDtoList;
     }
 
     public long getUserGroupsCount(String email) {
