@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "member",uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
