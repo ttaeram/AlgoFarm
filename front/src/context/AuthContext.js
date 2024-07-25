@@ -50,12 +50,16 @@ export const AuthProvider = ({ children }) => {
           'Authorization': `Bearer ${jwt}`
         }
       });
+      if (!response.ok) {
+        throw new Error('Failed to fetch group info');
+      }
       const data = await response.json();
       setGroupInfo(data.data);
     } catch (error) {
       console.error('Failed to fetch group info:', error);
     }
   };
+  
 
   return (
     <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, signOut, fetchGroupInfo }}>
