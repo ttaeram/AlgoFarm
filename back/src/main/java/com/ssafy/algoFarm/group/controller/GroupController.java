@@ -1,6 +1,6 @@
 package com.ssafy.algoFarm.group.controller;
 
-import com.ssafy.algoFarm.algo.auth.CurrentUser;
+import com.ssafy.algoFarm.algo.auth.annotation.CurrentUser;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.group.dto.request.CreateGroupReqDto;
 import com.ssafy.algoFarm.group.dto.request.EditGroupReqDto;
@@ -16,10 +16,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
