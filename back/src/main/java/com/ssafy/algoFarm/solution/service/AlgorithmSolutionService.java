@@ -1,5 +1,6 @@
 package com.ssafy.algoFarm.solution.service;
 
+import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.solution.dto.AlgorithmSolutionDTO;
 import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
 import com.ssafy.algoFarm.solution.repository.AlgorithmSolutionRepository;
@@ -17,10 +18,10 @@ public class AlgorithmSolutionService {
     }
 
 
-    public AlgorithmSolutionDTO saveBojData(AlgorithmSolutionDTO algorithmSolutionDTO) {
+    public AlgorithmSolutionDTO saveBojSolution(AlgorithmSolutionDTO algorithmSolutionDTO, User user) {
         // 기존 데이터를 조회
         Optional<AlgorithmSolution> existingDataOpt = algorithmSolutionRepository.findByUserIdAndProblemId(
-                algorithmSolutionDTO.getUserId(), algorithmSolutionDTO.getProblemId());
+                user.getId(), algorithmSolutionDTO.getProblemId());
 
         if (existingDataOpt.isPresent()) {
             // 기존 데이터가 존재하면 업데이트
