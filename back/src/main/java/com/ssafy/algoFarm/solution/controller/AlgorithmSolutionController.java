@@ -6,6 +6,7 @@ import com.ssafy.algoFarm.solution.dto.AlgorithmSolutionDTO;
 import com.ssafy.algoFarm.solution.service.AlgorithmSolutionService;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,9 @@ public class AlgorithmSolutionController {
         this.algorithmSolutionService = algorithmSolutionService;
     }
 
-    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/commits")
+    @Operation(summary = "맞은 문제정보를 저장하는 api")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse>
     createBojSolution(@RequestBody AlgorithmSolutionDTO algorithmSolutionDTO, @Parameter(hidden = true) @CurrentUser User user) {
         try {
