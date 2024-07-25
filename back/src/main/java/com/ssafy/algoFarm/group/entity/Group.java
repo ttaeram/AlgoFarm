@@ -13,7 +13,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @Table(name = "study_group")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,12 +35,15 @@ public class Group {
     //최대 참가 인원
     private Integer MaxNum = 10;
 
+    //그룹 생성시 사용
     //그룹명
+    @Setter
     private String name;
 
     private String description="";
 
     //초대코드
+    @Setter
     private String code;
 
     //현재 경험치
@@ -69,11 +71,6 @@ public class Group {
         mascot.getGroups().add(this);
     }
 
-    //그룹 생성시 사용
-    public void setName(String name){
-        this.name = name;
-    }
-
     public void countUpCurrentNum(){
         //TODO 최대 참가 인원을 초과한 경우 예외처리 해줘야함.
         this.currentNum++;
@@ -83,7 +80,4 @@ public class Group {
         this.currentNum--;
     }
 
-    public void setCode(String code){
-        this.code = code;
-    }
 }
