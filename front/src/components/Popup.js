@@ -26,10 +26,9 @@ const Popup = () => {
       const groupIdResponse = await fetchGroupId(serverJwt);
       setGroupId(groupIdResponse);
 
-      // 그룹 정보를 가져와서 Context에 저장
-      await fetchGroupInfo(serverJwt, groupIdResponse);
-
+      // 그룹 ID가 유효한 경우에만 그룹 정보를 가져옴
       if (groupIdResponse && groupIdResponse !== '-1') {
+        await fetchGroupInfo(serverJwt, groupIdResponse);
         navigate('/my-page/group-info');
       } else {
         navigate('/select-group');
@@ -49,8 +48,11 @@ const Popup = () => {
           'Authorization': `Bearer ${jwt}`
         }
       });
+      if (!response.ok) {
+        throw new Error('Failed to fetch group ID');
+      }
       const data = await response.json();
-      return data.data[0];
+      return data.data[0]?.groupId || '-1';
     } catch (error) {
       console.error('Failed to fetch group ID:', error);
       return '-1';
