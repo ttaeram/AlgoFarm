@@ -9,6 +9,8 @@ import lombok.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -28,6 +30,11 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<String> roles = new HashSet<>();
+
     @Column(nullable = false)
     private String email;
 
@@ -42,7 +49,17 @@ public class User {
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }
+    @Column(nullable = false)
+    private boolean accountNonExpired = true;
 
+    @Column(nullable = false)
+    private boolean accountNonLocked = true;
+
+    @Column(nullable = false)
+    private boolean credentialsNonExpired = true;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
