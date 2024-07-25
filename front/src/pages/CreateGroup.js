@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { jwt, useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';  // BackButton 컴포넌트 import
 import './CreateGroup.css';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 function CreateGroup() {
   const [groupName, setGroupName] = useState('');
   const [showWarning, setShowWarning] = useState(false);
-  const { jwt, setGroupId } = useAuth();
+  const { jwt, setGroupId, fetchGroupInfo } = useAuth();
   const navigate = useNavigate();  // useNavigate 훅을 사용
 
   const handleInputChange = (e) => {
@@ -37,7 +37,12 @@ function CreateGroup() {
         }
 
         const data = await response.json();
-        setGroupId(data.data.groupId); // 그룹 ID를 설정
+        const newGroupId = data.data.groupId;
+        setGroupId(newGroupId); // 그룹 ID를 설정
+
+        // 그룹 정보를 가져와서 Context에 저장
+        await fetchGroupInfo(jwt, newGroupId);
+
         navigate('/my-page/group-info');  // 그룹 생성이 성공하면 MyPage로 이동
       } catch (error) {
         console.error('Error creating group:', error);

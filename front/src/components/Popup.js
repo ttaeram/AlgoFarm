@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import './Popup.css';
 
 const Popup = () => {
-  const { user, setIsLogined, setUser, setJwt, isLogined, groupId, setGroupId, groupInfo, setGroupInfo, signOut: contextSignOut } = useAuth();
+  const { user, setIsLogined, setUser, setJwt, isLogined, groupId, setGroupId, groupInfo, setGroupInfo, fetchGroupInfo, signOut: contextSignOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -23,14 +23,12 @@ const Popup = () => {
       setUser(userInfo);
       setIsLogined(true);
 
-      // 그룹 ID 조회 로직 추가
-      const groupIdResponse = await fetchGroupId(serverJwt); // 서버로부터 그룹 ID를 조회하는 API 호출
+      const groupIdResponse = await fetchGroupId(serverJwt);
       setGroupId(groupIdResponse);
 
-      const groupInfoResponse = await fetchGroupInfo(serverJwt, groupIdResponse);
-      setGroupInfo(groupInfoResponse);
-
+      // 그룹 ID가 유효한 경우에만 그룹 정보를 가져옴
       if (groupIdResponse && groupIdResponse !== '-1') {
+        await fetchGroupInfo(serverJwt, groupIdResponse);
         navigate('/my-page/group-info');
       } else {
         navigate('/select-group');
@@ -50,29 +48,14 @@ const Popup = () => {
           'Authorization': `Bearer ${jwt}`
         }
       });
+      if (!response.ok) {
+        throw new Error('Failed to fetch group ID');
+      }
       const data = await response.json();
-      console.log(data)
-      return data[0];
+      return data.data[0]?.groupId || '-1';
     } catch (error) {
       console.error('Failed to fetch group ID:', error);
       return '-1';
-    }
-  };
-
-  const fetchGroupInfo = async (jwt, groupId) => {
-    try {
-      const response = await fetch(`http://i11a302.p.ssafy.io:8080/api/groups/${groupId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${jwt}`
-        }
-      });
-      const data = await response.json();
-      console.log(data.data)
-      return data.data;
-    } catch (error) {
-      console.error('Failed to fetch group info:', error);
-      return null;
     }
   };
 
@@ -98,7 +81,7 @@ const Popup = () => {
   return (
     <div>
       {isLogined && user ? (
-        <div className="loading">로딩 중...</div> // 로딩 상태를 표시
+        <div className="loading">로딩 중...</div>
       ) : (
         <div className="login">
           <h1 className="title">알고팜</h1>

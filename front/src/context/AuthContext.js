@@ -42,8 +42,27 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('groupInfo');
   };
 
+  const fetchGroupInfo = async (jwt, groupId) => {
+    try {
+      const response = await fetch(`http://i11a302.p.ssafy.io:8080/api/groups/${groupId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${jwt}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch group info');
+      }
+      const data = await response.json();
+      setGroupInfo(data.data);
+    } catch (error) {
+      console.error('Failed to fetch group info:', error);
+    }
+  };
+  
+
   return (
-    <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, signOut }}>
+    <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, signOut, fetchGroupInfo }}>
       {children}
     </AuthContext.Provider>
   );
