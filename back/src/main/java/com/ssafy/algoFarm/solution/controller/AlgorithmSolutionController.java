@@ -2,6 +2,7 @@ package com.ssafy.algoFarm.solution.controller;
 
 import com.ssafy.algoFarm.solution.dto.AlgorithmSolutionDTO;
 import com.ssafy.algoFarm.solution.service.AlgorithmSolutionService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +17,13 @@ public class AlgorithmSolutionController {
     public AlgorithmSolutionController(AlgorithmSolutionService algorithmSolutionService) {
         this.algorithmSolutionService = algorithmSolutionService;
     }
-
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/ss")
     public ResponseEntity<String> createBojData2() {
         return ResponseEntity.ok("savedBojData");
     }
 
-
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/commits")
     public ResponseEntity<AlgorithmSolutionDTO> createBojData(@RequestBody AlgorithmSolutionDTO algorithmSolutionDTO) {
         try {
