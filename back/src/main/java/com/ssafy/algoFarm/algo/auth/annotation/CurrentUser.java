@@ -1,4 +1,4 @@
-package com.ssafy.algoFarm.algo.auth;
+package com.ssafy.algoFarm.algo.auth.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

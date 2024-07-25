@@ -1,4 +1,4 @@
-package com.ssafy.algoFarm.algo.controller;
+package com.ssafy.algoFarm.algo.auth.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

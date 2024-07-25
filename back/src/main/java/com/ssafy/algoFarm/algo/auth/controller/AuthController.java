@@ -1,5 +1,11 @@
-package com.ssafy.algoFarm.algo.auth;
+package com.ssafy.algoFarm.algo.auth.controller;
 
+import com.ssafy.algoFarm.algo.auth.model.CustomOAuth2User;
+import com.ssafy.algoFarm.algo.auth.model.ErrorResponse;
+import com.ssafy.algoFarm.algo.auth.model.GoogleTokenRequest;
+import com.ssafy.algoFarm.algo.auth.model.JwtResponse;
+import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
+import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import com.ssafy.algoFarm.algo.user.UserProfile;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;

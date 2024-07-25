@@ -1,4 +1,4 @@
-package com.ssafy.algoFarm.algo.auth;
+package com.ssafy.algoFarm.algo.auth.model;
 
 import com.ssafy.algoFarm.algo.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;

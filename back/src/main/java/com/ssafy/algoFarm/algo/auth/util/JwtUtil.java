@@ -1,7 +1,8 @@
-package com.ssafy.algoFarm.algo.auth;
+package com.ssafy.algoFarm.algo.auth.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -180,5 +181,17 @@ public class JwtUtil {
         } catch (JwtException e) {
             throw new JwtException("Failed to extract claim from token", e);
         }
+    }
+    /**
+     * HTTP 요청에서 JWT 토큰을 추출합니다.
+     * @param request HTTP 요청
+     * @return 추출된 JWT 토큰, 없으면 null
+     */
+    public String extractTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }
