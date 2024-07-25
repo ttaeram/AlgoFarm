@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import './Popup.css';
 
 const Popup = () => {
-  const { user, setIsLogined, setUser, setJwt, isLogined, jwt, groupId, setGroupId, groupInfo, setGroupInfo, fetchGroupInfo, signOut: contextSignOut } = useAuth();
+  const { user, setIsLogined, setUser, setJwt, isLogined, jwt, groupId, setGroupId, setGroupInfo, fetchGroupInfo, signOut: contextSignOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -16,16 +16,21 @@ const Popup = () => {
           console.log('Checking group status for user:', user);
           const groupIdResponse = await fetchGroupId(jwt);
           console.log('Fetched group ID:', groupIdResponse);
-          setGroupId(groupIdResponse);
 
-          if (groupIdResponse && groupIdResponse !== '-1') {
+          if (groupIdResponse !== -1 && groupIdResponse !== null) {
+            setGroupId(groupIdResponse);
             await fetchGroupInfo(jwt, groupIdResponse);
             navigate('/my-page/group-info');
           } else {
+            setGroupId(null);
+            setGroupInfo(null);
             navigate('/select-group');
           }
         } catch (error) {
           console.error('Error checking group status:', error);
+          setGroupId(null);
+          setGroupInfo(null);
+          navigate('/select-group');
         }
       }
     };
@@ -49,16 +54,21 @@ const Popup = () => {
 
       const groupIdResponse = await fetchGroupId(serverJwt);
       console.log('Fetched group ID after sign-in:', groupIdResponse);
-      setGroupId(groupIdResponse);
 
-      if (groupIdResponse && groupIdResponse !== '-1') {
+      if (groupIdResponse !== -1 && groupIdResponse !== null) {
+        setGroupId(groupIdResponse);
         await fetchGroupInfo(serverJwt, groupIdResponse);
         navigate('/my-page/group-info');
       } else {
+        setGroupId(null);
+        setGroupInfo(null);
         navigate('/select-group');
       }
     } catch (error) {
       console.error('Sign in error:', error);
+      setGroupId(null);
+      setGroupInfo(null);
+      navigate('/select-group');
     } finally {
       setIsLoading(false);
     }
