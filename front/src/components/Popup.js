@@ -5,9 +5,33 @@ import { useAuth } from '../context/AuthContext';
 import './Popup.css';
 
 const Popup = () => {
-  const { user, setIsLogined, setUser, setJwt, isLogined, groupId, setGroupId, groupInfo, setGroupInfo, fetchGroupInfo, signOut: contextSignOut } = useAuth();
+  const { user, setIsLogined, setUser, setJwt, isLogined, jwt, groupId, setGroupId, groupInfo, setGroupInfo, fetchGroupInfo, signOut: contextSignOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUserGroupStatus = async () => {
+      if (isLogined && jwt) {
+        try {
+          console.log('Checking group status for user:', user);
+          const groupIdResponse = await fetchGroupId(jwt);
+          console.log('Fetched group ID:', groupIdResponse);
+          setGroupId(groupIdResponse);
+
+          if (groupIdResponse && groupIdResponse !== '-1') {
+            await fetchGroupInfo(jwt, groupIdResponse);
+            navigate('/my-page/group-info');
+          } else {
+            navigate('/select-group');
+          }
+        } catch (error) {
+          console.error('Error checking group status:', error);
+        }
+      }
+    };
+
+    checkUserGroupStatus();
+  }, [isLogined, jwt, user, setGroupId, fetchGroupInfo, navigate]);
 
   const handleSignIn = async () => {
     if (isLoading) {
@@ -24,9 +48,9 @@ const Popup = () => {
       setIsLogined(true);
 
       const groupIdResponse = await fetchGroupId(serverJwt);
+      console.log('Fetched group ID after sign-in:', groupIdResponse);
       setGroupId(groupIdResponse);
 
-      // 그룹 ID가 유효한 경우에만 그룹 정보를 가져옴
       if (groupIdResponse && groupIdResponse !== '-1') {
         await fetchGroupInfo(serverJwt, groupIdResponse);
         navigate('/my-page/group-info');
@@ -48,11 +72,9 @@ const Popup = () => {
           'Authorization': `Bearer ${jwt}`
         }
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch group ID');
-      }
       const data = await response.json();
-      return data.data[0]?.groupId || '-1';
+      console.log('Group ID response:', data);
+      return data.data.length > 0 ? data.data[0] : '-1';
     } catch (error) {
       console.error('Failed to fetch group ID:', error);
       return '-1';
@@ -67,16 +89,6 @@ const Popup = () => {
       console.error('Sign out error:', error);
     }
   };
-
-  useEffect(() => {
-    if (isLogined) {
-      if (groupId && groupId !== '-1') {
-        navigate('/my-page/group-info');
-      } else {
-        navigate('/select-group');
-      }
-    }
-  }, [isLogined, groupId, navigate]);
 
   return (
     <div>
