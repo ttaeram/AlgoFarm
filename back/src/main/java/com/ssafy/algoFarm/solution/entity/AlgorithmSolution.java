@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Entity
@@ -29,65 +31,44 @@ public class AlgorithmSolution {
     @JoinColumn(name = "user_id")
     private User user;
 
-    //문제제목
     private String title;
-
-    //문제레벨
     private String level;
 
-    //사용언어
     @Setter
     private String language;
 
-    //실행결과
     @Setter
     private String result;
-
-    //문제경로
     private String directory;
 
-    //문제태그-> 태그가 하나인가? 여러개면 분리필요
     @Convert(converter = StringListConverter.class)
     private List<String> problemTags;
 
-    //문제설명
     @Setter
     private String problemDescription;
-
-    //문제입력
     private String problemInput;
-
-    //문제출력
     private String problemOutput;
 
     @Setter
     private Long codeLength;
 
-    //제출코드
     @Setter
     @Lob
     @Column(columnDefinition = "TEXT")
     private String code;
 
-    //문제id
     private Long problemId;
-
-    //백준제출id
     private Long bojId;
 
-    //메모리사용량
     @Setter
     private Long memory;
 
-    //실행시간
     @Setter
     private Long runtime;
 
-    //점수
     @Setter
     private Long score;
 
-    //제출시간
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime currentDatetTime;
 
@@ -100,7 +81,10 @@ public class AlgorithmSolution {
     }
 
     public static AlgorithmSolutionDTO toDto(AlgorithmSolution algorithmSolution) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return AlgorithmSolutionDTO.builder()
+                .id(algorithmSolution.getId())
+                .userId(algorithmSolution.getUser().getId())
                 .directory(algorithmSolution.getDirectory())
                 .code(algorithmSolution.getCode())
                 .codeLength(algorithmSolution.getCodeLength())
@@ -116,13 +100,23 @@ public class AlgorithmSolution {
                 .runtime(algorithmSolution.getRuntime())
                 .title(algorithmSolution.getTitle())
                 .score(algorithmSolution.getScore())
-                .currentDateTime(algorithmSolution.getCurrentDatetTime())
+                .currentDateTime(algorithmSolution.getCurrentDatetTime().format(formatter))
                 .build();
     }
 
-    // 엔티티로 변환하는 메서드
     public static AlgorithmSolution toEntity(AlgorithmSolutionDTO algorithmSolutionDTO) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime;
+        try {
+            dateTime = LocalDateTime.parse(algorithmSolutionDTO.getCurrentDateTime(), formatter);
+        } catch (DateTimeParseException e) {
+            System.err.println("Invalid date format: " + algorithmSolutionDTO.getCurrentDateTime());
+            e.printStackTrace();
+            dateTime = LocalDateTime.now(); // 기본값을 현재 시간으로 설정 (필요시 수정)
+        }
         return AlgorithmSolution.builder()
+                .id(algorithmSolutionDTO.getId())
+                .user(User.builder().id(algorithmSolutionDTO.getUserId()).build())
                 .directory(algorithmSolutionDTO.getDirectory())
                 .code(algorithmSolutionDTO.getCode())
                 .codeLength(algorithmSolutionDTO.getCodeLength())
@@ -138,9 +132,7 @@ public class AlgorithmSolution {
                 .runtime(algorithmSolutionDTO.getRuntime())
                 .title(algorithmSolutionDTO.getTitle())
                 .score(algorithmSolutionDTO.getScore())
-                .currentDatetTime(algorithmSolutionDTO.getCurrentDateTime())
+                .currentDatetTime(dateTime)
                 .build();
-
-
-}
+    }
 }
