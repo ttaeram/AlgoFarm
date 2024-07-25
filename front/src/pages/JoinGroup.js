@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';
 import './JoinGroup.css';
 
@@ -6,6 +8,8 @@ function JoinGroup() {
   const [showCode, setShowCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [showWarning, setShowWarning] = useState(false);
+  const { jwt, setGroupId, fetchGroupInfo } = useAuth();
+  const navigate = useNavigate();
 
   const toggleShowCode = () => {
     setShowCode(!showCode);
@@ -15,16 +19,43 @@ function JoinGroup() {
     setInviteCode(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!inviteCode.trim() || inviteCode !== "VALID_CODE") {  // replace "VALID_CODE" with your actual validation logic
+    if (!inviteCode.trim()) {
       setShowWarning(true);
       setTimeout(() => {
         setShowWarning(false);
       }, 3000);  // 3초 후에 경고 메시지 숨기기
     } else {
-      // 유효한 초대 코드로 그룹 참가 로직 추가
-      console.log('그룹 참가');
+      try {
+        const response = await fetch('http://i11a302.p.ssafy.io:8080/api/groups/members', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`
+          },
+          body: JSON.stringify({ inviteCode })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to join group');
+        }
+
+        const data = await response.json();
+        const newGroupId = data.data.groupId;
+        setGroupId(newGroupId);
+
+        // 그룹 정보를 가져와서 Context에 저장
+        await fetchGroupInfo(jwt, newGroupId);
+
+        navigate('/my-page/group-info');  // 그룹 참가가 성공하면 MyPage로 이동
+      } catch (error) {
+        console.error('Error joining group:', error);
+        setShowWarning(true);
+        setTimeout(() => {
+          setShowWarning(false);
+        }, 3000);  // 3초 후에 경고 메시지 숨기기
+      }
     }
   };
 
