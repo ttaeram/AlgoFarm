@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';  // BackButton 컴포넌트 import
-import './CreateGroup.css';
 import { useNavigate } from 'react-router-dom';
+import * as styles from "./CreateGroup.module.css";
 
 function CreateGroup() {
   const [groupName, setGroupName] = useState('');
@@ -55,25 +55,25 @@ function CreateGroup() {
   };
 
   return (
-    <div className="createGroup">
+    <div className={styles.createGroup}>
       <BackButton />
-      <h1 className="title">알고팜</h1>
-      <div className="algoFarm">
-        <img src="path/to/placeholder/image.png" alt="algoFarm" />
+      <h1 className={styles.title}>알고팜</h1>
+      <div className={styles.algoFarm}>
+        <img src="" alt="algoFarm" />
       </div>
-      <form className="form" onSubmit={handleSubmit}>
-        <label className="label" htmlFor="groupName">그룹 이름</label>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <label className={styles.label} htmlFor="groupName">그룹 이름</label>
         <input
-          className="input"
+          className={styles.input}
           type="text"
           id="groupName"
           placeholder="그룹 이름"
           value={groupName}
           onChange={handleInputChange}
         />
-        <button className="button" type="submit">그룹 생성</button>
-        <div className="warningContainer">
-          {showWarning && <div className="warning">그룹 이름을 입력하세요.</div>}
+        <button className={styles.button} type="submit">그룹 생성</button>
+        <div className={styles.warningContainer}>
+          {showWarning && <div className={styles.warning}>그룹 이름을 입력하세요.</div>}
         </div>
       </form>
     </div>

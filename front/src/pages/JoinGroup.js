@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import BackButton from '../components/BackButton';
-import './JoinGroup.css';
+import * as styles from "./JoinGroup.module.css";
 
 function JoinGroup() {
   const [showCode, setShowCode] = useState(false);
@@ -60,30 +60,30 @@ function JoinGroup() {
   };
 
   return (
-    <div className="joinGroup">
+    <div className={styles.joinGroup}>
       <BackButton />
-      <h1 className="title">알고팜</h1>
-      <div className="algoFarm">
-        <img src="path/to/placeholder/image.png" alt="algoFarm" />
+      <h1 className={styles.title}>알고팜</h1>
+      <div className={styles.algoFarm}>
+        <img src="" alt="algoFarm" />
       </div>
-      <form className="form" onSubmit={handleSubmit}>
-        <label className="label" htmlFor="inviteCode">그룹 참가</label>
-        <div className="inputContainer">
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <label className={styles.label} htmlFor="inviteCode">그룹 참가</label>
+        <div className={styles.inputContainer}>
           <input
-            className="input"
+            className={styles.input}
             type={showCode ? 'text' : 'password'}
             id="inviteCode"
             value={inviteCode}
             onChange={handleInputChange}
             placeholder="초대 코드 입력"
           />
-          <button type="button" className="toggleButton" onClick={toggleShowCode}>
+          <button type="button" className={styles.toggleButton} onClick={toggleShowCode}>
             {showCode ? '숨기기' : '보기'}
           </button>
         </div>
-        <button className="button" type="submit">참가</button>
-        <div className="warningContainer">
-          {showWarning && <div className="warning">유효하지 않은 초대 코드입니다.</div>}
+        <button className={styles.button} type="submit">참가</button>
+        <div className={styles.warningContainer}>
+          {showWarning && <div className={styles.warning}>유효하지 않은 초대 코드입니다.</div>}
         </div>
       </form>
     </div>

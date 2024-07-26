@@ -8,7 +8,7 @@ import CharInfo from './myPages/CharInfo';
 import Settings from './myPages/Settings';
 import Chat from './myPages/Chat';
 import GroupLeaveButton from '../components/GroupLeaveButton';
-import './MyPage.css';
+import * as styles from "./MyPage.module.css";
 
 const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
 
@@ -66,10 +66,10 @@ const MyPage = () => {
   };
 
   return (
-    <div className="container">
-      <div className="topSection">
-        <div className="headers">
-          <div className="groupName">
+    <div className={styles.container}>
+      <div className={styles.topSection}>
+        <div className={styles.headers}>
+          <div className={styles.groupName}>
             {isEditing ? (
               <form onSubmit={handleGroupNameSubmit}>
                 <input
@@ -86,12 +86,12 @@ const MyPage = () => {
             {!isEditing && <button onClick={handleEditClick}>Edit</button>}
           </div>
         </div>
-        <div className="characterBox">
-          <div className="character">캐릭터 150px*150px</div>
+        <div className={styles.characterBox}>
+          <div className={styles.character}>캐릭터 150px*150px</div>
         </div>
         <Nav />
       </div>
-      <div className="content">
+      <div className={styles.content}>
         <Routes>
           <Route path="group-info" element={<GroupInfo />} />
           <Route path="member-info" element={<MemberInfo />} />
@@ -99,12 +99,12 @@ const MyPage = () => {
           <Route path="settings" element={<Settings />} />
         </Routes>
       </div>
-      <div className="chatIcon" onClick={toggleChat}>
+      <div className={styles.chatIcon} onClick={toggleChat}>
         💬
       </div>
       {isChatOpen && <Chat onClose={toggleChat} />}
       <GroupLeaveButton />
-      <button className="logoutButton" onClick={handleLogout}>로그아웃</button>
+      <button className={styles.logoutButton} onClick={handleLogout}>로그아웃</button>
     </div>
   );
 }

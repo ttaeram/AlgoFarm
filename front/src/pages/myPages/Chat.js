@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import './Chat.css';
+import * as styles from "./Chat.module.css";
 
 function ChatPopup({ onClose }) {
   const [serverUrl, setServerUrl] = useState('');
@@ -14,17 +14,17 @@ function ChatPopup({ onClose }) {
   }, []);
 
   return (
-    <div className="popup">
-      <div className="popupContent">
-        <span className="closeButton" onClick={onClose}>&times;</span>
+    <div className={styles.popup}>
+      <div className={styles.popupContent}>
+        <span className={styles.closeButton} onClick={onClose}>&times;</span>
         <h2>그룹명</h2>
-        <div className="chatContent">
+        <div className={styles.chatContent}>
           {/* 채팅 내용이 들어갈 부분 */}
           <p>서버 URL: {serverUrl}</p> {/* 서버 URL을 출력 */}
         </div>
-        <div className="inputContainer">
-          <input type="text" className="chatInput" placeholder="메시지를 입력하세요..." />
-          <button className="sendButton">전송</button>
+        <div className={styles.inputContainer}>
+          <input type="text" className={styles.chatInput} placeholder="메시지를 입력하세요..." />
+          <button className={styles.sendButton}>전송</button>
         </div>
       </div>
     </div>
