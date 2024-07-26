@@ -8,16 +8,6 @@ body {
   min-height: 200px;
 }
 
-.google-login-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.google-login-button img {
-  width: 191px;
-  height: 46px;
-}
 .App-header {
   background-color: #282c34;
   min-height: 200px;

@@ -1,16 +1,6 @@
-/**
- * @typedef {Object} UserInfo
- * @property {string} oAuthId
- * @property {string} name
- * @property {string} email
- */
-
 const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
 
-/**
- * 구글로부터 엑세스 토큰 받아오는 함수
- * @returns {Promise<string>}
- */
+// 구글로부터 엑세스 토큰 받아오는 함수
 export function signIn() {
     return new Promise((resolve, reject) => {
         chrome.identity.getAuthToken({ interactive: true }, (token) => {
@@ -25,11 +15,7 @@ export function signIn() {
     });
 }
 
-/**
- * 사용자 정보를 받아오는 함수
- * @param {string} token 
- * @returns {Promise<UserInfo>}
- */
+// 사용자 정보를 받아오는 함수
 export function getUserInfo(token) {
     return fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
         headers: { Authorization: `Bearer ${token}` }
@@ -41,10 +27,7 @@ export function getUserInfo(token) {
     });
 }
 
-/**
- * 로그아웃 함수
- * @returns {Promise<void>}
- */
+// 로그아웃 함수
 export function signOut() {
     return new Promise((resolve, reject) => {
         chrome.identity.clearAllCachedAuthTokens(() => {
@@ -57,11 +40,7 @@ export function signOut() {
     });
 }
 
-/**
- * 구글 토큰을 우리 서버에 보내서 우리 서버의 엑세스 토큰을 받는 함수
- * @param {string} token
- * @returns {Promise<string>}
- */
+// 구글 토큰을 우리 서버에 보내서 우리 서버의 엑세스 토큰을 받는 함수
 export async function exchangeTokenForJwt(token) {
     try {
         const response = await fetch(`${SERVER_URL}/auth/google`, {
@@ -84,11 +63,7 @@ export async function exchangeTokenForJwt(token) {
     }
 }
 
-/**
- * 서버에서 사용자 정보를 받아오는 함수
- * @param {string} jwt 
- * @returns {Promise<UserInfo>}
- */
+// 서버에서 사용자 정보를 받아오는 함수
 export async function getServerUserInfo(jwt) {
     try {
         const response = await fetch(`${SERVER_URL}/auth/userinfo`, {

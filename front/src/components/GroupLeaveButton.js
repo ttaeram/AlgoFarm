@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './GroupLeaveButton.css'
+import * as styles from "./GroupLeaveButton.module.css";
 
 const GroupLeaveButton = () => {
   const { jwt, setGroupId, groupId } = useAuth();
@@ -33,7 +33,7 @@ const GroupLeaveButton = () => {
   };
 
   return (
-    <button onClick={handleLeaveGroup} className="groupLeaveButton">
+    <button onClick={handleLeaveGroup} className={styles.groupLeaveButton}>
       그룹 탈퇴
     </button>
   );
