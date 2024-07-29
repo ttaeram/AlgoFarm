@@ -2,6 +2,8 @@ package com.ssafy.algoFarm.group.service;
 
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
+import com.ssafy.algoFarm.exception.BusinessException;
+import com.ssafy.algoFarm.exception.ErrorCode;
 import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
@@ -44,7 +46,7 @@ public class GroupService {
      */
     public CreateGroupResDto createGroup(Long userPk, String nickname, String groupName) {
         //기본 캐릭터 조회
-        Mascot defaultMascot = mascotRepository.findById(1L).orElseThrow();
+        Mascot defaultMascot = mascotRepository.findById(1L).orElseThrow(()-> new BusinessException(ErrorCode.MASCOT_NOT_FOUND));
 
         Group newGroup = new Group();
         //그룹을 생성한다.
