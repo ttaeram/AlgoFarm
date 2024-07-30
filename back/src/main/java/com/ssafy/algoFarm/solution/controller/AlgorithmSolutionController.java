@@ -9,6 +9,7 @@ import com.ssafy.global.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin("*")
+@Slf4j
 public class AlgorithmSolutionController {
     private final AlgorithmSolutionService algorithmSolutionService;
 
@@ -30,7 +32,7 @@ public class AlgorithmSolutionController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse>
     createBojSolution(@RequestBody AlgorithmSolutionDTO algorithmSolutionDTO, @Parameter(hidden = true) @CurrentUser User user) {
-
+        log.info("algorithmSolutionDTO={}",algorithmSolutionDTO);
         try {
             AlgorithmSolutionDTO resultDTO = algorithmSolutionService.saveBojSolution(algorithmSolutionDTO, user);
             if (resultDTO == null) {
