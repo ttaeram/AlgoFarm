@@ -48,13 +48,16 @@ public class Group {
 
     //현재 경험치
     @ColumnDefault("0")
+    @Setter
     private Long currentExp = 0L;
 
     //최대 경험치 -> 현재경험치가 최대 경험치가 되면 레벨업한다.
     @ColumnDefault("100")
+    @Setter
     private Long maxExp = 100L;
 
     @ColumnDefault("1")
+    @Setter
     private Integer level = 1;
 
     @OneToMany(mappedBy = "group",cascade = CascadeType.ALL, orphanRemoval = true)
