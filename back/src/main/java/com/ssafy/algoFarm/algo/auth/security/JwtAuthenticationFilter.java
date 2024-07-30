@@ -83,6 +83,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         // JWT 인증이 필요 없는 경로들을 여기서 정의합니다.
-        return path.startsWith("/auth") || path.equals("/") || path.equals("/home") || path.startsWith("/oauth2");
+        return path.startsWith("/auth") || path.equals("/") || path.equals("/home") || path.startsWith("/oauth2") ||path.equals("/chat-websocket");
     }
 }
