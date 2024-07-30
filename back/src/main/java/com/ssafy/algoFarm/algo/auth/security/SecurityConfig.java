@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/auth/**", "/", "/home", "/login", "/oauth2/**","/oauth2-success").permitAll()
+                                "/auth/**", "/", "/home", "/login", "/oauth2/**","/oauth2-success","/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
