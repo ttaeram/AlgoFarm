@@ -51,6 +51,7 @@ public class AlgorithmSolutionService {
         } else {
             // 기존 데이터가 존재하지 않으면 새로운 데이터 저장
             AlgorithmSolution newData = AlgorithmSolution.toEntity(algorithmSolutionDTO);
+            newData.setUser(user);
             AlgorithmSolution savedData = algorithmSolutionRepository.save(newData);
             return AlgorithmSolution.toDto(savedData);
         }

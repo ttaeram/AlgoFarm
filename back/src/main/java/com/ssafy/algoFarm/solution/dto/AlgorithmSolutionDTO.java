@@ -1,7 +1,9 @@
 package com.ssafy.algoFarm.solution.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
+import com.ssafy.algoFarm.solution.util.StringListDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -20,9 +22,6 @@ import java.util.List;
 public class AlgorithmSolutionDTO {
     @Schema(description = "문제고유Id", example = "0")
     private Long id; //auto id
-
-    @Schema(description = "사용자의 userId", example = "0이 들어가면 안됨, 자신의 userId를 적어주세요")
-    private Long userId; // 유저ID
 
     @Schema(description = "문제에 대한 카테고리", example = "백준/Bronze/1000.A+B")
     private String directory;
@@ -55,6 +54,7 @@ public class AlgorithmSolutionDTO {
     private String problemOutput; // 문제 출력
 
     @Schema(description = "문제정보 관련 태그", example = "['구현', '사칙연산', '수학']")
+    @JsonDeserialize(using = StringListDeserializer.class)
     private List<String> problemTags; // ["문제 태그1", "문제 태그2"]
 
     @Schema(description = "실행 결과", example = "맞았습니다!!")
@@ -85,7 +85,6 @@ public class AlgorithmSolutionDTO {
         }
         return AlgorithmSolution.builder()
                 .id(id)
-                .user(User.builder().id(userId).build()) // User 객체를 설정하는 방법에 따라 수정
                 .directory(directory)
                 .code(code)
                 .codeLength(codeLength)
@@ -110,7 +109,6 @@ public class AlgorithmSolutionDTO {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return AlgorithmSolutionDTO.builder()
                 .id(entity.getId())
-                .userId(entity.getUser().getId())
                 .directory(entity.getDirectory())
                 .code(entity.getCode())
                 .codeLength(entity.getCodeLength())

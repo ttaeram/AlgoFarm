@@ -84,7 +84,6 @@ public class AlgorithmSolution {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return AlgorithmSolutionDTO.builder()
                 .id(algorithmSolution.getId())
-                .userId(algorithmSolution.getUser().getId())
                 .directory(algorithmSolution.getDirectory())
                 .code(algorithmSolution.getCode())
                 .codeLength(algorithmSolution.getCodeLength())
@@ -116,7 +115,6 @@ public class AlgorithmSolution {
         }
         return AlgorithmSolution.builder()
                 .id(algorithmSolutionDTO.getId())
-                .user(User.builder().id(algorithmSolutionDTO.getUserId()).build())
                 .directory(algorithmSolutionDTO.getDirectory())
                 .code(algorithmSolutionDTO.getCode())
                 .codeLength(algorithmSolutionDTO.getCodeLength())
