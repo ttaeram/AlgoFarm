@@ -53,8 +53,8 @@ public class AlgorithmSolutionDTO {
     @Schema(description = "문제 출력", example = "<p>첫째 줄에 A+B를 출력한다.</p>")
     private String problemOutput; // 문제 출력
 
-    @Schema(description = "문제정보 관련 태그", example = "['구현', '사칙연산', '수학']")
-    @JsonDeserialize(using = StringListDeserializer.class)
+    @Schema(description = "문제정보 관련 태그", example = "[\"구현\", \"사칙연산\", \"수학\"]")
+    //@JsonDeserialize(using = StringListDeserializer.class)
     private List<String> problemTags; // ["문제 태그1", "문제 태그2"]
 
     @Schema(description = "실행 결과", example = "맞았습니다!!")
