@@ -9,6 +9,7 @@ const SIZE = 120;
 
 const CharacterOverlay = () => {
   const [model, setModel] = useState(null);
+  const [currentCharacter, setCurrentCharacter] = useState('Cat');
   const {
     position,
     setPosition,
@@ -29,25 +30,30 @@ const CharacterOverlay = () => {
 
   const handleAnimationComplete = useCallback(() => {
     if (animation === 'Death') {
-      // After Death animation completes, wait for 2 seconds before resuming 'Walk'
       setTimeout(() => setAnimation('Walk'), 2000);
     }
   }, [animation, setAnimation]);
 
-  useEffect(() => {
-    fetch(chrome.runtime.getURL('assets/models/Cat_Animations.glb'))
+  const loadModel = useCallback((character) => {
+    fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
       .then(response => response.arrayBuffer())
       .then(arrayBuffer => {
         setModel(arrayBuffer);
       });
+  }, []);
 
-    // Add message listener
+  useEffect(() => {
+    loadModel(currentCharacter);
+
     const messageListener = (request, sender, sendResponse) => {
       if (request.action === "playAnimation") {
         setAnimation(request.animation);
         if (request.animation !== 'Death') {
-          setTimeout(() => setAnimation('Walk'), 3000);  // Return to 'Walk' after 3 seconds for non-Death animations
+          setTimeout(() => setAnimation('Walk'), 3000);
         }
+      } else if (request.action === "changeCharacter") {
+        setCurrentCharacter(request.character);
+        loadModel(request.character);
       }
     };
 
@@ -56,7 +62,7 @@ const CharacterOverlay = () => {
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
-  }, [setAnimation]);
+  }, [setAnimation, loadModel]);
 
   const handleMouseDownWrapper = useCallback((e) => {
     e.stopPropagation();

@@ -3,7 +3,7 @@ import { useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 
-const ModelViewer = ({ modelData, scale = 1, animation = 'Walk', rotation = 0, pauseAnimation = false, onAnimationComplete }) => {
+const ModelViewer = ({ modelData, animation = 'Walk', rotation = 0, pauseAnimation = false, onAnimationComplete }) => {
   const groupRef = useRef();
   const { scene, camera } = useThree();
   const [gltf, setGltf] = useState(null);
@@ -85,26 +85,26 @@ const ModelViewer = ({ modelData, scale = 1, animation = 'Walk', rotation = 0, p
   useEffect(() => {
     if (gltf && groupRef.current) {
       const box = new THREE.Box3().setFromObject(gltf.scene);
-      const size = box.getSize(new THREE.Vector3());
       const center = box.getCenter(new THREE.Vector3());
 
-      const maxSize = Math.max(size.x, size.y, size.z);
-      const scaleFactor = (1 / maxSize) * scale;
-      groupRef.current.scale.setScalar(scaleFactor);
+      // 모델의 중심을 (0, 0, 0)으로 이동
+      groupRef.current.position.copy(center).multiplyScalar(-1);
 
-      groupRef.current.position.copy(center).multiplyScalar(-scaleFactor);
+      // 모델을 약간 위로 올림
+      groupRef.current.position.y += 1;
 
-      const cameraDistance = 2;
+      // 카메라 설정
+      const cameraDistance = 1;
       camera.position.set(cameraDistance, cameraDistance, cameraDistance);
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(0, 0, 0);  // 카메라가 모델의 중앙을 바라보도록 조정
 
       camera.near = 0.1;
       camera.far = 1000;
       camera.updateProjectionMatrix();
 
-      console.log('Model positioned and scaled:', groupRef.current.position, groupRef.current.scale);
+      console.log('Model positioned:', groupRef.current.position);
     }
-  }, [gltf, camera, scale]);
+  }, [gltf, camera]);
 
   useFrame((state, delta) => {
     if (mixerRef.current && !isDeathAnimationComplete) {
