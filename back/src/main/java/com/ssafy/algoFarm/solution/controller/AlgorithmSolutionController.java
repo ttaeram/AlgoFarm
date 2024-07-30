@@ -30,6 +30,7 @@ public class AlgorithmSolutionController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse>
     createBojSolution(@RequestBody AlgorithmSolutionDTO algorithmSolutionDTO, @Parameter(hidden = true) @CurrentUser User user) {
+
         try {
             AlgorithmSolutionDTO resultDTO = algorithmSolutionService.saveBojSolution(algorithmSolutionDTO, user);
             if (resultDTO == null) {
