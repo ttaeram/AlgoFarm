@@ -1,5 +1,7 @@
 package com.ssafy.algoFarm.chat.controller;
 
+import com.ssafy.algoFarm.algo.auth.CurrentUser;
+import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.chat.entity.ChatMessageReqDTO;
 import com.ssafy.algoFarm.chat.entity.ChatMessageResDTO;
 import com.ssafy.algoFarm.chat.service.ChatService;
@@ -7,6 +9,7 @@ import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +64,8 @@ public class ChatController {
     @PostMapping("/{chatroomId}/send")
     @Operation(summary = "Send message on chatroom", description = "API to send chat for a certain chat room")
     @SecurityRequirement(name = "bearerAuth")
-    public MessageResponse send(@PathVariable Long chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO) {
+    public MessageResponse send(@PathVariable Long chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO, @Parameter(hidden = true) @CurrentUser User user) {
+        chatMessageReqDTO.setUserId(user.getId());
         messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessageReqDTO.getContent());
         chatMessageReqDTO.setGroupId(chatroomId);
         chatService.saveChatMessage(chatMessageReqDTO);
