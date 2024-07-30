@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/context";
 
 function MemberInfo() {
-  const { groupId, groupInfo, jwt, members, fetchMembers } = useAuth();
+  const { groupId, groupInfo, jwt, members, fetchMembers: originalFetchMembers } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const fetchMembers = useCallback(async (jwt, groupId) => {
+    await originalFetchMembers(jwt, groupId);
+  }, [originalFetchMembers]);
+
   useEffect(() => {
-    const loadMembers = async () => {
-      if (groupId) {
-        await fetchMembers(jwt, groupId);
-      }
-    };
-    loadMembers();
+    if (groupId && jwt) {
+      fetchMembers(jwt, groupId);
+    }
   }, [groupId, jwt, fetchMembers]);
 
   const handleGenerateInviteCode = async () => {

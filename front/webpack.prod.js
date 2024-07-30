@@ -21,4 +21,10 @@ module.exports = merge(common, {
       ],
     }),
   ],
+  resolve: {
+    fallback: {
+      net: false,
+      tls: false,
+    },
+  },
 });
