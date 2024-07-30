@@ -10,7 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Schema(description = "그룹 잔디 데이터의 하루 치 정보를 담은 DTO")
 @Getter
-@Setter
 public class PieceOfGrassDto {
 
     @Schema(description = "잔디 한 포기에 해당하는 날짜데이터")

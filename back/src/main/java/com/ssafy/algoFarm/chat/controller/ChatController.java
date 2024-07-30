@@ -1,6 +1,6 @@
 package com.ssafy.algoFarm.chat.controller;
 
-import com.ssafy.algoFarm.algo.auth.CurrentUser;
+import com.ssafy.algoFarm.algo.auth.annotation.CurrentUser;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.chat.entity.ChatMessageReqDTO;
 import com.ssafy.algoFarm.chat.entity.ChatMessageResDTO;
