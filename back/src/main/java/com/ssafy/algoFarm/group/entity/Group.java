@@ -3,9 +3,7 @@ package com.ssafy.algoFarm.group.entity;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -17,6 +15,7 @@ import java.util.List;
 @Getter
 @Table(name = "study_group")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,23 +35,29 @@ public class Group {
     //최대 참가 인원
     private Integer MaxNum = 10;
 
+    //그룹 생성시 사용
     //그룹명
+    @Setter
     private String name;
 
     private String description="";
 
     //초대코드
+    @Setter
     private String code;
 
     //현재 경험치
     @ColumnDefault("0")
+    @Setter
     private Long currentExp = 0L;
 
     //최대 경험치 -> 현재경험치가 최대 경험치가 되면 레벨업한다.
     @ColumnDefault("100")
+    @Setter
     private Long maxExp = 100L;
 
     @ColumnDefault("1")
+    @Setter
     private Integer level = 1;
 
     @OneToMany(mappedBy = "group",cascade = CascadeType.ALL, orphanRemoval = true)
@@ -69,11 +74,6 @@ public class Group {
         mascot.getGroups().add(this);
     }
 
-    //그룹 생성시 사용
-    public void setName(String name){
-        this.name = name;
-    }
-
     public void countUpCurrentNum(){
         //TODO 최대 참가 인원을 초과한 경우 예외처리 해줘야함.
         this.currentNum++;
@@ -83,7 +83,4 @@ public class Group {
         this.currentNum--;
     }
 
-    public void setCode(String code){
-        this.code = code;
-    }
 }

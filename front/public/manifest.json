@@ -1,14 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Your Extension Name",
+  "name": "AlgoFarm",
   "version": "1.0",
-  "description": "Your extension description",
+  "description": "Solve algorithm problems to grow your pet :)",
   "key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7XMRHctq6XYnOtxaxI3\n4f24VWSreZ5eRsaV6uwQwJFnsaHXBhSzruFyuCcSRd/bEVf2z4qUUJp3VtkV8LCf\nAzLctbNxyJ0X1Oz26fNNql8eQ9UgbjhIBN7hncmdKb5CP1JBWvDi/HOIYIyeo5JQ\noE6lN2eqekVZunzdPBp5VDC+kLEMspB4i3HnQROsnYPAhYthHBbU6Y83ALr57BzA\njVoe0GGeoB9Z8eSq8OtinfgDpglXF0HsZOfHPrT8SYRngnO4RY5ofjrWGFOO0uMd\nXt5sX1+Z+tkEJkKXCGA4YWgwB4D/mzX0rGkqBKlKJ1JT2y3aHvG3SqNOxWtc/TES\ntQIDAQAB\n-----END PUBLIC KEY-----",
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
   },
   "permissions": [
-    "identity"
+    "identity",
+    "activeTab",
+    "storage"
   ],
   "host_permissions": [
     "http://i11a302.p.ssafy.io:8080/*"

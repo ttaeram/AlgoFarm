@@ -1,0 +1,112 @@
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/context';  // useAuth 훅을 import
+import Nav from '../components/Navbar';
+import GroupInfo from './MyPages/GroupInfo';
+import MemberInfo from './MyPages/MemberInfo';
+import CharInfo from './MyPages/CharInfo';
+import Settings from './MyPages/Settings';
+import Chat from './MyPages/Chat';
+import GroupLeaveButton from '../components/GroupLeaveButton';
+import * as styles from "./MyPage.module.css";
+
+const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
+
+const MyPage = () => {
+  const navigate = useNavigate();
+  const { setIsLogined, groupInfo, jwt, setGroupInfo } = useAuth();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
+
+  useEffect(() => {
+    setNewGroupName(groupInfo?.name || '');
+    console.log(groupInfo);
+  }, [groupInfo]);
+
+  const handleLogout = () => {
+    setIsLogined(false);  // 로그인 상태를 false로 설정
+    navigate('/');
+  };
+
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleGroupNameChange = (e) => {
+    setNewGroupName(e.target.value);
+  };
+
+  const handleGroupNameSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${SERVER_URL}/api/groups`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`
+        },
+        body: JSON.stringify({ groupId: groupInfo.groupId, newGroupName: newGroupName })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update group name');
+      }
+
+      const data = await response.json();
+      setGroupInfo(prevGroupInfo => ({ ...prevGroupInfo, name: data.data.newName }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating group name:', error);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.topSection}>
+        <div className={styles.headers}>
+          <div className={styles.groupName}>
+            {isEditing ? (
+              <form onSubmit={handleGroupNameSubmit}>
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={handleGroupNameChange}
+                />
+                <button type="submit">Save</button>
+                <button type="button" onClick={() => setIsEditing(false)}>Cancel</button>
+              </form>
+            ) : (
+              <span>{groupInfo?.name || '그룹명'}</span>
+            )}
+            {!isEditing && <button onClick={handleEditClick}>Edit</button>}
+          </div>
+        </div>
+        <div className={styles.characterBox}>
+          <div className={styles.character}>캐릭터 150px*150px</div>
+        </div>
+        <Nav />
+      </div>
+      <div className={styles.content}>
+        <Routes>
+          <Route path="group-info" element={<GroupInfo />} />
+          <Route path="member-info" element={<MemberInfo />} />
+          <Route path="char-info" element={<CharInfo />} />
+          <Route path="settings" element={<Settings />} />
+        </Routes>
+      </div>
+      <div className={styles.chatIcon} onClick={toggleChat}>
+        💬
+      </div>
+      {isChatOpen && <Chat onClose={toggleChat} />}
+      <GroupLeaveButton />
+      <button className={styles.logoutButton} onClick={handleLogout}>로그아웃</button>
+    </div>
+  );
+}
+
+export default MyPage;

@@ -2,21 +2,29 @@ package com.ssafy.algoFarm.group.service;
 
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
-import com.ssafy.algoFarm.group.dto.response.CreateGroupResDto;
-import com.ssafy.algoFarm.group.dto.response.JoinGroupResDto;
+import com.ssafy.algoFarm.exception.BusinessException;
+import com.ssafy.algoFarm.exception.ErrorCode;
+import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.group.repository.MemberRepository;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import com.ssafy.algoFarm.mascot.repository.MascotRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -38,7 +46,7 @@ public class GroupService {
      */
     public CreateGroupResDto createGroup(Long userPk, String nickname, String groupName) {
         //기본 캐릭터 조회
-        Mascot defaultMascot = mascotRepository.findById(1L).orElseThrow();
+        Mascot defaultMascot = mascotRepository.findById(1L).orElseThrow(()-> new BusinessException(ErrorCode.MASCOT_NOT_FOUND));
 
         Group newGroup = new Group();
         //그룹을 생성한다.
@@ -50,6 +58,8 @@ public class GroupService {
         groupRepository.save(newGroup);
         Long groupId = newGroup.getId();
 
+
+
         //해당 그룹에 생성자를 가입시킨다.
         User participant = userRepository.findById(userPk).get();
         Member member = new Member();
@@ -59,7 +69,9 @@ public class GroupService {
         member.setGroup(newGroup);
         memberRepository.save(member);
 
+
         newGroup.countUpCurrentNum();//현재 참가인원을 증가시킨다.
+
         return new CreateGroupResDto(groupId,groupName,inviteCode);
     }
 
@@ -119,5 +131,93 @@ public class GroupService {
         log.info("member={},{}",member.getId(),member.getJoinAt());
         //member테이블에서 삭제(그룹 탈퇴)
         memberRepository.delete(member);
+    }
+
+    /**
+     * 그룹정보를 반환하는 pk
+     * @param userId 유저테이블의 pk
+     * @return GroupInfoDto(그룹 id,그룹 이름, 현재 경험치, 최대 경험치)
+     */
+    public GroupInfoDto getGroup(Long userId, Long groupId) {
+        //그룹아이디를 가져온다.
+        Group group = groupRepository.findById(groupId).orElseThrow();
+
+        //반환해야할 정보
+        Boolean isLeader = false;
+        for(Member member : group.getMembers()){
+            if(member.getUser().getId() == userId){
+                isLeader = member.getIsLeader();
+            }
+        }
+
+        String name = group.getName();
+        String description = group.getDescription();
+        Long currentExp = group.getCurrentExp();
+        Long maxExp = group.getMaxExp();
+        Integer level = group.getLevel();
+
+
+        GroupInfoDto groupInfoDto = new GroupInfoDto(groupId,name, description, currentExp,maxExp,level, isLeader);
+        //그룹의 현재 유저가 그룹장인지 확인한다.
+        //필요한 정보들을 가져온다.
+        return groupInfoDto;
+    }
+
+    /**
+     * 초대코드를 조회하는 메서드
+     * @param groupId
+     * @return 초대코드를 담은 resDto
+     */
+    public CodeResDto getInviteCode(Long groupId) {
+        Group group =groupRepository.findById(groupId).orElseThrow();
+        return new CodeResDto(group.getCode());
+    }
+
+    /**
+     * 그룹명을 변경하는 메서드
+     * @param groupId 그룹 고유id
+     * @param newGroupName 새로운 그룹명
+     * @return 변경전 그룹명과, 변경이후의 그룹명을 담은 dto
+     */
+    public EditGroupResDto editGroupName(Long groupId, String newGroupName) {
+        Group group = groupRepository.findById(groupId).orElseThrow();
+        String originalName = group.getName();
+        group.setName(newGroupName);
+        groupRepository.save(group);
+        return new EditGroupResDto(groupId, originalName, newGroupName);
+    }
+
+    public List<Long> getUserGroupIds(User user) {
+        List<Long> groupIds = memberRepository.findGroupIdsByUser(user);
+        if (groupIds.isEmpty()) {
+            return List.of(-1L);
+        }
+        return groupIds;
+    }
+
+    /**
+     * 파라미터에 해당하는 그룹에 속한 유저의 리스트를 반환하는 메서드
+     * @param groupId 그룹아이디
+     * @return 그룹에 속한 유저의 리스트
+     */
+    public List<GroupMemberDto> getMemberList(Long groupId){
+        List<Member> memberList = memberRepository.findAllByGroupId(groupId);
+        List<GroupMemberDto> memberDtoList = new ArrayList<>();
+        if(memberList.isEmpty()){
+            throw new EntityNotFoundException();
+        }
+        for(Member member : memberList){
+            GroupMemberDto groupMemberDto = new GroupMemberDto();
+            groupMemberDto.setMemberId(member.getId());
+            groupMemberDto.setUserId(member.getUser().getId());
+            groupMemberDto.setNickname(member.getNickname());
+            groupMemberDto.setIsLeader(member.getIsLeader());
+            memberDtoList.add(groupMemberDto);
+        }
+        return memberDtoList;
+    }
+
+    public long getUserGroupsCount(String email) {
+        return memberRepository.countByUserEmail(email);
     }
 }

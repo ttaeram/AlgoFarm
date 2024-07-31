@@ -75,3 +75,35 @@ dist/
 dist-ssr/
 out/
 build/
+# Gradle 관련
+.gradle/
+build/
+
+# 디렉토리 내의 모든 파일을 제외합니다. 예: /build/
+
+# IDE 관련 파일들
+/.idea/
+/*.iml
+/.project
+/.classpath
+/.settings/
+
+# Maven 관련 (만약 사용 중이라면)
+/target/
+
+# 로그 파일
+*.log
+
+# OS별 파일들
+.DS_Store
+Thumbs.db
+
+# 환경 설정 파일
+.env
+# Gradle 관련 디렉토리와 파일들
+.gradle/
+**/*.bin
+**/*.lock
+**/*.probe
+
+back/.gradle/

@@ -1,0 +1,13 @@
+.backButton {
+  padding: 5px 10px;
+  margin: 10px;
+  background-color: #ff0000; /* 빨간색 */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  background-color: #cc0000; /* 어두운 빨간색 */
+}
