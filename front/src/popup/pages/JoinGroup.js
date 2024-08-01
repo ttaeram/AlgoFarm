@@ -28,7 +28,7 @@ function JoinGroup() {
       }, 3000);  // 3초 후에 경고 메시지 숨기기
     } else {
       try {
-        const response = await fetch('http://i11a302.p.ssafy.io:8080/api/groups/members', {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

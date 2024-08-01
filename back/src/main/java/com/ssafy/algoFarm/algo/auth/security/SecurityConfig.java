@@ -16,6 +16,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 /**
  * Spring Security 설정을 담당하는 클래스
@@ -41,7 +46,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .requiresChannel(channel -> channel
+                        .anyRequest().requiresSecure())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/auth/**", "/", "/home", "/login", "/oauth2/**","/oauth2-success","/**").permitAll()
@@ -88,12 +95,49 @@ public class SecurityConfig {
         public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable)
+                    .requiresChannel(channel -> channel
+                            .anyRequest().requiresSecure())
                     .authorizeHttpRequests(authorize -> authorize
                             .anyRequest().permitAll()
                     )
+
                     .sessionManagement(session -> session
                             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     );
+
+            return http.build();
+        }
+    }
+    @Configuration
+    @Profile("local")
+    public class LocalSecurityConfig {
+
+
+
+        @Bean
+        public SecurityFilterChain localSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+            http
+                    .csrf(AbstractHttpConfigurer::disable)
+                    // .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 주석 처리
+                    .authorizeHttpRequests(authorize -> authorize
+                            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .oauth2Login(oauth2 -> oauth2
+                            .loginPage("/home")
+                            .userInfoEndpoint(userInfo -> userInfo
+                                    .userService(customOAuth2UserService)
+                            )
+                            .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
+                    )
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
+                    .exceptionHandling(exceptions -> exceptions
+                            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                    )
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
             return http.build();
         }
