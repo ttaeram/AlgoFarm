@@ -33,7 +33,9 @@ public class AlgorithmSolution {
 
     private String title;
     private String level;
-    private int problemExperience;
+
+    @Setter
+    private double problemExperience;
 
     @Setter
     private String language;

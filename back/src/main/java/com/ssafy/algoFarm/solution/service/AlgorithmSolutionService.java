@@ -61,6 +61,7 @@ public class AlgorithmSolutionService {
             AlgorithmSolution newData = AlgorithmSolution.toEntity(algorithmSolutionDTO);
             newData.setUser(user);
             newData.setSubmitTime(LocalDateTime.now());
+            newData.setProblemExperience(ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel()));
 
             AlgorithmSolution savedData = algorithmSolutionRepository.save(newData);
 
@@ -74,9 +75,10 @@ public class AlgorithmSolutionService {
         // 사용자(user)의 멤버십 정보에서 그룹을 찾기
         Member member = user.getMembers().get(0);
         Group group = member.getGroup();
-        Long currentExp = group.getMascot().getCurrentExp();
-        Long maxExp = group.getMascot().getMaxExp();
-        int problemExp = ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel());
+        double currentExp = group.getMascot().getCurrentExp();
+        double maxExp = group.getMascot().getMaxExp();
+        double problemExp = ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel());
+
 
         currentExp += problemExp;
         while (currentExp >= maxExp) {
