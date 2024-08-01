@@ -32,9 +32,9 @@ public class Group {
     private LocalDateTime createdAt;
 
     @Setter
-    private Integer currentNum;
+    private double currentNum;
 
-    private Integer maxNum;
+    private double maxNum;
 
     @Setter
     private String name;

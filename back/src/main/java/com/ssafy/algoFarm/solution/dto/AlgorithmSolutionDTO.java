@@ -69,20 +69,10 @@ public class AlgorithmSolutionDTO {
     @Schema(description = "문제 점수", example = "70")
     private Long score; // 점수
 
-    @Schema(description = "제출시각", example = "2024-07-25 16:55:30")
-    private String currentDateTime; // String 형태로 LocalDateTime 받기
 
     // 엔티티로 변환하는 메서드
     public AlgorithmSolution toEntity() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dateTime;
-        try {
-            dateTime = LocalDateTime.parse(currentDateTime, formatter);
-        } catch (DateTimeParseException e) {
-            System.err.println("Invalid date format: " + currentDateTime);
-            e.printStackTrace();
-            dateTime = LocalDateTime.now(); // 기본값을 현재 시간으로 설정 (필요시 수정)
-        }
+
         return AlgorithmSolution.builder()
                 .id(id)
                 .directory(directory)
@@ -100,31 +90,11 @@ public class AlgorithmSolutionDTO {
                 .runtime(runtime)
                 .title(title)
                 .score(score)
-                .currentDatetTime(dateTime)
                 .build();
     }
 
     // 엔티티에서 DTO로 변환하는 메서드
     public static AlgorithmSolutionDTO fromEntity(AlgorithmSolution entity) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return AlgorithmSolutionDTO.builder()
-                .id(entity.getId())
-                .directory(entity.getDirectory())
-                .code(entity.getCode())
-                .codeLength(entity.getCodeLength())
-                .language(entity.getLanguage())
-                .level(entity.getLevel())
-                .memory(entity.getMemory())
-                .problemId(entity.getProblemId())
-                .problemDescription(entity.getProblemDescription())
-                .problemInput(entity.getProblemInput())
-                .problemOutput(entity.getProblemOutput())
-                .problemTags(entity.getProblemTags())
-                .result(entity.getResult())
-                .runtime(entity.getRuntime())
-                .title(entity.getTitle())
-                .score(entity.getScore())
-                .currentDateTime(entity.getCurrentDatetTime().format(formatter))
-                .build();
+        return AlgorithmSolution.toDto(entity);
     }
 }
