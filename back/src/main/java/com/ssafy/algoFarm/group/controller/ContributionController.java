@@ -18,4 +18,5 @@ public class ContributionController {
     public ContributionController(ContributionService contributionService) {
         this.contributionService = contributionService;
     }
+
 }

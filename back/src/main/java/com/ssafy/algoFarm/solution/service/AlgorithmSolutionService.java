@@ -74,19 +74,18 @@ public class AlgorithmSolutionService {
         // 사용자(user)의 멤버십 정보에서 그룹을 찾기
         Member member = user.getMembers().get(0);
         Group group = member.getGroup();
-        Long currentExp = group.getCurrentExp();
-        Long maxExp = group.getMaxExp();
+        Long currentExp = group.getMascot().getCurrentExp();
+        Long maxExp = group.getMascot().getMaxExp();
         int problemExp = ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel());
 
         currentExp += problemExp;
         while (currentExp >= maxExp) {
             currentExp -= maxExp;
-            group.setLevel(group.getLevel() + 1);
+            group.getMascot().setLevel(group.getMascot().getLevel() + 1);
             maxExp += 50;
         }
-
-        group.setCurrentExp(currentExp);
-        group.setMaxExp(maxExp);
+        group.getMascot().setCurrentExp(currentExp);
+        group.getMascot().setMaxExp(maxExp);
 
         // 그룹 저장소에 업데이트
         groupRepository.save(group);
