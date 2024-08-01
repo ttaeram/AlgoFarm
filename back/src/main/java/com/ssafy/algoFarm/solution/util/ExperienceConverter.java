@@ -5,44 +5,47 @@ import java.util.Map;
 
 public class ExperienceConverter {
 
-    private static final Map<String, Integer> levelToExperienceMap = new HashMap<>();
+    // Map을 사용하여 levelName을 키로, 경험치를 값으로 저장
+    private static final Map<String, Integer> problemExperienceMap = new HashMap<>();
 
     static {
-        levelToExperienceMap.put("Unrated", 0);
-        levelToExperienceMap.put("Bronze V", 1);
-        levelToExperienceMap.put("Bronze IV", 2);
-        levelToExperienceMap.put("Bronze III", 3);
-        levelToExperienceMap.put("Bronze II", 4);
-        levelToExperienceMap.put("Bronze I", 5);
-        levelToExperienceMap.put("Silver V", 6);
-        levelToExperienceMap.put("Silver IV", 7);
-        levelToExperienceMap.put("Silver III", 8);
-        levelToExperienceMap.put("Silver II", 9);
-        levelToExperienceMap.put("Silver I", 10);
-        levelToExperienceMap.put("Gold V", 11);
-        levelToExperienceMap.put("Gold IV", 12);
-        levelToExperienceMap.put("Gold III", 13);
-        levelToExperienceMap.put("Gold II", 14);
-        levelToExperienceMap.put("Gold I", 15);
-        levelToExperienceMap.put("Platinum V", 16);
-        levelToExperienceMap.put("Platinum IV", 17);
-        levelToExperienceMap.put("Platinum III", 18);
-        levelToExperienceMap.put("Platinum II", 19);
-        levelToExperienceMap.put("Platinum I", 20);
-        levelToExperienceMap.put("Diamond V", 21);
-        levelToExperienceMap.put("Diamond IV", 22);
-        levelToExperienceMap.put("Diamond III", 23);
-        levelToExperienceMap.put("Diamond II", 24);
-        levelToExperienceMap.put("Diamond I", 25);
-        levelToExperienceMap.put("Ruby V", 26);
-        levelToExperienceMap.put("Ruby IV", 27);
-        levelToExperienceMap.put("Ruby III", 28);
-        levelToExperienceMap.put("Ruby II", 29);
-        levelToExperienceMap.put("Ruby I", 30);
-        levelToExperienceMap.put("Master", 31);
+        // levelName과 경험치를 저장
+        problemExperienceMap.put("Unrated", 0);
+        problemExperienceMap.put("Bronze V", 100);
+        problemExperienceMap.put("Bronze IV", 200);
+        problemExperienceMap.put("Bronze III", 300);
+        problemExperienceMap.put("Bronze II", 400);
+        problemExperienceMap.put("Bronze I", 500);
+        problemExperienceMap.put("Silver V", 600);
+        problemExperienceMap.put("Silver IV", 700);
+        problemExperienceMap.put("Silver III", 800);
+        problemExperienceMap.put("Silver II", 900);
+        problemExperienceMap.put("Silver I", 1000);
+        problemExperienceMap.put("Gold V", 1100);
+        problemExperienceMap.put("Gold IV", 1200);
+        problemExperienceMap.put("Gold III", 1300);
+        problemExperienceMap.put("Gold II", 1400);
+        problemExperienceMap.put("Gold I", 1500);
+        problemExperienceMap.put("Platinum V", 1600);
+        problemExperienceMap.put("Platinum IV", 1700);
+        problemExperienceMap.put("Platinum III", 1800);
+        problemExperienceMap.put("Platinum II", 1900);
+        problemExperienceMap.put("Platinum I", 2000);
+        problemExperienceMap.put("Diamond V", 2100);
+        problemExperienceMap.put("Diamond IV", 2200);
+        problemExperienceMap.put("Diamond III", 2300);
+        problemExperienceMap.put("Diamond II", 2400);
+        problemExperienceMap.put("Diamond I", 2500);
+        problemExperienceMap.put("Ruby V", 2600);
+        problemExperienceMap.put("Ruby IV", 2700);
+        problemExperienceMap.put("Ruby III", 2800);
+        problemExperienceMap.put("Ruby II", 2900);
+        problemExperienceMap.put("Ruby I", 3000);
+        problemExperienceMap.put("Master", 3100);
     }
 
-    public static int convertLevelToExperience(String level) {
-        return levelToExperienceMap.getOrDefault(level, 0);
+    // 특정 levelName에 해당하는 경험치를 반환하는 메서드
+    public static int getExperienceByLevelName(String levelName) {
+        return problemExperienceMap.getOrDefault(levelName, 0);  // 일치하는 levelName이 없을 경우 0 반환
     }
 }

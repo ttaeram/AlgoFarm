@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 @Service
 @Transactional
@@ -58,6 +60,8 @@ public class AlgorithmSolutionService {
             // 기존 데이터가 존재하지 않으면 새로운 데이터 저장
             AlgorithmSolution newData = AlgorithmSolution.toEntity(algorithmSolutionDTO);
             newData.setUser(user);
+            newData.setSubmitTime(LocalDateTime.now());
+
             AlgorithmSolution savedData = algorithmSolutionRepository.save(newData);
 
             //기존에 풀었던 문제가 아니어서 새롭게 DB에 저장하는 경우라면 그룹 경험치를 증가시킴
@@ -72,7 +76,7 @@ public class AlgorithmSolutionService {
         Group group = member.getGroup();
         Long currentExp = group.getCurrentExp();
         Long maxExp = group.getMaxExp();
-        int problemExp = ExperienceConverter.convertLevelToExperience(algorithmSolutionDTO.getLevel());
+        int problemExp = ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel());
 
         currentExp += problemExp;
         while (currentExp >= maxExp) {

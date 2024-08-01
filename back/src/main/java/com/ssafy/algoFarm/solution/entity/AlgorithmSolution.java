@@ -33,6 +33,7 @@ public class AlgorithmSolution {
 
     private String title;
     private String level;
+    private int problemExperience;
 
     @Setter
     private String language;
@@ -69,8 +70,8 @@ public class AlgorithmSolution {
     @Setter
     private Long score;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private LocalDateTime currentDatetTime;
+    @Setter
+    private LocalDateTime submitTime;
 
     public void setUser(User user){
         if(this.user != null){
@@ -99,20 +100,10 @@ public class AlgorithmSolution {
                 .runtime(algorithmSolution.getRuntime())
                 .title(algorithmSolution.getTitle())
                 .score(algorithmSolution.getScore())
-                .currentDateTime(algorithmSolution.getCurrentDatetTime().format(formatter))
                 .build();
     }
 
     public static AlgorithmSolution toEntity(AlgorithmSolutionDTO algorithmSolutionDTO) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dateTime;
-        try {
-            dateTime = LocalDateTime.parse(algorithmSolutionDTO.getCurrentDateTime(), formatter);
-        } catch (DateTimeParseException e) {
-            System.err.println("Invalid date format: " + algorithmSolutionDTO.getCurrentDateTime());
-            e.printStackTrace();
-            dateTime = LocalDateTime.now(); // 기본값을 현재 시간으로 설정 (필요시 수정)
-        }
         return AlgorithmSolution.builder()
                 .id(algorithmSolutionDTO.getId())
                 .directory(algorithmSolutionDTO.getDirectory())
@@ -130,7 +121,6 @@ public class AlgorithmSolution {
                 .runtime(algorithmSolutionDTO.getRuntime())
                 .title(algorithmSolutionDTO.getTitle())
                 .score(algorithmSolutionDTO.getScore())
-                .currentDatetTime(dateTime)
                 .build();
     }
 }
