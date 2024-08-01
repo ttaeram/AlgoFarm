@@ -23,7 +23,6 @@ import java.util.List;
 public class GrassDataController {
     private final GrassDataService grassDataService;
 
-    @Autowired
     public GrassDataController(GrassDataService grassDataService) {
         this.grassDataService = grassDataService;
     }

@@ -6,7 +6,6 @@ import com.ssafy.algoFarm.group.dto.response.PieceOfGrassDto;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.solution.repository.AlgorithmSolutionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,12 +17,15 @@ import java.util.stream.Collectors;
 
 @Service
 public class GrassDataService {
-    @Autowired
-    private AlgorithmSolutionRepository algorithmSolutionRepository;
 
-    @Autowired
-    private GroupRepository groupRepository;
+    private final AlgorithmSolutionRepository algorithmSolutionRepository;
 
+    private final GroupRepository groupRepository;
+
+    public GrassDataService(AlgorithmSolutionRepository algorithmSolutionRepository, GroupRepository groupRepository){
+        this.algorithmSolutionRepository = algorithmSolutionRepository;
+        this.groupRepository = groupRepository;
+    }
 
     /**
      * 그룹별 잔디데이터를 반환하는 메서드
