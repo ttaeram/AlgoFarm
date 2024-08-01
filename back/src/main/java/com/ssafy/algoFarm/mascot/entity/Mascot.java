@@ -23,11 +23,11 @@ public class Mascot {
 
     @Setter
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long currentExp;
+    private Double currentExp;
 
     @Setter
     @Column(columnDefinition = "BIGINT DEFAULT 100")
-    private Long maxExp;
+    private Double maxExp;
 
     @Setter
     @Column(columnDefinition = "INTEGER DEFAULT 1")
