@@ -4,15 +4,22 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.*;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        Server server = new Server();
+        server.setUrl("https://i11a302.p.ssafy.io");
+
+
         return new OpenAPI()
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
@@ -23,7 +30,8 @@ public class SwaggerConfig {
                 )
                 .info(new Info().title("AlgoFarm API")
                         .description("AlgoFarm application API documentation. Use the Authorize button to input your JWT token.")
-                        .version("v1.0.0"));
+                        .version("v1.0.0"))
+                .servers(List.of(server));
     }
 
     @Bean
