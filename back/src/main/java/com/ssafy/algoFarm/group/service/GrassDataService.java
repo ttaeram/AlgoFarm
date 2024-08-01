@@ -1,8 +1,11 @@
 package com.ssafy.algoFarm.group.service;
 
+import com.ssafy.algoFarm.exception.BusinessException;
+import com.ssafy.algoFarm.exception.ErrorCode;
 import com.ssafy.algoFarm.group.dto.response.PieceOfGrassDto;
+import com.ssafy.algoFarm.group.entity.Group;
+import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.solution.repository.AlgorithmSolutionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -14,10 +17,27 @@ import java.util.stream.Collectors;
 
 @Service
 public class GrassDataService {
-    @Autowired
-    private AlgorithmSolutionRepository algorithmSolutionRepository;
 
+    private final AlgorithmSolutionRepository algorithmSolutionRepository;
+
+    private final GroupRepository groupRepository;
+
+    public GrassDataService(AlgorithmSolutionRepository algorithmSolutionRepository, GroupRepository groupRepository){
+        this.algorithmSolutionRepository = algorithmSolutionRepository;
+        this.groupRepository = groupRepository;
+    }
+
+    /**
+     * 그룹별 잔디데이터를 반환하는 메서드
+     *
+     * @param groupId group 고유 id
+     * @return List<PieceOfGrassDto> (날짜, 커밋수, x축, y축) 리스트
+     */
     public List<PieceOfGrassDto> getAllGrassData(Long groupId) {
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
+
         int currentYear = LocalDate.now().getYear();
         LocalDate startDate = LocalDate.of(currentYear, 1, 1);
         LocalDate endDate = LocalDate.of(currentYear, 12, 31);
