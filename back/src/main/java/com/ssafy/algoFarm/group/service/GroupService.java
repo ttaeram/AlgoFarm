@@ -54,7 +54,6 @@ public class GroupService {
         String inviteCode = UUID.randomUUID().toString();
         newGroup.setCode(inviteCode);
         newGroup.setName(groupName);
-        newGroup.setMascot(defaultMascot);
         groupRepository.save(newGroup);
         Long groupId = newGroup.getId();
 
@@ -70,7 +69,7 @@ public class GroupService {
         memberRepository.save(member);
 
 
-        newGroup.countUpCurrentNum();//현재 참가인원을 증가시킨다.
+        newGroup.setCurrentNum(newGroup.getCurrentNum() + 1);
 
         return new CreateGroupResDto(groupId,groupName,inviteCode);
     }
@@ -90,7 +89,7 @@ public class GroupService {
         newMember.setNickname(nickname);
         newMember.setGroup(group);
         memberRepository.save(newMember);
-        group.countUpCurrentNum();
+        group.setCurrentNum(group.getCurrentNum() + 1);
 
         return new JoinGroupResDto(group.getId(), group.getName());
     }
@@ -124,7 +123,7 @@ public class GroupService {
             }
         }
         //group에서 현재인원 -1, 관계제거
-        group.countDownCurrentNum();
+        group.setCurrentNum(group.getCurrentNum() - 1);
         group.getMembers().remove(member);
         //user에서 관계제거
         userRepository.findById(userPk).orElseThrow().getMembers().remove(member);
@@ -152,12 +151,9 @@ public class GroupService {
 
         String name = group.getName();
         String description = group.getDescription();
-        Long currentExp = group.getCurrentExp();
-        Long maxExp = group.getMaxExp();
-        Integer level = group.getLevel();
 
 
-        GroupInfoDto groupInfoDto = new GroupInfoDto(groupId,name, description, currentExp,maxExp,level, isLeader);
+        GroupInfoDto groupInfoDto = new GroupInfoDto(groupId,name, description, isLeader);
         //그룹의 현재 유저가 그룹장인지 확인한다.
         //필요한 정보들을 가져온다.
         return groupInfoDto;

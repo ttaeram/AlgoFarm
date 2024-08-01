@@ -10,8 +10,6 @@ import Chat from './MyPages/Chat';
 import GroupLeaveButton from '../components/GroupLeaveButton';
 import * as styles from "./MyPage.module.css";
 
-const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
-
 const MyPage = () => {
   const navigate = useNavigate();
   const { setIsLogined, groupInfo, jwt, setGroupInfo } = useAuth();
@@ -44,7 +42,7 @@ const MyPage = () => {
   const handleGroupNameSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${SERVER_URL}/api/groups`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

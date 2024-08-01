@@ -71,7 +71,7 @@ const Popup = () => {
 
   const fetchGroupId = async (jwt) => {
     try {
-      const response = await fetch('http://i11a302.p.ssafy.io:8080/api/user/groups', {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/user/groups`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${jwt}`

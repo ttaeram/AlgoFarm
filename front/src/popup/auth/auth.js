@@ -1,5 +1,3 @@
-const SERVER_URL = 'http://i11a302.p.ssafy.io:8080';
-
 // 구글로부터 엑세스 토큰 받아오는 함수
 export function signIn() {
     return new Promise((resolve, reject) => {
@@ -43,7 +41,7 @@ export function signOut() {
 // 구글 토큰을 우리 서버에 보내서 우리 서버의 엑세스 토큰을 받는 함수
 export async function exchangeTokenForJwt(token) {
     try {
-        const response = await fetch(`${SERVER_URL}/auth/google`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/auth/google`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -66,7 +64,7 @@ export async function exchangeTokenForJwt(token) {
 // 서버에서 사용자 정보를 받아오는 함수
 export async function getServerUserInfo(jwt) {
     try {
-        const response = await fetch(`${SERVER_URL}/auth/userinfo`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/auth/userinfo`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${jwt}`,
