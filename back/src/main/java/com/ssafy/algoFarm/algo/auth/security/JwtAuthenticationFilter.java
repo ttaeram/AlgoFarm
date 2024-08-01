@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final List<String> excludedUrls = Arrays.asList(
-            "/v3/api-docs", "/swagger-ui", "/auth", "/", "/home", "/login", "/oauth2", "/api", "/chat-websocket"
+            "/v3/api-docs", "/swagger-ui", "/auth", "/", "/home", "/login", "/oauth2", "/chat-websocket"
     );
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
@@ -42,7 +42,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+
             String jwt = getJwtFromRequest(request);
+            log.info("JWT: {}", jwt);
             if (StringUtils.hasText(jwt) && jwtUtil.validateToken(jwt)) {
                 String email = jwtUtil.getEmailFromToken(jwt);
                 CustomOAuth2User userDetails = (CustomOAuth2User) userDetailsService.loadUserByUsername(email);
@@ -69,6 +71,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return excludedUrls.stream().anyMatch(path::startsWith);
+        return path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.equals("/") ||
+                path.equals("/home") ||
+                path.equals("/login") ||
+                path.startsWith("/oauth2") ||
+                path.equals("/chat-websocket");
     }
 }
