@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.*;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,11 +15,17 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
     @Bean
     public OpenAPI customOpenAPI() {
         Server server = new Server();
-        server.setUrl("https://i11a302.p.ssafy.io");
-
+        if ("prod".equals(activeProfile)) {
+            server.setUrl("https://i11a302.p.ssafy.io");
+        } else {
+            server.setUrl("http://localhost:8080");
+        }
 
         return new OpenAPI()
                 .components(new Components()
