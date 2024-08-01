@@ -81,10 +81,11 @@
 <h1>로그인 성공!</h1>
 
 <p>아래의 토큰이 클립보드에 복사되었습니다.</p>
+<p>자동으로 swagger 로 이동합니다. </p>
 
 <div id="tokenDisplay"></div>
 
-<button onclick="location.href='/swagger-ui/index.html'">Swagger UI로 이동</button>
+<button onclick="location.href='/swagger-ui/index.html'">수동으로 Swagger UI 이동</button>
 
 <div id="toast">토큰이 클립보드에 복사되었습니다!</div>
 
@@ -100,7 +101,7 @@
                 showToast();
                 setTimeout(function() {
                     window.location.href = '/swagger-ui/index.html';
-                }, 3000); // 토스트 알림이 사라진 후에 이동
+                }, 500); // 토스트 알림이 사라진 후에 이동
             }).catch(function(err) {
                 console.error('토큰을 클립보드에 복사하는 데 실패했습니다.', err);
             });
