@@ -103,6 +103,13 @@ const ModelViewer = ({ modelData, animation = 'Walk', rotation = 0, pauseAnimati
       camera.updateProjectionMatrix();
 
       console.log('Model positioned:', groupRef.current.position);
+      console.log('Camera positioned:', camera.position);
+      // 캐릭터 크기
+      console.log('Model size:', box.getSize(new THREE.Vector3()));
+      // 카메라 lookat
+      console.log('Camera lookAt:', camera.getWorldDirection(new THREE.Vector3()));
+      // 카메라 거리
+      console.log('Camera distance:', camera.position.distanceTo(new THREE.Vector3()));
     }
   }, [gltf, camera]);
 
