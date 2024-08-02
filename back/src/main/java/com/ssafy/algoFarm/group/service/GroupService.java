@@ -54,6 +54,7 @@ public class GroupService {
         String inviteCode = UUID.randomUUID().toString();
         newGroup.setCode(inviteCode);
         newGroup.setName(groupName);
+        newGroup.setMascot(defaultMascot);
         groupRepository.save(newGroup);
         Long groupId = newGroup.getId();
 
