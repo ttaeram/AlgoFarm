@@ -2,6 +2,12 @@ const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const path = require('path');
+const fs = require('fs');
+
+const baekjoonFiles = fs.readdirSync(path.resolve(__dirname, 'src/baekjoon'))
+    .filter(file => file.endsWith('.js'))
+    .map(file => `./src/baekjoon/${file}`);
 
 module.exports = merge(common, {
   mode: 'production',
@@ -9,6 +15,7 @@ module.exports = merge(common, {
     popup: './src/popup/index.js',
     background: './src/background/background.js',
     contentScript: './src/contentScript/contentScript.js',
+    baekjoon: baekjoonFiles, // baekjoon 엔트리 추가
   },
   plugins: [
     new HtmlWebpackPlugin({

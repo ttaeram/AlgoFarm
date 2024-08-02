@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CharacterOverlay from './CharacterOverlay';
-console.log('contentScript script loaded');
 
 // 현재 URL 확인
 const currentUrl = window.location.href;
@@ -28,10 +27,10 @@ console.log('Common content script loaded');
 
 // 사이트별 스크립트 동적 로드
 if (currentUrl.includes('acmicpc.net')) {
-    import(/* webpackChunkName: "baekjoon" */ './baekjoon/baekjoon')
+    import('../baekjoon/baekjoon')
         .then(module => {
-            console.log('Baekjoon script loaded');
-            module.default(); // 또는 필요한 함수 호출
+            console.log('Baekjoon module loaded');
+            module.default();
         })
-        .catch(err => console.error('Error loading Baekjoon script', err));
+        .catch(err => console.error('Error loading Baekjoon module:', err));
 }
