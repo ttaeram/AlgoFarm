@@ -21,7 +21,6 @@
             padding: 10px;
             margin-bottom: 20px;
             word-break: break-all;
-            cursor: text;
             user-select: all;
         }
         button {
@@ -40,37 +39,90 @@
         button:hover {
             background-color: #45a049;
         }
-        #copyInstructions {
-            color: #666;
-            font-style: italic;
-            margin-top: 10px;
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
         }
     </style>
 </head>
 <body>
 <h1>로그인 성공!</h1>
 
-<p>아래의 토큰을 복사한 후, Swagger UI로 이동하여 사용하세요.</p>
+<p>아래의 토큰이 클립보드에 복사되었습니다.</p>
+<p>자동으로 swagger 로 이동합니다. </p>
 
-<div id="tokenDisplay" onclick="selectToken()"></div>
+<div id="tokenDisplay"></div>
 
-<div id="copyInstructions">토큰을 선택하려면 클릭하세요. 그 후 Ctrl+C (Mac의 경우 Cmd+C)를 눌러 복사할 수 있습니다.</div>
+<button onclick="location.href='/swagger-ui/index.html'">수동으로 Swagger UI 이동</button>
 
-<button onclick="location.href='/swagger-ui/index.html'">Swagger UI로 이동</button>
+<div id="toast">토큰이 클립보드에 복사되었습니다!</div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
     var token = /*[[${token}]]*/ 'default';
     document.getElementById('tokenDisplay').textContent = token;
 
-    function selectToken() {
-        var tokenText = document.getElementById('tokenDisplay');
-        var range = document.createRange();
-        range.selectNodeContents(tokenText);
-        var selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
+    function copyTokenToClipboard() {
+        if (document.hasFocus()) {
+            navigator.clipboard.writeText(token).then(function() {
+                // 클립보드에 복사 성공
+                showToast();
+                setTimeout(function() {
+                    window.location.href = '/swagger-ui/index.html';
+                }, 500); // 토스트 알림이 사라진 후에 이동
+            }).catch(function(err) {
+                console.error('토큰을 클립보드에 복사하는 데 실패했습니다.', err);
+            });
+        } else {
+            // 포커스가 없는 경우 일정 시간 후 다시 시도
+            setTimeout(copyTokenToClipboard, 100);
+        }
     }
+
+    function showToast() {
+        var toast = document.getElementById("toast");
+        toast.className = "show";
+        setTimeout(function() {
+            toast.className = toast.className.replace("show", "");
+        }, 3000);
+    }
+
+    // 페이지 로드 시 토큰을 클립보드에 복사하고 이동
+    document.addEventListener('DOMContentLoaded', (event) => {
+        copyTokenToClipboard();
+    });
     /*]]>*/
 </script>
 </body>
