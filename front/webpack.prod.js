@@ -19,6 +19,8 @@ module.exports = merge(common, {
     new CopyPlugin({
       patterns: [
         { from: 'public', to: '.', globOptions: { ignore: ['**/index.html'] } },
+        { from: 'src/library', to: 'library' }, // 라이브러리 폴더 복사
+        { from: 'src/css', to: 'css' }, // 라이브러리 폴더 복사
       ],
     }),
   ],
