@@ -1,5 +1,7 @@
 package com.ssafy.algoFarm.solution.repository;
 
+import com.ssafy.algoFarm.group.dto.response.ContributionDto;
+import com.ssafy.algoFarm.group.dto.response.PieceOfGrassDto;
 import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,18 +13,35 @@ import java.util.Optional;
 public interface AlgorithmSolutionRepository extends JpaRepository<AlgorithmSolution, Long> {
     Optional<AlgorithmSolution> findByUserIdAndProblemId(Long userId, Long problemId);
 
-    @Query(value = "SELECT DATE(s.submit_time) as date, COUNT(DISTINCT s.user_id) as commitCount " +
-            "FROM algorithm_solution s " +
-            "JOIN member m ON s.user_id = m.user_id " +
-            "WHERE m.group_id = :groupId " +
-            "GROUP BY DATE(s.submit_time)", nativeQuery = true)
-    List<Object[]> findCommitCountByGroupId(@Param("groupId") Long groupId);
+    @Query("SELECT new com.ssafy.algoFarm.group.dto.response.PieceOfGrassDto(DATE(s.submitTime), COUNT(DISTINCT s.user.id)) " +
+            "FROM AlgorithmSolution s " +
+            "JOIN Member m ON s.user.id = m.user.id " +
+            "WHERE m.group.id = :groupId " +
+            "GROUP BY DATE(s.submitTime)")
+    List<PieceOfGrassDto> findCommitCountByGroupId(@Param("groupId") Long groupId);
 
-    @Query(value = "SELECT m.user_id, m.nickname, SUM(s.problem_experience) as total_experience " +
-            "FROM algorithm_solution s " +
-            "JOIN member m ON s.user_id = m.user_id " +
-            "WHERE m.group_id = :groupId " +
-            "AND s.submit_time >= m.join_at " +
-            "GROUP BY m.user_id, m.nickname", nativeQuery = true)
-    List<Object[]> findMemberContributionsByGroupId(@Param("groupId") Long groupId);
+
+//    @Query(value = "SELECT m.user_id, m.nickname, SUM(s.problem_experience) as total_experience " +
+//            "FROM algorithm_solution s " +
+//            "JOIN member m ON s.user_id = m.user_id " +
+//            "WHERE m.group_id = :groupId " +
+//            "AND s.submit_time >= m.join_at " +
+//            "GROUP BY m.user_id, m.nickname", nativeQuery = true)
+//    List<Object[]> findMemberContributionsByGroupId(@Param("groupId") Long groupId);
+
+
+    @Query("SELECT new com.ssafy.algoFarm.group.dto.response.ContributionDto(" +
+            "m.nickname, " +
+            "SUM(s.problemExperience), " +
+            "(SELECT SUM(s2.problemExperience) FROM AlgorithmSolution s2 " +
+            "JOIN Member m2 ON s2.user = m2.user " +
+            "WHERE m2.group.id = :groupId)) " +
+            "FROM AlgorithmSolution s " +
+            "JOIN Member m ON s.user = m.user " +
+            "WHERE m.group.id = :groupId " +
+            "AND s.submitTime >= m.joinAt " +
+            "GROUP BY m.nickname")
+    List<ContributionDto> findMemberContributionsByGroupId(@Param("groupId") Long groupId);
+
+
 }
