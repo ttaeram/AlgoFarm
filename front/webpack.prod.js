@@ -8,6 +8,7 @@ module.exports = merge(common, {
   entry: {
     popup: './src/popup/index.js',
     background: './src/background/background.js',
+    contentScript: './src/contentScript/contentScript.js',
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -21,10 +22,4 @@ module.exports = merge(common, {
       ],
     }),
   ],
-  resolve: {
-    fallback: {
-      net: false,
-      tls: false,
-    },
-  },
 });

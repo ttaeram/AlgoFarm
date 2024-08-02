@@ -1,0 +1,7 @@
+.character-overlay {
+  pointer-events: auto !important;
+}
+
+.character-overlay canvas {
+  pointer-events: none;
+}
