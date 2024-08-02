@@ -20,16 +20,6 @@ public interface AlgorithmSolutionRepository extends JpaRepository<AlgorithmSolu
             "GROUP BY DATE(s.submitTime)")
     List<PieceOfGrassDto> findCommitCountByGroupId(@Param("groupId") Long groupId);
 
-
-//    @Query(value = "SELECT m.user_id, m.nickname, SUM(s.problem_experience) as total_experience " +
-//            "FROM algorithm_solution s " +
-//            "JOIN member m ON s.user_id = m.user_id " +
-//            "WHERE m.group_id = :groupId " +
-//            "AND s.submit_time >= m.join_at " +
-//            "GROUP BY m.user_id, m.nickname", nativeQuery = true)
-//    List<Object[]> findMemberContributionsByGroupId(@Param("groupId") Long groupId);
-
-
     @Query("SELECT new com.ssafy.algoFarm.group.dto.response.ContributionDto(" +
             "m.nickname, " +
             "SUM(s.problemExperience), " +
