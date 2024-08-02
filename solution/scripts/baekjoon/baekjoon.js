@@ -67,7 +67,7 @@ function startLoader() {
           // const data = await getDataFromIndexedDB();
           console.log("data="+data);
 
-        // Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
+        //Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
           chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
             if (response && response.token) {
               console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);

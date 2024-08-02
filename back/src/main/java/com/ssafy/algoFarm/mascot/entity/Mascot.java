@@ -22,11 +22,11 @@ public class Mascot {
     private MascotType type;
 
     @Setter
-    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    @Column(columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double currentExp;
 
     @Setter
-    @Column(columnDefinition = "BIGINT DEFAULT 100")
+    @Column(columnDefinition = "DOUBLE DEFAULT 100.0")
     private Double maxExp;
 
     @Setter

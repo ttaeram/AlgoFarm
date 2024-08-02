@@ -6,6 +6,8 @@ import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.algoFarm.chat.entity.ChatMessageReqDTO;
 import com.ssafy.algoFarm.chat.entity.ChatMessageResDTO;
 import com.ssafy.algoFarm.chat.repository.ChatMessageRepository;
+import com.ssafy.algoFarm.exception.BusinessException;
+import com.ssafy.algoFarm.exception.ErrorCode;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import jakarta.transaction.Transactional;
@@ -45,8 +47,8 @@ public class ChatService {
         chatMessage.setContent(chatMessageReqDTO.getContent());
         chatMessage.setCreateAt(chatMessageReqDTO.getCreateAt());
 
-        Group sendGroup = groupRepository.findById(chatMessageReqDTO.getGroupId()).get();
-        User sendUser = userRepository.findById(chatMessageReqDTO.getUserId()).get();
+        Group sendGroup = groupRepository.findById(chatMessageReqDTO.getGroupId()).orElseThrow(()-> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
+        User sendUser = userRepository.findById(chatMessageReqDTO.getUserId()).orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         chatMessage.setGroup(sendGroup);
         chatMessage.setUser(sendUser);
