@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -35,8 +36,7 @@ public class SecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
-
+    private final OAuth2AuthorizedClientService authorizedClientService;
     /**
      * 보안 필터 체인을 구성
      * 이 메소드는 HTTP 보안 설정, CORS, CSRF, 인증, 인가 등을 정의
@@ -53,30 +53,29 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
                                  "/chat-websocket").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/home")
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
+                        .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                 )
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                );
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        log.info("JwtAuthenticationFilter Bean 생성");
-        return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
     }
 
     /**
@@ -114,9 +113,6 @@ public class SecurityConfig {
     @Configuration
     @Profile("local")
     public class LocalSecurityConfig {
-
-
-
         @Bean
         public SecurityFilterChain localSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
             http
@@ -132,7 +128,7 @@ public class SecurityConfig {
                             .userInfoEndpoint(userInfo -> userInfo
                                     .userService(customOAuth2UserService)
                             )
-                            .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
+                            .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                     )
                     .sessionManagement(session -> session
                             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

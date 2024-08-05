@@ -4,7 +4,7 @@ import { useAuth } from '../context/context';  // useAuth 훅을 import
 import Nav from '../components/Navbar';
 import GroupInfo from './MyPages/GroupInfo';
 import MemberInfo from './MyPages/MemberInfo';
-import CharInfo from './MyPages/CharInfo';
+import MemberManage from './MyPages/MemberManage';
 import Settings from './MyPages/Settings';
 import Chat from './MyPages/Chat';
 import GroupLeaveButton from '../components/GroupLeaveButton';
@@ -93,7 +93,7 @@ const MyPage = () => {
         <Routes>
           <Route path="group-info" element={<GroupInfo />} />
           <Route path="member-info" element={<MemberInfo />} />
-          <Route path="char-info" element={<CharInfo />} />
+          <Route path="member-manage" element={<MemberManage />} />
           <Route path="settings" element={<Settings />} />
         </Routes>
       </div>
