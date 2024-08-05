@@ -122,25 +122,6 @@ function errorMemoryLimitAni() {
     }
   }, 5000);
 }
-function errorTimeLimitAni() {
-  let elem = document.querySelector('.wrapper');
-  let fixedComponent = document.querySelector('.fixed-component');
-
-  if (elem !== null && !fixedComponent) {
-    fixedComponent = document.createElement('div');
-    fixedComponent.classList.add('fixed-component');
-    fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
-    elem.appendChild(fixedComponent);
-  } else if (elem !== null && fixedComponent) {
-    fixedComponent.innerHTML = `<div>시간 초과</div>`;
-  }
-
-  setTimeout(() => {
-    if (fixedComponent) {
-      elem.removeChild(fixedComponent);
-    }
-  }, 5000);
-}
 
 function errorOutputLimitAni() {
   let elem = document.querySelector('.wrapper');
