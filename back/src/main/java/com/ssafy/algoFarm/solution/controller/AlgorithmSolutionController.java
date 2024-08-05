@@ -44,4 +44,5 @@ public class AlgorithmSolutionController {
             return new ResponseEntity<>(MessageResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류가 발생했습니다."), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

@@ -14,7 +14,10 @@ public enum ErrorCode {
     MEMBER_NOT_EXIST(HttpStatus.FORBIDDEN, "G002", "해당 그룹에 멤버가 존재하지 않습니다."),
 
     // User
-    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "U001", "해당하는 ID의 유저가 없습니다.");
+    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "U001", "해당하는 ID의 유저가 없습니다."),
+
+    // Solution
+    SOLUTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "S001", "유저ID와 문제ID에 해당하는 문제 정보가 없습니다.");
 
     private final HttpStatus status;
     private final String code;
