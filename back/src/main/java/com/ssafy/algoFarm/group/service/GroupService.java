@@ -11,6 +11,7 @@ import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.group.repository.MemberRepository;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
 import com.ssafy.algoFarm.mascot.repository.MascotRepository;
+import com.ssafy.algoFarm.mascot.service.MascotService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class GroupService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
     private final MascotRepository mascotRepository;
+    private final MascotService mascotService;
 
     /**
      * 그룹을 생성한뒤 그룹 id를 반환한다.
@@ -44,20 +46,21 @@ public class GroupService {
      * @param groupName 생성할 그룹의 이름
      * @return dto
      */
-    public CreateGroupResDto createGroup(Long userPk, String nickname, String groupName) {
-        //기본 캐릭터 조회
-        Mascot defaultMascot = mascotRepository.findById(1L).orElseThrow(()-> new BusinessException(ErrorCode.MASCOT_NOT_FOUND));
 
+
+    public CreateGroupResDto createGroup(Long userPk, String nickname, String groupName) {
         Group newGroup = new Group();
+        //그룹이 생성되면 마스코트도 생성시킨다.
+        Mascot mascot = mascotService.createMascot();
+        newGroup.setMascot(mascot);
+
         //그룹을 생성한다.
         //TODO 초대코드 로직 레디스 활용해서 바꿔야함.
         String inviteCode = UUID.randomUUID().toString();
         newGroup.setCode(inviteCode);
         newGroup.setName(groupName);
-        newGroup.setMascot(defaultMascot);
         groupRepository.save(newGroup);
         Long groupId = newGroup.getId();
-
 
 
         //해당 그룹에 생성자를 가입시킨다.
