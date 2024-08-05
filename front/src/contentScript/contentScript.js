@@ -24,13 +24,3 @@ function renderOverlay() {
 // 공통 로직 실행
 renderOverlay();
 console.log('Common content script loaded');
-
-// 사이트별 스크립트 동적 로드
-if (currentUrl.includes('acmicpc.net')) {
-    import('../baekjoon/baekjoon')
-        .then(module => {
-            console.log('Baekjoon module loaded');
-            module.default();
-        })
-        .catch(err => console.error('Error loading Baekjoon module:', err));
-}
