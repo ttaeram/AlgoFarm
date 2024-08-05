@@ -1,18 +1,43 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/context";
+import GrassGraph from "../../components/GrassGraph";
 
 function GroupInfo() {
   const { groupId, jwt, members, fetchMembers } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [grassData, setGrassData] = useState([]);
 
   useEffect(() => {
     const loadMembers = async () => {
-      if (groupId) {
+      if (groupId !== -1) {
         await fetchMembers(jwt, groupId);
       }
       setLoading(false);
     };
+
+    const fetchGrassData = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/grassData/${groupId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch grass data');
+        }
+
+        const data = await response.json();
+        setGrassData(data.data);
+      } catch (error) {
+        console.error('Error fetching grass data:', error);
+      }
+    };
+
     loadMembers();
+    fetchGrassData();
   }, [groupId, jwt, fetchMembers]);
 
   if (loading) {
@@ -35,6 +60,8 @@ function GroupInfo() {
           </li>
         ))}
       </ul>
+      <h2>Activity Streak</h2>
+      <GrassGraph data={grassData} />
     </div>
   );
 }
