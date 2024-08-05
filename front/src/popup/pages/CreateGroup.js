@@ -23,7 +23,7 @@ function CreateGroup() {
       }, 3000); // 3초 후에 문구 숨기기
     } else {
       try {
-        const response = await fetch('http://i11a302.p.ssafy.io:8080/api/groups', {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

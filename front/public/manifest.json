@@ -16,14 +16,68 @@
   "permissions": [
     "identity",
     "activeTab",
-    "storage"
+    "storage",
+    "unlimitedStorage",
+    "storage",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "webRequest"
   ],
   "host_permissions": [
-    "http://i11a302.p.ssafy.io:8080/*"
+    "http://i11a302.p.ssafy.io:8080/*",
+    "http://localhost:8080/*",
+    "https://www.acmicpc.net/",
+    "https://school.programmers.co.kr/",
+    "https://github.com/",
+    "https://swexpertacademy.com/",
+    "https://solved.ac/api/v3/*",
+    "https://level.goorm.io/"
   ],
   "background": {
     "service_worker": "static/js/background.js"
   },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/models/*","static/js/*.chunk.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "run_at": "document_idle",
+      "js": [
+        "static/js/contentScript.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.acmicpc.net/*"
+      ],
+      "css": [
+        "css/baekjoon/inject.css"
+      ],
+      "js": [
+        "library/sha1.min.js",
+        "library/jszip.min.js",
+        "library/FileSaver.min.js",
+        "common/toast.js",
+        "common/util.js",
+        "common/storage.js",
+        "common/enable.js",
+        "baekjoon/variables.js",
+        "baekjoon/storage.js",
+        "baekjoon/parsing.js",
+        "baekjoon/util.js",
+        "baekjoon/baekjoon.js"
+      ],
+      "run_at": "document_idle"
+    }
+
+  ],
   "oauth2": {
     "client_id": "791103562299-ebih2865pdmhgde8enq8ha96chi898da.apps.googleusercontent.com",
     "scopes": [

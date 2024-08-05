@@ -13,15 +13,6 @@ public record GroupInfoDto(
         @Schema(description = "그룹 설명")
         String description,
 
-        @Schema(description = "현재 경험치")
-        Long currentExp,
-
-        @Schema(description = "최대 경험치")
-        Long maxExp,
-
-        @Schema(description = "캐릭터 레벨")
-        Integer level,
-
         @Schema(description = "그룹장 여부")
         Boolean isLeader
 

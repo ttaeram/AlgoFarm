@@ -70,7 +70,7 @@ public class GroupService {
         memberRepository.save(member);
 
 
-        newGroup.countUpCurrentNum();//현재 참가인원을 증가시킨다.
+        newGroup.setCurrentNum(newGroup.getCurrentNum() + 1);
 
         return new CreateGroupResDto(groupId,groupName,inviteCode);
     }
@@ -82,7 +82,7 @@ public class GroupService {
      */
     public JoinGroupResDto joinGroup( Long userPk, String nickname, String code) {
 
-        Group group = groupRepository.findByCode(code).orElseThrow();
+        Group group = groupRepository.findByCode(code).orElseThrow(()-> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
 
         User participant = userRepository.findById(userPk).get();
         Member newMember = new Member();
@@ -90,7 +90,7 @@ public class GroupService {
         newMember.setNickname(nickname);
         newMember.setGroup(group);
         memberRepository.save(newMember);
-        group.countUpCurrentNum();
+        group.setCurrentNum(group.getCurrentNum() + 1);
 
         return new JoinGroupResDto(group.getId(), group.getName());
     }
@@ -103,7 +103,7 @@ public class GroupService {
     public void leaveGroup(Long userPk, Long groupId) {
         //그룹의 마지막 멤버인 경우, 그룹을 삭제한다.
         //TODO 그룹이 없는 경우 예외처리 해야함.
-        Group group = groupRepository.findById(groupId).orElseThrow();
+        Group group = groupRepository.findById(groupId).orElseThrow(()-> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
         if(group.getMembers().size() == 1){
             groupRepository.delete(group);
             return;
@@ -111,7 +111,7 @@ public class GroupService {
 
         //그룹장의 경우 가입일이 빠른 다른 파티원에게 그룹장의 권한을 넘긴다.
         log.info("userPk={}",userPk);
-        Member member = memberRepository.findByUserIdAndGroupId(userPk,groupId).orElseThrow();
+        Member member = memberRepository.findByUserIdAndGroupId(userPk,groupId).orElseThrow(()-> new BusinessException(ErrorCode.MEMBER_NOT_EXIST));
         if(member.getIsLeader()){
             List<Member> members = group.getMembers();
             members.sort((m1, m2) -> m1.getJoinAt().compareTo(m2.getJoinAt()));
@@ -124,10 +124,10 @@ public class GroupService {
             }
         }
         //group에서 현재인원 -1, 관계제거
-        group.countDownCurrentNum();
+        group.setCurrentNum(group.getCurrentNum() - 1);
         group.getMembers().remove(member);
         //user에서 관계제거
-        userRepository.findById(userPk).orElseThrow().getMembers().remove(member);
+        userRepository.findById(userPk).orElseThrow(()-> new BusinessException(ErrorCode.USER_NOT_FOUND)).getMembers().remove(member);
         log.info("member={},{}",member.getId(),member.getJoinAt());
         //member테이블에서 삭제(그룹 탈퇴)
         memberRepository.delete(member);
@@ -140,7 +140,7 @@ public class GroupService {
      */
     public GroupInfoDto getGroup(Long userId, Long groupId) {
         //그룹아이디를 가져온다.
-        Group group = groupRepository.findById(groupId).orElseThrow();
+        Group group = groupRepository.findById(groupId).orElseThrow(()-> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
 
         //반환해야할 정보
         Boolean isLeader = false;
@@ -152,12 +152,9 @@ public class GroupService {
 
         String name = group.getName();
         String description = group.getDescription();
-        Long currentExp = group.getCurrentExp();
-        Long maxExp = group.getMaxExp();
-        Integer level = group.getLevel();
 
 
-        GroupInfoDto groupInfoDto = new GroupInfoDto(groupId,name, description, currentExp,maxExp,level, isLeader);
+        GroupInfoDto groupInfoDto = new GroupInfoDto(groupId,name, description, isLeader);
         //그룹의 현재 유저가 그룹장인지 확인한다.
         //필요한 정보들을 가져온다.
         return groupInfoDto;
@@ -169,7 +166,7 @@ public class GroupService {
      * @return 초대코드를 담은 resDto
      */
     public CodeResDto getInviteCode(Long groupId) {
-        Group group =groupRepository.findById(groupId).orElseThrow();
+        Group group =groupRepository.findById(groupId).orElseThrow(()-> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
         return new CodeResDto(group.getCode());
     }
 
@@ -180,7 +177,7 @@ public class GroupService {
      * @return 변경전 그룹명과, 변경이후의 그룹명을 담은 dto
      */
     public EditGroupResDto editGroupName(Long groupId, String newGroupName) {
-        Group group = groupRepository.findById(groupId).orElseThrow();
+        Group group = groupRepository.findById(groupId).orElseThrow(()-> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
         String originalName = group.getName();
         group.setName(newGroupName);
         groupRepository.save(group);
@@ -204,7 +201,7 @@ public class GroupService {
         List<Member> memberList = memberRepository.findAllByGroupId(groupId);
         List<GroupMemberDto> memberDtoList = new ArrayList<>();
         if(memberList.isEmpty()){
-            throw new EntityNotFoundException();
+            throw new BusinessException(ErrorCode.MEMBER_NOT_EXIST);
         }
         for(Member member : memberList){
             GroupMemberDto groupMemberDto = new GroupMemberDto();

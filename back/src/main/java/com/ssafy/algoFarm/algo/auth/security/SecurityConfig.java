@@ -3,6 +3,8 @@ package com.ssafy.algoFarm.algo.auth.security;
 import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,6 +18,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 /**
  * Spring Security 설정을 담당하는 클래스
@@ -25,6 +32,7 @@ import org.springframework.http.HttpStatus;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
@@ -41,10 +49,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/auth/**", "/", "/home", "/login", "/oauth2/**","/oauth2-success","/**").permitAll()
+                                "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
+                                 "/chat-websocket").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -54,18 +68,25 @@ public class SecurityConfig {
                         )
                         .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
+                );
         return http.build();
     }
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:9000", "https://i11a302.p.ssafy.io"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+    @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        log.info("JwtAuthenticationFilter Bean 생성");
         return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
     }
 
@@ -88,12 +109,49 @@ public class SecurityConfig {
         public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable)
+                    .requiresChannel(channel -> channel
+                            .anyRequest().requiresSecure())
                     .authorizeHttpRequests(authorize -> authorize
                             .anyRequest().permitAll()
                     )
+
                     .sessionManagement(session -> session
                             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     );
+
+            return http.build();
+        }
+    }
+    @Configuration
+    @Profile("local")
+    public class LocalSecurityConfig {
+
+
+
+        @Bean
+        public SecurityFilterChain localSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+            http
+                    .csrf(AbstractHttpConfigurer::disable)
+                    // .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 주석 처리
+                    .authorizeHttpRequests(authorize -> authorize
+                            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .oauth2Login(oauth2 -> oauth2
+                            .loginPage("/home")
+                            .userInfoEndpoint(userInfo -> userInfo
+                                    .userService(customOAuth2UserService)
+                            )
+                            .successHandler(new OAuth2LoginSuccessHandler(jwtUtil))
+                    )
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
+                    .exceptionHandling(exceptions -> exceptions
+                            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                    )
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
             return http.build();
         }

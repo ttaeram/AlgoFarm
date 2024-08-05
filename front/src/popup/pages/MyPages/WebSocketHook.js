@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/context';
 
 
-const WS_URL = 'ws://i11a302.p.ssafy.io:8080/chat-websocket';
+const WS_URL = `ws://i11a302.p.ssafy.io:8080/chat-websocket`;
 
 const buildUrl = ({ groupId }) => `${WS_URL}/${groupId}`;
 const isWebSocketOpen = (wsInstance) => wsInstance && wsInstance.readyState === WebSocket.OPEN;

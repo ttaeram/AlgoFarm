@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 @Service
 @Transactional
@@ -58,6 +60,9 @@ public class AlgorithmSolutionService {
             // 기존 데이터가 존재하지 않으면 새로운 데이터 저장
             AlgorithmSolution newData = AlgorithmSolution.toEntity(algorithmSolutionDTO);
             newData.setUser(user);
+            newData.setSubmitTime(LocalDateTime.now());
+            newData.setProblemExperience(ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel()));
+
             AlgorithmSolution savedData = algorithmSolutionRepository.save(newData);
 
             //기존에 풀었던 문제가 아니어서 새롭게 DB에 저장하는 경우라면 그룹 경험치를 증가시킴
@@ -70,19 +75,19 @@ public class AlgorithmSolutionService {
         // 사용자(user)의 멤버십 정보에서 그룹을 찾기
         Member member = user.getMembers().get(0);
         Group group = member.getGroup();
-        Long currentExp = group.getCurrentExp();
-        Long maxExp = group.getMaxExp();
-        int problemExp = ExperienceConverter.convertLevelToExperience(algorithmSolutionDTO.getLevel());
+        double currentExp = group.getMascot().getCurrentExp();
+        double maxExp = group.getMascot().getMaxExp();
+        double problemExp = ExperienceConverter.getExperienceByLevelName(algorithmSolutionDTO.getLevel());
+
 
         currentExp += problemExp;
         while (currentExp >= maxExp) {
             currentExp -= maxExp;
-            group.setLevel(group.getLevel() + 1);
+            group.getMascot().setLevel(group.getMascot().getLevel() + 1);
             maxExp += 50;
         }
-
-        group.setCurrentExp(currentExp);
-        group.setMaxExp(maxExp);
+        group.getMascot().setCurrentExp(currentExp);
+        group.getMascot().setMaxExp(maxExp);
 
         // 그룹 저장소에 업데이트
         groupRepository.save(group);

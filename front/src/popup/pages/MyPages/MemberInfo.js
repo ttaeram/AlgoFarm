@@ -23,7 +23,7 @@ function MemberInfo() {
     }
 
     try {
-      const response = await fetch(`http://i11a302.p.ssafy.io:8080/api/groups/code/${groupId}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/code/${groupId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function MemberInfo() {
 
   const handleKickMember = async (userId) => {
     try {
-      const response = await fetch(`http://i11a302.p.ssafy.io:8080/api/groups/${groupId}/members/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/${groupId}/members/${userId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

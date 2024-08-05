@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
     
     try {
-      const response = await fetch(`http://i11a302.p.ssafy.io:8080/api/groups/${groupId}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/${groupId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${jwt}`
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch(`http://i11a302.p.ssafy.io:8080/api/groups/${groupId}/memberList`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/${groupId}/memberList`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

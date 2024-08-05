@@ -1,20 +1,68 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const Dotenv = require('dotenv-webpack');
+const IMAGE_TYPES = /\.(png|jpe?g|gif|svg)$/i;
 
 module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'static/js/[name].js',
   },
+  stats: {
+    all: false,
+    errors: true,
+    builtAt: true,
+    assets: true,
+    excludeAssets: [IMAGE_TYPES],
+  },
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
+          options: {
+            cacheDirectory: true,
+            cacheCompression: false,
+          }
         },
+      },
+      {
+        test: IMAGE_TYPES,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'images',
+              name: '[name].[ext]',
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(gltf)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'assets/models/',
+              name: '[name].[ext]'
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(bin|glb)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'assets/models/',
+              name: '[name].[ext]'
+            }
+          }
+        ]
       },
       {
         test: /\.css$/,
@@ -45,4 +93,12 @@ module.exports = {
     }),
     new Dotenv(),
   ],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'], // 여기에 처리하고자 하는 파일 확장자를 추가
+    modules: [path.resolve(__dirname, 'src'), 'node_modules'], // src 디렉토리를 모듈 검색 경로에 추가
+    fallback: {
+      net: false,
+      tls: false,
+    },
+  },
 };

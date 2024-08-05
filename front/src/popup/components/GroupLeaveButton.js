@@ -9,7 +9,7 @@ const GroupLeaveButton = () => {
   const handleLeaveGroup = async () => {
     try {
       console.log('Attempting to leave group with ID:', groupId);
-      const response = await fetch('http://i11a302.p.ssafy.io:8080/api/groups/members', {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
