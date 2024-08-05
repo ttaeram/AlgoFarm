@@ -5,17 +5,12 @@ const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const fs = require('fs');
 
-const baekjoonFiles = fs.readdirSync(path.resolve(__dirname, 'src/baekjoon'))
-    .filter(file => file.endsWith('.js'))
-    .map(file => `./src/baekjoon/${file}`);
-
 module.exports = merge(common, {
   mode: 'production',
   entry: {
     popup: './src/popup/index.js',
     background: './src/background/background.js',
     contentScript: './src/contentScript/contentScript.js',
-    baekjoon: baekjoonFiles, // baekjoon 엔트리 추가
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -28,6 +23,8 @@ module.exports = merge(common, {
         { from: 'public', to: '.', globOptions: { ignore: ['**/index.html'] } },
         { from: 'src/library', to: 'library' }, // 라이브러리 폴더 복사
         { from: 'src/css', to: 'css' }, // 라이브러리 폴더 복사
+        { from: 'src/baekjoon', to: 'baekjoon' }, // 라이브러리 폴더 복사
+        { from: 'src/common', to: 'common' }, // 라이브러리 폴더 복사
       ],
     }),
   ],

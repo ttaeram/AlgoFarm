@@ -1,0 +1,31 @@
+/* GrassGraph.module.css */
+.grassGraph {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.grassCell {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+}
+
+.level0 {
+  background-color: #ebedf0;
+}
+
+.level1 {
+  background-color: #c6e48b;
+}
+
+.level2 {
+  background-color: #7bc96f;
+}
+
+.level3 {
+  background-color: #239a3b;
+}
+
+.level4 {
+  background-color: #196127;
+}
