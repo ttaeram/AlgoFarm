@@ -1,61 +1,51 @@
 package com.ssafy.algoFarm.algo.auth.model;
 
 import com.ssafy.algoFarm.algo.user.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
-/**
- * 커스텀 OAuth2User 및 UserDetails 구현 클래스
- * 이 클래스는 OAuth2User와 UserDetails 인터페이스를 모두 구현하여
- * OAuth2 인증과 일반 인증 모두에서 사용할 수 있습니다.
- */
 public class CustomOAuth2User implements OAuth2User, UserDetails {
 
-    private final OAuth2User oauth2User;
-    private final User user;
+    private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2User.class);
 
-    /**
-     * CustomOAuth2User 객체를 생성
-     *
-     * @param oauth2User 원본 OAuth2User 객체
-     * @param user 애플리케이션의 User 엔티티 객체
-     */
-    public CustomOAuth2User(OAuth2User oauth2User, User user) {
-        this.oauth2User = oauth2User;
+    private final User user;
+    private final Map<String, Object> attributes;
+
+    public CustomOAuth2User(User user, Map<String, Object> attributes) {
         this.user = user;
+        this.attributes = attributes;
     }
 
     @Override
     public Map<String, Object> getAttributes() {
-        return oauth2User.getAttributes();
+        return attributes;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return oauth2User.getAuthorities();
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getName() {
-        return oauth2User.getName();
+        return user.getName();
     }
 
-    /**
-     * 연결된 User 엔티티 객체를 반환
-     *
-     * @return User 엔티티 객체
-     */
     public User getUser() {
         return user;
     }
 
     @Override
     public <A> A getAttribute(String name) {
-        return oauth2User.getAttribute(name);
+        return (A) attributes.get(name);
     }
 
     // UserDetails 인터페이스 구현
@@ -71,21 +61,39 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // 또는 user 객체의 상태에 따라 결정
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // 또는 user 객체의 상태에 따라 결정
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 또는 user 객체의 상태에 따라 결정
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return user.getIsEmailVerified(); // 이메일 인증 상태에 따라 결정
+        return user.getIsEmailVerified();
+    }
+
+    // 추가 메서드
+    public String getEmail() {
+        return user.getEmail();
+    }
+
+    public String getOAuthId() {
+        return user.getOAuthId();
+    }
+
+    @Override
+    public String toString() {
+        return "CustomOAuth2User{" +
+                "email='" + getEmail() + '\'' +
+                ", name='" + getName() + '\'' +
+                ", oAuthId='" + getOAuthId() + '\'' +
+                '}';
     }
 }

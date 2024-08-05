@@ -19,11 +19,8 @@ public class UserController {
 
     @GetMapping("/me")
     @Operation(summary = "현재 로그인한 사용자 정보", description = "현재 사용자의 정보를 확인합니다.")
-
     @SecurityRequirement(name = "bearerAuth")
-
     public ResponseEntity<UserInfo> getCurrentUser(@Parameter(hidden = true) @CurrentUser User user) {
-
         UserInfo userInfo = UserInfo.builder()
                 .id(user.getOAuthId())
                 .email(user.getEmail())

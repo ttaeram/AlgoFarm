@@ -1,48 +1,42 @@
 package com.ssafy.algoFarm.algo.auth.security;
 
-import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-
+import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
-/**
- * OAuth2 로그인 성공 시 처리를 담당하는 핸들러
- */
-public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+@Component
+public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JwtUtil jwtUtil;
+    private final OAuth2AuthorizedClientService clientService;
 
-    /**
-     * 생성자를 통한 JwtUtil 주입
-     * @param jwtUtil JWT 유틸리티 클래스
-     */
-    public OAuth2LoginSuccessHandler(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
+    public OAuth2LoginSuccessHandler(OAuth2AuthorizedClientService clientService) {
+        this.clientService = clientService;
     }
 
-    /**
-     * 인증 성공 시 호출되는 메서드
-     * @param request HTTP 요청
-     * @param response HTTP 응답
-     * @param authentication 인증 정보
-     * @throws IOException 입출력 예외
-     * @throws ServletException 서블릿 예외
-     */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        // 인증된 사용자 정보 가져오기
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException, java.io.IOException {
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
+                oauthToken.getAuthorizedClientRegistrationId(),
+                oauthToken.getName());
 
-        // JWT 토큰 생성
-        String token = jwtUtil.generateToken(email, null);
+        String accessToken = client.getAccessToken().getTokenValue();
+        System.out.println("google accessToken: " + accessToken);
+        // 액세스 토큰을 URL 파라미터로 전달
+        String targetUrl = UriComponentsBuilder.fromUriString("/oauth2-success")
+                .queryParam("token", accessToken)
+                .build().toUriString();
 
-        // JWT를 쿼리 파라미터로 포함하여 /oauth2-success로 리다이렉트
-        response.sendRedirect("/oauth2-success?token=" + token);
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
+
 }
