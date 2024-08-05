@@ -47,16 +47,36 @@
   ],
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
+      "matches": ["<all_urls>"],
       "run_at": "document_idle",
       "js": [
-        "static/js/contentScript.js",
-        "library/jquery-3.3.1.min.js",
-        "library/semantic.min.js"
+        "static/js/contentScript.js"
       ]
+    },
+    {
+      "matches": [
+        "https://www.acmicpc.net/*"
+      ],
+      "css": [
+        "css/baekjoon/inject.css"
+      ],
+      "js": [
+        "library/sha1.min.js",
+        "library/jszip.min.js",
+        "library/FileSaver.min.js",
+        "common/toast.js",
+        "common/util.js",
+        "common/storage.js",
+        "common/enable.js",
+        "baekjoon/variables.js",
+        "baekjoon/storage.js",
+        "baekjoon/parsing.js",
+        "baekjoon/util.js",
+        "baekjoon/baekjoon.js"
+      ],
+      "run_at": "document_idle"
     }
+
   ],
   "oauth2": {
     "client_id": "791103562299-ebih2865pdmhgde8enq8ha96chi898da.apps.googleusercontent.com",
