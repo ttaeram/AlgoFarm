@@ -53,8 +53,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
@@ -71,14 +69,7 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService), UsernamePasswordAuthenticationFilter.class)
-                .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
-                        .xssProtection(xss -> xss.disable())  // XSS 보호 비활성화 (CSP로 대체)
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("default-src 'self'; script-src 'self' https://trusted.cdn.com; style-src 'self' https://trusted.cdn.com; img-src 'self' data:;")
-                        )
-                );
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Bean
