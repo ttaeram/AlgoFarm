@@ -11,8 +11,10 @@ import com.ssafy.algoFarm.exception.ErrorCode;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,5 +56,12 @@ public class ChatService {
         chatMessage.setUser(sendUser);
 
         chatMessageRepository.save(chatMessage);
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?") // 매일 새벽 2시에 실행
+    @Transactional
+    public void deleteOldMessages() {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
+        chatMessageRepository.deleteMessagesOlderThan(cutoffDate);
     }
 }
