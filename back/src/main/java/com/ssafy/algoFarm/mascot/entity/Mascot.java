@@ -4,6 +4,8 @@ import com.ssafy.algoFarm.group.entity.Group;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
 
@@ -22,40 +24,31 @@ public class Mascot {
     private MascotType type;
 
     @Setter
-    @Column(columnDefinition = "DOUBLE DEFAULT 0.0")
-    private Double currentExp;
+    private Double currentExp = 0.0;
 
     @Setter
-    @Column(columnDefinition = "DOUBLE DEFAULT 100.0")
-    private Double maxExp;
+    private Double maxExp = 100.0;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 1")
-    private Integer level;
+    private Integer level = 1;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 100")
-    private Integer attack;
+    private Integer attack = 100;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 100")
-    private Integer defense;
+    private Integer defense = 100 ;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 100")
-    private Integer health;
+    private Integer health = 100;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 100")
-    private Integer speed;
+    private Integer speed = 100;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 100")
-    private Integer evasion;
+    private Integer evasion = 100;
 
     @Setter
-    @Column(columnDefinition = "INTEGER DEFAULT 100")
-    private Integer accuracy;
+    private Integer accuracy = 100;
 
     @OneToOne(mappedBy = "mascot")
     private Group group;
