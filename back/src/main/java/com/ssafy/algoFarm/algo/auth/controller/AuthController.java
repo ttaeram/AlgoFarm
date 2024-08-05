@@ -11,11 +11,14 @@ import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -30,18 +33,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Auth API", description = "인증 관련 API")
+@RequiredArgsConstructor
 public class AuthController {
-
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     /**
      * Google 토큰을 사용하여 인증을 수행합니다.
@@ -50,26 +47,29 @@ public class AuthController {
      * @return JWT 토큰 또는 에러 응답
      */
     @PostMapping("/google")
-    @Operation(summary = "Google 토큰 인증", description = "Google 토큰을 사용하여 인증을 수행하고 JWT 토큰을 반환합니다.")
     public ResponseEntity<?> authenticateWithGoogle(@RequestBody GoogleTokenRequest request) {
         try {
-            logger.info("Received token: " + request.getToken());
+            logger.info("Received Google token for authentication: {}", request.getToken());
 
-            OAuth2User oauth2User = customOAuth2UserService.loadUserByToken(request.getToken(), "google");
+            CustomOAuth2User oauth2User = customOAuth2UserService.loadUserByToken(request.getToken(), "google");
+            User user = oauth2User.getUser();
 
-            User user = ((CustomOAuth2User) oauth2User).getUser();
+            String jwt = jwtUtil.generateToken(user.getEmail(), null);
 
-            String jwt = jwtUtil.generateToken(user.getEmail(),null);
-            logger.info("Generated JWT for user: {}", user.getEmail());
+            // Create authentication token and set it in SecurityContextHolder
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(oauth2User, null, oauth2User.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authToken);
 
+            logger.info("JWT generated and authentication set for user: {}", user.getEmail());
             return ResponseEntity.ok(new JwtResponse(jwt));
         } catch (OAuth2AuthenticationException e) {
-            logger.error("Authentication error: ", e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            logger.error("Google authentication failed: {}", e.getMessage());
+            return ResponseEntity.status(401)
                     .body(new ErrorResponse("authentication_failed", e.getMessage()));
         } catch (Exception e) {
-            logger.error("Unexpected error: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            logger.error("Unexpected error during authentication", e);
+            return ResponseEntity.status(500)
                     .body(new ErrorResponse("server_error", "An unexpected error occurred"));
         }
     }

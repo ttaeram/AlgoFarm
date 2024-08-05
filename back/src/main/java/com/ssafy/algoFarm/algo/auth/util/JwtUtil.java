@@ -49,7 +49,9 @@ public class JwtUtil {
         try {
             privateKey = parsePrivateKey(privateKeyResource);
             publicKey = parsePublicKey(publicKeyResource);
+            log.info("JWT keys initialized successfully");
         } catch (Exception e) {
+            log.error("Failed to initialize JWT keys", e);
             throw new JwtException("Failed to initialize JWT keys", e);
         }
     }
@@ -107,18 +109,22 @@ public class JwtUtil {
      * @return 생성된 JWT 토큰
      */
     public String generateToken(String email, Map<String, Object> additionalClaims) {
+        log.debug("Generating JWT token for email: {}", email);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+
         JwtBuilder builder = Jwts.builder()
                 .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime));
+                .setIssuedAt(now)
+                .setExpiration(expiryDate);
 
-        // 추가 클레임이 있다면 토큰에 포함
         if (additionalClaims != null) {
             additionalClaims.forEach(builder::claim);
         }
 
-        return builder.signWith(privateKey, SignatureAlgorithm.RS256)
-                .compact();
+        String token = builder.signWith(privateKey, SignatureAlgorithm.RS256).compact();
+        log.debug("JWT token generated successfully");
+        return token;
     }
 
     /**
@@ -129,6 +135,7 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token);
+            log.debug("JWT token validated successfully");
             return true;
         } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
@@ -152,13 +159,16 @@ public class JwtUtil {
      */
     public String getEmailFromToken(String token) {
         try {
-            return Jwts.parserBuilder()
+            String email = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
+            log.debug("Email extracted from token: {}", email);
+            return email;
         } catch (JwtException e) {
+            log.error("Failed to extract email from token", e);
             throw new JwtException("Failed to extract email from token", e);
         }
     }
@@ -172,13 +182,16 @@ public class JwtUtil {
      */
     public Object getClaimFromToken(String token, String claimName) {
         try {
-            return Jwts.parserBuilder()
+            Object claim = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
                     .get(claimName);
+            log.debug("Claim '{}' extracted from token", claimName);
+            return claim;
         } catch (JwtException e) {
+            log.error("Failed to extract claim '{}' from token", claimName, e);
             throw new JwtException("Failed to extract claim from token", e);
         }
     }
@@ -190,8 +203,62 @@ public class JwtUtil {
     public String extractTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            log.debug("JWT token extracted from request");
             return bearerToken.substring(7);
         }
+        log.debug("No JWT token found in request");
         return null;
+    }
+    /**
+     * 토큰이 만료되었는지 확인합니다.
+     * @param token JWT 토큰
+     * @return 토큰 만료 여부
+     */
+    public boolean isTokenExpired(String token) {
+        try {
+            Date expirationDate = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getExpiration();
+            return expirationDate.before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException e) {
+            log.error("Error checking token expiration", e);
+            return false;
+        }
+    }
+    /**
+     * 리프레시 토큰을 생성합니다.
+     * @param email 사용자 이메일
+     * @return 생성된 리프레시 토큰
+     */
+    public String generateRefreshToken(String email) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + (expirationTime * 24 * 7)); // 7일 후 만료
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .compact();
+    }
+
+    /**
+     * 리프레시 토큰의 유효성을 검증합니다.
+     * @param token 리프레시 토큰
+     * @return 토큰의 유효성 여부
+     */
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token);
+            return !isTokenExpired(token);
+        } catch (JwtException e) {
+            log.error("Invalid refresh token", e);
+            return false;
+        }
     }
 }
