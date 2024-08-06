@@ -93,6 +93,8 @@ const CharacterOverlay = () => {
         {model && (
           <ModelViewer
             modelData={model}
+            cameraDistanceFactor={0.7} // 카메라와 모델의 거리 줄어들면 크게 보임
+            cameraHorizontalAngle={30}
             scale={3}
             animation={animation}
             rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
