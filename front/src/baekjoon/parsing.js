@@ -49,7 +49,7 @@ async function findData(data) {
     const timestamp = kstDate.toISOString().replace('T', ' ').substring(0, 19);
     data.submissionTime = formattedDateString;
     data.currentDateTime = timestamp;
-
+    
     return { ...data, ...detail }; // detail 만 반환해도 되나, 확장성을 위해 모든 데이터를 반환합니다.
   } catch (error) {
     console.error(error);
@@ -109,9 +109,11 @@ async function makeDetailMessageAndReadme(data) {
 */
 function findUsername() {
   const el = document.querySelector('a.username');
-  if (isNull(el)) return null;
+  if (isNull(el)) {
+    return null};
   const username = el?.innerText?.trim();
-  if (isEmpty(username)) return null;
+  if (isEmpty(username)) {
+    return null};
   return username;
 }
 

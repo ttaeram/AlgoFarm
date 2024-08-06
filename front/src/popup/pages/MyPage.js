@@ -7,11 +7,11 @@ import MemberInfo from './MyPages/MemberInfo';
 import MemberManage from './MyPages/MemberManage';
 import Settings from './MyPages/Settings';
 import Chat from './MyPages/Chat';
+import ToggleEnableButton from '../components/ToggleEnableButton';
 import * as styles from "./MyPage.module.css";
 
 const MyPage = () => {
-  const navigate = useNavigate();
-  const { setIsLogined, groupInfo, jwt, setGroupInfo } = useAuth();
+  const { groupInfo, jwt, setGroupInfo } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
@@ -20,11 +20,6 @@ const MyPage = () => {
     setNewGroupName(groupInfo?.name || '');
     console.log(groupInfo);
   }, [groupInfo]);
-
-  // const handleLogout = () => {
-  //   setIsLogined(false);  // 로그인 상태를 false로 설정
-  //   navigate('/');
-  // };
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
@@ -84,6 +79,7 @@ const MyPage = () => {
               <button onClick={handleEditClick}>Edit</button>
             )}
           </div>
+          <ToggleEnableButton />
         </div>
         <div className={styles.characterBox}>
           <div className={styles.character}>캐릭터 150px*150px</div>

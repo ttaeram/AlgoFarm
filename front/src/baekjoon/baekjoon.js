@@ -8,13 +8,14 @@ const debug = false;
 let loader;
 
 const currentUrl = window.location.href;
+console.log("currentUrl=",currentUrl)
 
 // 문제 제출 사이트의 경우에는 로더를 실행하고, 유저 페이지의 경우에는 버튼을 생성한다.
 // 백준 사이트 로그인 상태이면 username이 있으며, 아니면 없다.
 const username = findUsername();
 if (!isNull(username)) {findData
   if (['status', `user_id=${username}`, 'problem_id', 'from_mine=1'].every((key) =>
-     currentUrl.includes(key))) startLoader();
+    currentUrl.includes(key))) startLoader();
   else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) parseProblemDescription();
 }
 
@@ -60,19 +61,19 @@ function startLoader() {
 
           //startUpload();이거 뭔가요...?
           const bojData = await findData()
+          // console.log("username=" , bojData.username);
           bojData.username += `_${bojData.problemId}`
           console.log("전송데이터 (JSON):", JSON.stringify(bojData, null, 2));
           
-          //헤더에 넣을 토큰 정보 가져오기
-          // const data = await getDataFromIndexedDB();
-          console.log("data="+data);
 
-        //Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
+          //Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
           chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
             if (response && response.token) {
               console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
               // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
-              fetch("http://localhost:8080/api/commits", {
+              // fetch(`${process.env.REACT_APP_SERVER_URL}`, {
+              fetch("https://i11a302.p.ssafy.io/api/commits", {
+              // fetch("http:localhost:8080/api/commits", {
                 method: "POST",
                 headers: {
                   'Content-Type': 'application/json',
@@ -87,19 +88,6 @@ function startLoader() {
               console.error('Token not found in response');
             }
           });
-
-          
-          // TODO 임시주석처리 api요청
-          // fetch("http://localhost:8080/api/commits", {
-          //   method:"POST",
-          //   headers: {
-          //     'Content-Type' : 'application/json',
-          //     'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzMzAyZm91bmRAZ21haWwuY29tIiwiaWF0IjoxNzIyMzE5NTg3LCJleHAiOjE3MjI0MDU5ODd9.SLBvBvB3MKc1gVt-kW_CXDuV7HxbZMrrdGW5ahc5LISnrMZIq80BDeFMP1O6drhuggU3kjQvO841SPwYYPhXsEZMs76b_3Zqh2UjIZfgwmskLrZfn8v2cec_vFkYp_jIdvv0IHiTFrh5NqIbz_8KFXbjeRB0PNWGXSF9JJ_WLopw354tXEPxgDCoYUoDaE38GDnUQAF_ZU2qkvw7NffHPSNaEGNXYDEKKN_c_FoogPxbCHAoz0r-xM4-DRNlt2I8FrAPuDYrAvSBjTZF_I_sySjIen3er-S8LoWPSL-pcg6_5CIg6mIOWicyqUrIZZWm5VTntrHC8P6r4IxPCE-BpA'
-          //   },
-          //   body: JSON.stringify(bojData)
-          // })
-          // .then((res) => {console.log("응답 : ", res);});
-          // await beginUpload(bojData); // 이 함수가 제출하는 커밋 올리는 함수
         }
       }
     }

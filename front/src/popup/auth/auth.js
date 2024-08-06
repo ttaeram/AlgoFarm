@@ -143,8 +143,6 @@ async function signInWithWeb() {
   const authInstance = window.gapi.auth2.getAuthInstance();
   const googleUser = await authInstance.signIn();
   const token = googleUser.getAuthResponse().access_token;
-  // 토큰
-  console.log('Web Token:', token);
   return token;
 }
 

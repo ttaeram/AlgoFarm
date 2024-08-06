@@ -4,7 +4,7 @@ const ToastType = {
     Succes : "#00b894",
 }
 
-  
+
 class Toast {
     constructor(message,color,time){
         log('Constructor', message)
