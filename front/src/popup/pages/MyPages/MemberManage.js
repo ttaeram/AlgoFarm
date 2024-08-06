@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/context";
 
 function MemberManage() {
@@ -6,15 +6,15 @@ function MemberManage() {
   const [inviteCode, setInviteCode] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const fetchMembers = useCallback(async (jwt, groupId) => {
-    await originalFetchMembers(jwt, groupId);
-  }, [originalFetchMembers]);
-
+  // useEffect에서 fetchMembers 호출
   useEffect(() => {
-    if (groupId && jwt) {
-      fetchMembers(jwt, groupId);
-    }
-  }, [groupId, jwt, fetchMembers]);
+    const loadMembers = async () => {
+      if (groupId && jwt) {
+        await originalFetchMembers(jwt, groupId);
+      }
+    };
+    loadMembers();
+  }, [groupId, jwt]); // 여기서 fetchMembers를 의존성 배열에서 제거
 
   const handleGenerateInviteCode = async () => {
     if (!groupId) {
@@ -61,7 +61,7 @@ function MemberManage() {
       }
 
       // 멤버 리스트를 새로고침
-      await fetchMembers(jwt, groupId);
+      await originalFetchMembers(jwt, groupId); // fetchMembers를 바로 호출
     } catch (error) {
       console.error('Error kicking member:', error);
     }

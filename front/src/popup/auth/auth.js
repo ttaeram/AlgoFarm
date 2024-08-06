@@ -5,6 +5,7 @@ export function signIn() {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
             } else if (token) {
+                console.log('이게 토큰: ', token)
                 resolve(token);
             } else {
                 reject(new Error('Failed to get auth token'));
