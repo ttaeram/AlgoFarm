@@ -10,7 +10,6 @@ import Toggle from './components/Toggle';
 function App() {
   return (
     <AuthProvider>
-      <Toggle/>
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />

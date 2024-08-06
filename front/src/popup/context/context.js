@@ -18,13 +18,42 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
+  //토큰을 받아오고, 저장하는 곳
   useEffect(() => {
     if (jwt) {
       localStorage.setItem('jwt', jwt);
+      handleSave(jwt);
     } else {
       localStorage.removeItem('jwt');
     }
   }, [jwt]);
+
+  //jwt토큰이 존재하면 indexDB에 토큰을 저장하는 로직
+  const handleSave = (jwt) => {
+    const request = indexedDB.open('MyDatabase', 1);
+
+    request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        db.createObjectStore('MyStore', { keyPath: 'id' });
+    };
+
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction('MyStore', 'readwrite');
+        const store = transaction.objectStore('MyStore');
+        store.put({ id: 'myData', value: jwt });
+
+        transaction.oncomplete = () => {
+            console.log('Data saved to IndexedDB');
+        };
+    };
+
+    request.onerror = (event) => {
+        console.error('Error opening IndexedDB', event);
+    };
+  };
+
+
 
   useEffect(() => {
     localStorage.setItem('isLogined', isLogined);
@@ -54,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [members]);
 
+  //logout로직
   const signOut = () => {
     setUser(null);
     setJwt(null);
