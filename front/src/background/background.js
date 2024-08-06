@@ -59,12 +59,9 @@ chrome.runtime.onMessage.addListener(handleMessage);
 /* 커밋 요청시 헤더에 토큰을 넣기 위한 background*/
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getToken') {
-    console.log("1.토큰 가져오는 요청 in background");
     getDataFromIndexedDB().then(token => {
-      console.log("2.토큰 가져왔다 곧 반환한다.");
       sendResponse({ token: token });
     }).catch(error => {
-      console.error('Error fetching data from IndexedDB:', error);
       sendResponse({ token: null });
     });
     // 비동기 응답을 보내기 위해 true를 반환합니다.
