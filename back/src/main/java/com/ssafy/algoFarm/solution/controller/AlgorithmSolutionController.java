@@ -30,9 +30,7 @@ public class AlgorithmSolutionController {
     @PostMapping("/commits")
     @Operation(summary = "맞은 문제정보를 저장하는 api")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<MessageResponse>
-    createBojSolution(@RequestBody AlgorithmSolutionDTO algorithmSolutionDTO, @Parameter(hidden = true) @CurrentUser User user) {
-        log.info("algorithmSolutionDTO={}",algorithmSolutionDTO);
+    public ResponseEntity<MessageResponse> createBojSolution(@RequestBody AlgorithmSolutionDTO algorithmSolutionDTO, @Parameter(hidden = true) @CurrentUser User user) {
         try {
             AlgorithmSolutionDTO resultDTO = algorithmSolutionService.saveBojSolution(algorithmSolutionDTO, user);
             if (resultDTO == null) {

@@ -5,6 +5,8 @@ import com.ssafy.algoFarm.exception.ErrorCode;
 import com.ssafy.algoFarm.group.dto.response.PieceOfGrassDto;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.solution.repository.AlgorithmSolutionRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -13,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
+@Slf4j
 public class GrassDataService {
 
     private final AlgorithmSolutionRepository algorithmSolutionRepository;
