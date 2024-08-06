@@ -1,22 +1,22 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import './GaugeBar.css';
 
-function GaugeBar({ label, value }) {
+const GaugeBar = ({ contribution }) => {
+  const percentage = Math.min(Math.max(contribution, 0), 100);
+
   return (
-    <div className="gauge-bar">
-      <div className="gauge-bar__label">{label}</div>
-      <div className="gauge-bar__container">
-        <div className="gauge-bar__fill" style={{ width: `${value}%` }}></div>
-      </div>
-      <div className="gauge-bar__value">{value}%</div>
+    <div style={{ width: '100%', backgroundColor: '#e0e0df', borderRadius: '8px', overflow: 'hidden' }}>
+      <div
+        style={{
+          width: `${percentage}%`,
+          backgroundColor: '#76c7c0',
+          height: '24px',
+          borderRadius: '8px 0 0 8px',
+          transition: 'width 0.3s ease-in-out'
+        }}
+      ></div>
     </div>
   );
-}
-
-GaugeBar.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
 };
+
 
 export default GaugeBar;
