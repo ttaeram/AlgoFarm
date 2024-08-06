@@ -6,6 +6,7 @@ import com.ssafy.algoFarm.group.dto.response.ContributionDto;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.solution.repository.AlgorithmSolutionRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class ContributionService {
 
     private final GroupRepository groupRepository;
