@@ -4,6 +4,7 @@ import com.ssafy.algoFarm.algo.auth.annotation.CurrentUser;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.chat.entity.ChatMessageReqDTO;
 import com.ssafy.algoFarm.chat.entity.ChatMessageResDTO;
+import com.ssafy.algoFarm.chat.entity.SentChatMessageDTO;
 import com.ssafy.algoFarm.chat.service.ChatService;
 import com.ssafy.algoFarm.chat.entity.ChatMessage;
 import com.ssafy.global.response.DataResponse;
@@ -66,9 +67,18 @@ public class ChatController {
     @SecurityRequirement(name = "bearerAuth")
     public MessageResponse send(@PathVariable Long chatroomId, @RequestBody ChatMessageReqDTO chatMessageReqDTO, @Parameter(hidden = true) @CurrentUser User user) {
         chatMessageReqDTO.setUserId(user.getId());
-        messagingTemplate.convertAndSend("/chat/" + chatroomId, chatMessageReqDTO.getContent());
+        messagingTemplate.convertAndSend("/chat/" + chatroomId, convertToSentChatMessageDTO(chatMessageReqDTO));
         chatMessageReqDTO.setGroupId(chatroomId);
         chatService.saveChatMessage(chatMessageReqDTO);
         return MessageResponse.of(HttpStatus.OK, "Sent chatroomId " + chatroomId);
+    }
+
+    private SentChatMessageDTO convertToSentChatMessageDTO(ChatMessageReqDTO chatMessageReqDTO) {
+        SentChatMessageDTO sentChatMessageDTO = new SentChatMessageDTO();
+        sentChatMessageDTO.setNickname(chatMessageReqDTO.getNickname());
+        sentChatMessageDTO.setContent(chatMessageReqDTO.getContent());
+        sentChatMessageDTO.setCreateAt(chatMessageReqDTO.getCreateAt());
+
+        return sentChatMessageDTO;
     }
 }
