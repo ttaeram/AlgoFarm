@@ -20,8 +20,8 @@ chrome.storage.local.get('isSync', (data) => {
 });
 
 /* stats 초기값이 없는 경우, 기본값을 생성하고 stats를 업데이트한다.
-   만약 새로운 버전이 업데이트되었을 경우, 기존 submission은 업데이트를 위해 초기화 한다.
-   (확인하기 어려운 다양한 케이스가 발생하는 것을 확인하여서 if 조건문을 복잡하게 하였다.)
+  만약 새로운 버전이 업데이트되었을 경우, 기존 submission은 업데이트를 위해 초기화 한다.
+  (확인하기 어려운 다양한 케이스가 발생하는 것을 확인하여서 if 조건문을 복잡하게 하였다.)
 */
 getStats().then((stats) => {
   if (isNull(stats)) stats = {};
