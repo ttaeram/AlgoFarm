@@ -77,9 +77,20 @@ const Popup = () => {
           'Authorization': `Bearer ${jwt}`
         }
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch group ID');
+      }
+
       const data = await response.json();
+
+      if (!data || !data.data) {
+        return '-1';
+      }
+
       return data.data.length > 0 ? data.data[0] : '-1';
     } catch (error) {
+      console.error('Error fetching group ID:', error);
       return '-1';
     }
   };

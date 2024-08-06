@@ -22,10 +22,10 @@ const MyPage = () => {
     console.log(groupInfo);
   }, [groupInfo]);
 
-  const handleLogout = () => {
-    setIsLogined(false);  // 로그인 상태를 false로 설정
-    navigate('/');
-  };
+  // const handleLogout = () => {
+  //   setIsLogined(false);  // 로그인 상태를 false로 설정
+  //   navigate('/');
+  // };
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
@@ -102,7 +102,6 @@ const MyPage = () => {
       </div>
       {isChatOpen && <Chat onClose={toggleChat} />}
       <GroupLeaveButton />
-      <button className={styles.logoutButton} onClick={handleLogout}>로그아웃</button>
     </div>
   );
 }

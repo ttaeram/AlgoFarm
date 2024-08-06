@@ -1,0 +1,12 @@
+.logoutButton {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px; /* 패딩 조정 */
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.logoutButton:hover {
+  background-color: #ff3333;
+}
