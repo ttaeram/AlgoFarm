@@ -14,7 +14,7 @@ const currentUrl = window.location.href;
 const username = findUsername();
 if (!isNull(username)) {findData
   if (['status', `user_id=${username}`, 'problem_id', 'from_mine=1'].every((key) =>
-     currentUrl.includes(key))) startLoader();
+    currentUrl.includes(key))) startLoader();
   else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) parseProblemDescription();
 }
 
