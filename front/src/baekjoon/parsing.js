@@ -14,15 +14,19 @@
   - Readme 내용 : readme
 */
 async function findData(data) {
+  console.log("1 in findDate");
   try {
     if (isNull(data)) {
+      console.log("2 in findDate before findFromResultTable");
       let table = findFromResultTable();
+      console.log("3 in findDate before isEmpty()");
       if (isEmpty(table)) return null;
       table = filter(table, {
         resultCategory: RESULT_CATEGORY.RESULT_ACCEPTED,
         username: findUsername(),
         language: table[0]['language'],
       });
+      console.log("3. after findUsername");
       data = selectBestSubmissionList(table)[0];
     }
     if (isNaN(Number(data.problemId)) || Number(data.problemId) < 1000) throw new Error(`정책상 대회 문제는 업로드 되지 않습니다. 대회 문제가 아니라고 판단된다면 이슈로 남겨주시길 바랍니다.\n문제 ID: ${data.problemId}`);

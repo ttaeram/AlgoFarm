@@ -15,7 +15,9 @@ const username = findUsername();
 if (!isNull(username)) {findData
   if (['status', `user_id=${username}`, 'problem_id', 'from_mine=1'].every((key) =>
      currentUrl.includes(key))) startLoader();
-  else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) parseProblemDescription();
+  else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) {
+    console.log("before parseProblemDescription")
+    parseProblemDescription()};
 }
 
 function startLoader() {
@@ -57,6 +59,18 @@ function startLoader() {
           chrome.storage.local.get('bjhEnable', (result) => {
             console.log('bjhEnable:', result.bjhEnable);
           });
+
+          //토큰 들고있는지 먼저 확인 -> 확인후 삭제 필요
+          chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
+            if (response && response.token) {
+              console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
+              // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
+            }else{
+              console.log("토큰 안가져옴")
+            }
+          });
+
+
 
           //startUpload();이거 뭔가요...?
           const bojData = await findData()

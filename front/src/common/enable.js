@@ -5,7 +5,6 @@
 async function checkEnable() {
   const enable = await getObjectFromLocalStorage('bjhEnable');
   if (!enable) writeEnableMsgOnLog();
-  enable = true;
   return enable;
 }
 
