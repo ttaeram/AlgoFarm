@@ -55,8 +55,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
-                                 "/chat-websocket").permitAll()
+                                "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
