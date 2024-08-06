@@ -3,7 +3,15 @@ import { useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 
-const ModelViewer = ({ modelData, animation = 'Walk', rotation = 0, pauseAnimation = false, onAnimationComplete }) => {
+const ModelViewer = ({
+                       modelData,
+                       animation = 'Walk',
+                       rotation = 0,
+                       pauseAnimation = false,
+                       onAnimationComplete,
+                       cameraDistanceFactor = 2,
+                       cameraHorizontalAngle = 0
+                     }) => {
   const groupRef = useRef();
   const { scene, camera } = useThree();
   const [gltf, setGltf] = useState(null);
@@ -20,27 +28,76 @@ const ModelViewer = ({ modelData, animation = 'Walk', rotation = 0, pauseAnimati
   useEffect(() => {
     const loader = new GLTFLoader();
     loader.parse(
-      modelData,
-      '',
-      (loadedGltf) => {
-        console.log('GLTF loaded successfully:', loadedGltf);
-        setGltf(loadedGltf);
+        modelData,
+        '',
+        (loadedGltf) => {
+          console.log('GLTF loaded successfully:', loadedGltf);
+          setGltf(loadedGltf);
 
-        const mixer = new THREE.AnimationMixer(loadedGltf.scene);
-        mixerRef.current = mixer;
+          const mixer = new THREE.AnimationMixer(loadedGltf.scene);
+          mixerRef.current = mixer;
 
-        const defaultAnimationIndex = animationMap['Walk'];
-        if (loadedGltf.animations[defaultAnimationIndex]) {
-          const action = mixer.clipAction(loadedGltf.animations[defaultAnimationIndex]);
-          action.play();
-          currentAnimationRef.current = action;
+          const defaultAnimationIndex = animationMap['Walk'];
+          if (loadedGltf.animations[defaultAnimationIndex]) {
+            const action = mixer.clipAction(loadedGltf.animations[defaultAnimationIndex]);
+            action.play();
+            currentAnimationRef.current = action;
+          }
+
+          // Reset model position and scale
+          loadedGltf.scene.position.set(0, 0, 0);
+          loadedGltf.scene.scale.set(1, 1, 1);
+
+          // Adjust camera and model
+          adjustModelAndCamera(loadedGltf.scene);
+        },
+        (error) => {
+          console.error('An error occurred while loading the model:', error);
         }
-      },
-      (error) => {
-        console.error('An error occurred while loading the model:', error);
-      }
     );
   }, [modelData]);
+
+  const adjustModelAndCamera = (model) => {
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+
+    // Scale the model to fit within a 1x1x1 cube
+    const scale = 1 / Math.max(size.x, size.y, size.z);
+    model.scale.multiplyScalar(scale);
+
+    // Recalculate the bounding box after scaling
+    box.setFromObject(model);
+    box.getCenter(center);
+    box.getSize(size);
+
+    // Center the model
+    model.position.sub(center.multiplyScalar(scale));
+
+    // Position the camera
+    const distance = Math.max(size.x, size.y, size.z) * cameraDistanceFactor;
+    const fov = camera.fov * (Math.PI / 180);
+    const cameraZ = Math.abs(distance / Math.tan(fov / 2));
+
+    // Calculate camera position with horizontal angle
+    const angleRad = cameraHorizontalAngle * (Math.PI / 180);
+    const cameraX = Math.sin(angleRad) * cameraZ;
+    const cameraZAdjusted = Math.cos(angleRad) * cameraZ;
+
+    camera.position.set(cameraX, 0, cameraZAdjusted);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    // Adjust near and far planes
+    camera.near = distance / 100;
+    camera.far = distance * 100;
+    camera.updateProjectionMatrix();
+
+    console.log('Model positioned:', model.position);
+    console.log('Camera positioned:', camera.position);
+    console.log('Model size:', size);
+    console.log('Camera distance:', distance);
+    console.log('Camera angle:', cameraHorizontalAngle);
+  };
 
   useEffect(() => {
     if (gltf && mixerRef.current) {
@@ -82,37 +139,6 @@ const ModelViewer = ({ modelData, animation = 'Walk', rotation = 0, pauseAnimati
     }
   }, [gltf, animation, pauseAnimation, onAnimationComplete]);
 
-  useEffect(() => {
-    if (gltf && groupRef.current) {
-      const box = new THREE.Box3().setFromObject(gltf.scene);
-      const center = box.getCenter(new THREE.Vector3());
-
-      // 모델의 중심을 (0, 0, 0)으로 이동
-      groupRef.current.position.copy(center).multiplyScalar(-1);
-
-      // 모델을 약간 위로 올림
-      groupRef.current.position.y += 1;
-
-      // 카메라 설정
-      const cameraDistance = 1;
-      camera.position.set(cameraDistance, cameraDistance, cameraDistance);
-      camera.lookAt(0, 0, 0);  // 카메라가 모델의 중앙을 바라보도록 조정
-
-      camera.near = 0.1;
-      camera.far = 1000;
-      camera.updateProjectionMatrix();
-
-      console.log('Model positioned:', groupRef.current.position);
-      console.log('Camera positioned:', camera.position);
-      // 캐릭터 크기
-      console.log('Model size:', box.getSize(new THREE.Vector3()));
-      // 카메라 lookat
-      console.log('Camera lookAt:', camera.getWorldDirection(new THREE.Vector3()));
-      // 카메라 거리
-      console.log('Camera distance:', camera.position.distanceTo(new THREE.Vector3()));
-    }
-  }, [gltf, camera]);
-
   useFrame((state, delta) => {
     if (mixerRef.current && !isDeathAnimationComplete) {
       mixerRef.current.update(delta);
@@ -127,9 +153,9 @@ const ModelViewer = ({ modelData, animation = 'Walk', rotation = 0, pauseAnimati
   }
 
   return (
-    <group ref={groupRef}>
-      <primitive object={gltf.scene} />
-    </group>
+      <group ref={groupRef}>
+        <primitive object={gltf.scene} />
+      </group>
   );
 };
 
