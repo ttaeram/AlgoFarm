@@ -11,11 +11,19 @@ export const AuthProvider = ({ children }) => {
   const [members, setMembers] = useState(JSON.parse(localStorage.getItem('members')) || []);
 
   useEffect(() => {
-    localStorage.setItem('user', JSON.stringify(user));
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('jwt', jwt);
+    if (jwt) {
+      localStorage.setItem('jwt', jwt);
+    } else {
+      localStorage.removeItem('jwt');
+    }
   }, [jwt]);
 
   useEffect(() => {
@@ -23,15 +31,27 @@ export const AuthProvider = ({ children }) => {
   }, [isLogined]);
 
   useEffect(() => {
-    localStorage.setItem('groupId', groupId);
+    if (groupId) {
+      localStorage.setItem('groupId', groupId);
+    } else {
+      localStorage.removeItem('groupId');
+    }
   }, [groupId]);
 
   useEffect(() => {
-    localStorage.setItem('groupInfo', JSON.stringify(groupInfo));
+    if (groupInfo) {
+      localStorage.setItem('groupInfo', JSON.stringify(groupInfo));
+    } else {
+      localStorage.removeItem('groupInfo');
+    }
   }, [groupInfo]);
 
   useEffect(() => {
-    localStorage.setItem('members', JSON.stringify(members));
+    if (members) {
+      localStorage.setItem('members', JSON.stringify(members));
+    } else {
+      localStorage.removeItem('members');
+    }
   }, [members]);
 
   const signOut = () => {
@@ -41,17 +61,11 @@ export const AuthProvider = ({ children }) => {
     setGroupId(null);
     setGroupInfo(null);
     setMembers([]);
-    localStorage.removeItem('user');
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('isLogined');
-    localStorage.removeItem('groupId');
-    localStorage.removeItem('groupInfo');
-    localStorage.removeItem('members');
   };
 
   const fetchGroupInfo = async (jwt, groupId) => {
-    if (!groupId || groupId === -1) {
-      console.warn('Invalid groupId:', groupId);
+    if (!isLogined || !groupId || groupId === -1) {
+      console.warn('Invalid groupId or user not logged in');
       return;
     }
     
@@ -73,8 +87,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const fetchMembers = async (jwt, groupId) => {
-    if (!groupId || groupId === -1) {
-      console.warn('Invalid groupId:', groupId);
+    if (!isLogined || !groupId || groupId === -1) {
+      console.warn('Invalid groupId or user not logged in');
       return;
     }
 

@@ -1,4 +1,5 @@
 import { useAuth } from "../../context/context";
+import LogoutButton from "../../components/LogoutButton";
 
 function Settings() {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ function Settings() {
       ) : (
         <p>Loading user information...</p>
       )}
+      <LogoutButton />
     </div>
   );
 }
