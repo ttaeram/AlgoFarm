@@ -20,7 +20,7 @@ function ChatPopup({ onClose }) {
 
   const fetchChatHistory = async () => {
     try {
-      const response = await fetch(`https://i11a302.p.ssafy.io/api/chat/${groupId}/all`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/chat/${groupId}/all`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${jwt}`,
@@ -40,7 +40,7 @@ function ChatPopup({ onClose }) {
 
   const connect = () => {
     client.current = new StompJs.Client({
-      brokerURL: "https://i11a302.p.ssafy.io/chat-websocket",
+      brokerURL: `${process.env.REACT_APP_SERVER_URL}/chat-websocket`,
       connectHeaders: {
         "auth-token": `Bearer ${jwt}`,
       },
@@ -110,7 +110,7 @@ function ChatPopup({ onClose }) {
 
     // Log the message to the server
     try {
-      const response = await fetch(`https://i11a302.p.ssafy.io/api/chat/${groupId}/send`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/chat/${groupId}/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
