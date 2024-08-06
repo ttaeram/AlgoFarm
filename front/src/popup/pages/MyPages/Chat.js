@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as StompJs from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useAuth } from '../../context/context';
@@ -7,8 +7,8 @@ import * as styles from './Chat.module.css';
 function ChatPopup({ onClose }) {
   const { jwt, groupId, user } = useAuth(); // user 추가
   const [chatMessages, setChatMessages] = useState([]);
+  const [previousChatMessages, setPreviousChatMessages] = useState([]); // New state for previous chat messages
   const [message, setMessage] = useState("");
-  const [initialMessagesLoaded, setInitialMessagesLoaded] = useState(false); // 초기 메시지 로드 상태
   const client = useRef(null);
 
   useEffect(() => {
@@ -27,12 +27,12 @@ function ChatPopup({ onClose }) {
         },
       });
       const data = await response.json();
+      // 데이터가 배열이 아니라면, 배열로 변환하거나 올바른 데이터를 추출
       if (data && Array.isArray(data.data)) {
-        setChatMessages(data.data);
+        setPreviousChatMessages(data.data); // Store previous chat messages
       } else {
-        setChatMessages([]);
+        setPreviousChatMessages([]); // Default to an empty array
       }
-      setInitialMessagesLoaded(true); // 초기 메시지 로드 완료
     } catch (error) {
       console.error("Failed to fetch chat history", error);
     }
@@ -72,32 +72,30 @@ function ChatPopup({ onClose }) {
       console.log('Received message:', body);
       try {
         const message = JSON.parse(body);
-        if (initialMessagesLoaded) {
-          setChatMessages((prevMessages) => [...prevMessages, message]);
-        }
+        setChatMessages((_chatMessages) => [..._chatMessages, message]);
       } catch (error) {
+        // JSON 형식이 아닌 경우 일반 텍스트로 처리
         console.error('Failed to parse message as JSON:', error);
-        if (initialMessagesLoaded) {
-          setChatMessages((prevMessages) => [...prevMessages, { content: body }]);
-        }
+        setChatMessages((_chatMessages) => [..._chatMessages, { content: body, nickname: user.name }]);
       }
     });
   };
 
-  const publish = async (content) => {
+  const publish = async (message) => {
     if (!client.current.connected) {
       console.error('WebSocket is not connected');
       return;
     }
     const newMessage = {
       roomSeq: groupId,
-      message: content
+      content: message,
+      nickname: user.name
     };
 
     const serverLogMessage = {
       userId: user.userId, // Assuming user object has userId
       groupId,
-      content,
+      content: message,
       nickname: user.name, // Assuming user object has nickname
       createAt: new Date().toISOString()
     };
@@ -108,7 +106,7 @@ function ChatPopup({ onClose }) {
       body: JSON.stringify(newMessage),
     });
 
-    // Log the message to the server
+    // 서버에 메시지를 기록할 때, WebSocket을 통해 다시 수신할 수 있으므로 상태를 업데이트하지 않습니다.
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/chat/${groupId}/send`, {
         method: 'POST',
@@ -126,8 +124,7 @@ function ChatPopup({ onClose }) {
       console.error('Error logging message to server:', error);
     }
 
-    // Add the new message to chat immediately without duplicating it
-    setChatMessages((prevMessages) => [...prevMessages, serverLogMessage]);
+    // 사용자가 직접 보낸 메시지를 WebSocket을 통해 수신할 때 중복되지 않도록 상태를 업데이트하지 않습니다.
     setMessage("");
   };
 
@@ -137,10 +134,19 @@ function ChatPopup({ onClose }) {
         <span className={styles.closeButton} onClick={onClose}>&times;</span>
         <h2>그룹명</h2>
         <div className={styles.chatContent}>
+          <h3>이전 채팅 기록</h3>
           <ul>
-            {chatMessages.map((msg, index) => (
+            {previousChatMessages.map((_chatMessage, index) => (
               <li key={index}>
-                {msg.name ? `${msg.name}: ` : ''}{msg.content}
+                {_chatMessage.nickname ? `${_chatMessage.nickname}: ` : ''}{_chatMessage.content}
+              </li>
+            ))}
+          </ul>
+          <h3>새로운 메시지</h3>
+          <ul>
+            {chatMessages.map((_chatMessage, index) => (
+              <li key={index}>
+                {_chatMessage.nickname ? `${_chatMessage.nickname}: ` : ''}{_chatMessage.content}
               </li>
             ))}
           </ul>

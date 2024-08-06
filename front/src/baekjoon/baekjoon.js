@@ -15,10 +15,8 @@ console.log("currentUrl=",currentUrl)
 const username = findUsername();
 if (!isNull(username)) {findData
   if (['status', `user_id=${username}`, 'problem_id', 'from_mine=1'].every((key) =>
-     currentUrl.includes(key))) startLoader();
-  else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) {
-    console.log("before parseProblemDescription")
-    parseProblemDescription()};
+    currentUrl.includes(key))) startLoader();
+  else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) parseProblemDescription();
 }
 
 function startLoader() {
@@ -74,8 +72,8 @@ function startLoader() {
               console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
               // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
               // fetch(`${process.env.REACT_APP_SERVER_URL}`, {
-              // fetch("https://i11a302.p.ssafy.io/api/commits", {
-              fetch("http:localhost:8080/api/commits", {
+              fetch("https://i11a302.p.ssafy.io/api/commits", {
+              // fetch("http:localhost:8080/api/commits", {
                 method: "POST",
                 headers: {
                   'Content-Type': 'application/json',
