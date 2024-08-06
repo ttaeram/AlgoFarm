@@ -76,7 +76,8 @@ function ChatPopup({ onClose }) {
       } catch (error) {
         // JSON 형식이 아닌 경우 일반 텍스트로 처리
         console.error('Failed to parse message as JSON:', error);
-        setChatMessages((_chatMessages) => [..._chatMessages, { content: body, nickname: user.name }]);
+        console.log('바디바디: ', body)
+        setChatMessages((_chatMessages) => [..._chatMessages, { content: body.content, nickname: body.nickname }]);
       }
     });
   };
@@ -134,16 +135,12 @@ function ChatPopup({ onClose }) {
         <span className={styles.closeButton} onClick={onClose}>&times;</span>
         <h2>그룹명</h2>
         <div className={styles.chatContent}>
-          <h3>이전 채팅 기록</h3>
           <ul>
             {previousChatMessages.map((_chatMessage, index) => (
               <li key={index}>
                 {_chatMessage.nickname ? `${_chatMessage.nickname}: ` : ''}{_chatMessage.content}
               </li>
             ))}
-          </ul>
-          <h3>새로운 메시지</h3>
-          <ul>
             {chatMessages.map((_chatMessage, index) => (
               <li key={index}>
                 {_chatMessage.nickname ? `${_chatMessage.nickname}: ` : ''}{_chatMessage.content}

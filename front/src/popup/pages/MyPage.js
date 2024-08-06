@@ -7,7 +7,6 @@ import MemberInfo from './MyPages/MemberInfo';
 import MemberManage from './MyPages/MemberManage';
 import Settings from './MyPages/Settings';
 import Chat from './MyPages/Chat';
-import GroupLeaveButton from '../components/GroupLeaveButton';
 import * as styles from "./MyPage.module.css";
 
 const MyPage = () => {
@@ -48,7 +47,7 @@ const MyPage = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
         },
-        body: JSON.stringify({ groupId: groupInfo.groupId, newGroupName: newGroupName })
+        body: JSON.stringify({ groupId: groupInfo.data.groupId, newGroupName: newGroupName })
       });
 
       if (!response.ok) {
@@ -81,7 +80,9 @@ const MyPage = () => {
             ) : (
               <span>{groupInfo?.name || '그룹명'}</span>
             )}
-            {!isEditing && <button onClick={handleEditClick}>Edit</button>}
+            {!isEditing && groupInfo?.isLeader && (
+              <button onClick={handleEditClick}>Edit</button>
+            )}
           </div>
         </div>
         <div className={styles.characterBox}>
@@ -101,7 +102,6 @@ const MyPage = () => {
         💬
       </div>
       {isChatOpen && <Chat onClose={toggleChat} />}
-      <GroupLeaveButton />
     </div>
   );
 }
