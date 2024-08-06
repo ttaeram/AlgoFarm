@@ -9,36 +9,38 @@ function GroupInfo() {
 
   useEffect(() => {
     const loadMembers = async () => {
-      if (groupId !== -1) {
+      if (groupId !== -1 && groupId !== null) {
         await fetchMembers(jwt, groupId);
       }
       setLoading(false);
     };
 
     const fetchGrassData = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/grassData/${groupId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`
+      if (groupId !== -1 && groupId !== null) {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/grassData/${groupId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${jwt}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch grass data');
           }
-        });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch grass data');
+          const data = await response.json();
+          setGrassData(data.data);
+        } catch (error) {
+          console.error('Error fetching grass data:', error);
         }
-
-        const data = await response.json();
-        setGrassData(data.data);
-      } catch (error) {
-        console.error('Error fetching grass data:', error);
       }
     };
 
     loadMembers();
     fetchGrassData();
-  }, [groupId, jwt, fetchMembers]);
+  }, [groupId, jwt]);
 
   if (loading) {
     return <div>Loading...</div>;

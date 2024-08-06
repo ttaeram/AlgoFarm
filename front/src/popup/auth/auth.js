@@ -1,8 +1,24 @@
+<<<<<<< front/src/popup/auth/auth.js
+// 구글로부터 엑세스 토큰 받아오는 함수
+export function signIn() {
+    return new Promise((resolve, reject) => {
+        chrome.identity.getAuthToken({ interactive: true }, (token) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else if (token) {
+                resolve(token);
+            } else {
+                reject(new Error('Failed to get auth token'));
+            }
+        });
+    });
+=======
 import { loadGapiInsideDOM } from 'gapi-script';
 
 // 현재 환경이 Chrome 확장 프로그램인지 확인하는 함수
 export function isChromeExtension() {
   return typeof chrome !== "undefined" && typeof chrome.identity !== "undefined";
+>>>>>>> front/src/popup/auth/auth.js
 }
 
 // 로그인 함수: Chrome 확장 프로그램과 일반 웹 애플리케이션에서 모두 사용 가능

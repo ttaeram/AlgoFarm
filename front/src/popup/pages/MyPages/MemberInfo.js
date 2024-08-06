@@ -7,37 +7,40 @@ const GroupContributions = () => {
   const [contributions, setContributions] = useState([]);
 
   useEffect(() => {
-    if (jwt && groupId) {
-      fetchMembers(jwt, groupId);
-    }
-  }, [jwt, groupId, fetchMembers]);
+    const loadMembers = async () => {
+      if (jwt && groupId && groupId !== -1) {
+        await fetchMembers(jwt, groupId);
+      }
+    };
+    loadMembers();
+  }, [jwt, groupId]);
 
   useEffect(() => {
     const fetchContributions = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/contributions/${groupId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${jwt}`
+      if (groupId && groupId !== -1) {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/contributions/${groupId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${jwt}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch contributions');
           }
-        });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch contributions');
+          const data = await response.json();
+          if (data.status === '100 CONTINUE') {
+            setContributions(data.data);
+          }
+        } catch (error) {
+          console.error('Error fetching contributions:', error);
         }
-
-        const data = await response.json();
-        if (data.status === '100 CONTINUE') {
-          setContributions(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching contributions:', error);
       }
     };
 
-    if (groupId) {
-      fetchContributions();
-    }
+    fetchContributions();
   }, [groupId, jwt]);
 
   const combinedData = members.map(member => {
