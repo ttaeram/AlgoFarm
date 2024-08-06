@@ -1,5 +1,6 @@
 import { useAuth } from "../../context/context";
 import LogoutButton from "../../components/LogoutButton";
+import GroupLeaveButton from '../../components/GroupLeaveButton';
 
 function Settings() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ function Settings() {
         <p>Loading user information...</p>
       )}
       <LogoutButton />
+      <GroupLeaveButton />
     </div>
   );
 }
