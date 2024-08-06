@@ -62,7 +62,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     getDataFromIndexedDB().then(token => {
       sendResponse({ token: token });
     }).catch(error => {
-      console.error('Error fetching data from IndexedDB:', error);
       sendResponse({ token: null });
     });
     // 비동기 응답을 보내기 위해 true를 반환합니다.

@@ -5,6 +5,7 @@ import CreateGroup from './pages/CreateGroup';
 import JoinGroup from './pages/JoinGroup';
 import MyPage from './pages/MyPage'
 import { AuthProvider } from './context/context';
+import Toggle from './components/Toggle';
 
 function App() {
   return (
