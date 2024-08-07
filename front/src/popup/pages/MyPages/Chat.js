@@ -2,14 +2,30 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as StompJs from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useAuth } from '../../context/context';
-import * as styles from './Chat.module.css';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  TextField,
+  Button,
+  List,
+  ListItem,
+  Card,
+  CardContent,
+  Typography,
+  Box
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 function ChatPopup({ onClose }) {
-  const { jwt, groupId, user } = useAuth(); // user 추가
+  const { jwt, groupId, user, groupInfo } = useAuth();
   const [chatMessages, setChatMessages] = useState([]);
-  const [previousChatMessages, setPreviousChatMessages] = useState([]); // New state for previous chat messages
+  const [previousChatMessages, setPreviousChatMessages] = useState([]);
   const [message, setMessage] = useState("");
   const client = useRef(null);
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
     fetchChatHistory();
@@ -17,6 +33,10 @@ function ChatPopup({ onClose }) {
 
     return () => disconnect();
   }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages, previousChatMessages]);
 
   const fetchChatHistory = async () => {
     try {
@@ -27,11 +47,10 @@ function ChatPopup({ onClose }) {
         },
       });
       const data = await response.json();
-      // 데이터가 배열이 아니라면, 배열로 변환하거나 올바른 데이터를 추출
       if (data && Array.isArray(data.data)) {
-        setPreviousChatMessages(data.data); // Store previous chat messages
+        setPreviousChatMessages(data.data);
       } else {
-        setPreviousChatMessages([]); // Default to an empty array
+        setPreviousChatMessages([]);
       }
     } catch (error) {
       console.error("Failed to fetch chat history", error);
@@ -74,10 +93,8 @@ function ChatPopup({ onClose }) {
         const message = JSON.parse(body);
         setChatMessages((_chatMessages) => [..._chatMessages, message]);
       } catch (error) {
-        // JSON 형식이 아닌 경우 일반 텍스트로 처리
         console.error('Failed to parse message as JSON:', error);
-        console.log('바디바디: ', body)
-        setChatMessages((_chatMessages) => [..._chatMessages, { content: body.content, nickname: body.nickname }]);
+        setChatMessages((_chatMessages) => [..._chatMessages, { content: body.content, nickname: body.nickname, createAt: body.createAt }]);
       }
     });
   };
@@ -90,24 +107,23 @@ function ChatPopup({ onClose }) {
     const newMessage = {
       roomSeq: groupId,
       content: message,
-      nickname: user.name
-    };
-
-    const serverLogMessage = {
-      userId: user.userId, // Assuming user object has userId
-      groupId,
-      content: message,
-      nickname: user.name, // Assuming user object has nickname
+      nickname: user.name,
       createAt: new Date().toISOString()
     };
 
-    // Send the message via WebSocket
+    const serverLogMessage = {
+      userId: user.userId,
+      groupId,
+      content: message,
+      nickname: user.name,
+      createAt: new Date().toISOString()
+    };
+
     client.current.publish({
       destination: "/chat",
       body: JSON.stringify(newMessage),
     });
 
-    // 서버에 메시지를 기록할 때, WebSocket을 통해 다시 수신할 수 있으므로 상태를 업데이트하지 않습니다.
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/chat/${groupId}/send`, {
         method: 'POST',
@@ -125,42 +141,104 @@ function ChatPopup({ onClose }) {
       console.error('Error logging message to server:', error);
     }
 
-    // 사용자가 직접 보낸 메시지를 WebSocket을 통해 수신할 때 중복되지 않도록 상태를 업데이트하지 않습니다.
     setMessage("");
   };
 
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const utcDate = new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
+    const koreaDate = new Date(utcDate.getTime() + (9 * 60 * 60000) * 2); // 대한민국 시간 (UTC+9)
+    return `${koreaDate.toLocaleDateString()} ${koreaDate.toLocaleTimeString()}`;
+  };
+
   return (
-    <div className={styles.popup}>
-      <div className={styles.popupContent}>
-        <span className={styles.closeButton} onClick={onClose}>&times;</span>
-        <h2>그룹명</h2>
-        <div className={styles.chatContent}>
-          <ul>
-            {previousChatMessages.map((_chatMessage, index) => (
-              <li key={index}>
-                {_chatMessage.nickname ? `${_chatMessage.nickname}: ` : ''}{_chatMessage.content}
-              </li>
-            ))}
-            {chatMessages.map((_chatMessage, index) => (
-              <li key={index}>
-                {_chatMessage.nickname ? `${_chatMessage.nickname}: ` : ''}{_chatMessage.content}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className={styles.inputContainer}>
-          <input
-            type="text"
-            className={styles.chatInput}
+    <Dialog open onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        {groupInfo.name}
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers sx={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+        <List>
+          {previousChatMessages.map((_chatMessage, index) => (
+            <ListItem 
+              key={index} 
+              disableGutters 
+              sx={{ 
+                display: 'flex', 
+                justifyContent: _chatMessage.nickname === user.name ? 'flex-end' : 'flex-start' 
+              }}>
+              <Card sx={{
+                maxWidth: '80%',
+                mb: 1,
+                backgroundColor: _chatMessage.nickname === user.name ? 'lightblue' : 'white'
+              }}>
+                <CardContent>
+                  <Typography variant="body2" color="textSecondary">
+                    {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
+                  </Typography>
+                  <Typography variant="body1">
+                    {_chatMessage.content}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </ListItem>
+          ))}
+          {chatMessages.map((_chatMessage, index) => (
+            <ListItem 
+              key={index} 
+              disableGutters 
+              sx={{ 
+                display: 'flex', 
+                justifyContent: _chatMessage.nickname === user.name ? 'flex-end' : 'flex-start' 
+              }}>
+              <Card sx={{
+                maxWidth: '80%',
+                mb: 1,
+                backgroundColor: _chatMessage.nickname === user.name ? 'lightblue' : 'white'
+              }}>
+                <CardContent>
+                  <Typography variant="body2" color="textSecondary">
+                    {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
+                  </Typography>
+                  <Typography variant="body1">
+                    {_chatMessage.content}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </ListItem>
+          ))}
+          <div ref={chatEndRef} />
+        </List>
+      </DialogContent>
+      <DialogActions>
+        <Box sx={{ display: 'flex', width: '100%' }}>
+          <TextField
+            fullWidth
+            variant="outlined"
             placeholder="메시지를 입력하세요..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.which === 13 && publish(message)}
           />
-          <button className={styles.sendButton} onClick={() => publish(message)}>전송</button>
-        </div>
-      </div>
-    </div>
+          <Button variant="contained" color="primary" onClick={() => publish(message)}>전송</Button>
+        </Box>
+      </DialogActions>
+    </Dialog>
   );
 }
 
