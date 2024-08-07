@@ -55,8 +55,8 @@ const SelectGroup = () => {
 
       <Paper
         sx={{
-          width: 400,
-          height: 250,
+          width: 340,
+          height: 210,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -76,6 +76,7 @@ const SelectGroup = () => {
           variant="contained"
           color="primary"
           onClick={() => navigate('/create-group')}
+          sx={{width:'340px'}}
         >
           그룹 생성
         </Button>
@@ -83,6 +84,7 @@ const SelectGroup = () => {
           variant="outlined"
           color="primary"
           onClick={() => navigate('/join-group')}
+          sx={{width:'340px'}}
         >
           그룹 참가
         </Button>
