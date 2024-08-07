@@ -10,12 +10,11 @@
 .characterBox {
   width: 100%;
   height: 200px; /* 캐릭터가 들어갈 공간의 높이 */
-  background-color: black; /* 캐릭터 박스의 배경색을 검은색으로 설정 */
+  background-color: rgb(55, 211, 235); /* 캐릭터 박스의 배경색을 검은색으로 설정 */
   display: flex; /* Flexbox 사용 */
   align-items: center; /* 세로 가운데 정렬 */
   justify-content: center; /* 가로 가운데 정렬 */
   box-sizing: border-box; /* 패딩을 포함한 전체 크기 조절 */
-  margin-bottom: 10px; /* 하단의 간격 */
 }
 
 .character {
