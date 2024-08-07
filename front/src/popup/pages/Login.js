@@ -122,7 +122,7 @@ const Popup = () => {
               AlgoFarm
             </Typography>
             <div className={styles.algoFarm}>
-              <img src='/assets/models.Cat_Animations.glb' alt='algoFarm' />
+              <img src='/images/logo.jpeg' alt='algoFarm' />
             </div>
             <Button color="success" variant="outlined" onClick={handleSignIn} disabled={isLoading} className={styles.oauthButton}>
             <svg className={styles.icon} viewBox="0 0 24 24">

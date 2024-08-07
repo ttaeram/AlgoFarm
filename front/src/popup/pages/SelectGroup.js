@@ -1,29 +1,3 @@
-// import { useNavigate } from 'react-router-dom';
-// import * as styles from './SelectGroup.module.css';
-// import Box from '@mui/material/Box';
-// import Paper from '@mui/material/Paper';
-// import Typography from '@mui/material/Typography';
-// import Button from '@mui/material/Button';
-
-// const SelectGroup = () => {
-//   const navigate = useNavigate();
-
-//   return (
-//     <div className={styles.selectGroup}>
-//       <h1 className={styles.title}>AlgoFarm</h1>
-//       <div className={styles.algoFarm}>
-//         <img src="" alt="algoFarm" />
-//       </div>
-//       <div className={styles.buttonContainer}>
-//         <button className={styles.button} onClick={() => navigate('/create-group')}>그룹 생성</button>
-//         <button className={styles.button} onClick={() => navigate('/join-group')}>그룹 참가</button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default SelectGroup;
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Paper, Typography, Button } from '@mui/material';
@@ -65,7 +39,7 @@ const SelectGroup = () => {
         }}
       >
         <img
-          src=""
+          src="images/logo.jpeg"
           alt="algoFarm"
           style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
         />
