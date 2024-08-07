@@ -2,23 +2,21 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import CharacterOverlay from './CharacterOverlay';
 
-// 현재 URL 확인
-const currentUrl = window.location.href;
-
 // React 컴포넌트를 렌더링하는 함수
 function renderOverlay() {
-    const root = document.createElement('div');
-    root.id = 'chrome-extension-root';
-    root.style.position = 'fixed';
-    root.style.top = '0';
-    root.style.left = '0';
-    root.style.width = '100%';
-    root.style.height = '100%';
-    root.style.zIndex = '9999';
-    root.style.pointerEvents = 'none';
-    document.body.appendChild(root);
+    const rootElement = document.createElement('div');
+    rootElement.id = 'chrome-extension-root';
+    rootElement.style.position = 'fixed';
+    rootElement.style.top = '0';
+    rootElement.style.left = '0';
+    rootElement.style.width = '100%';
+    rootElement.style.height = '100%';
+    rootElement.style.zIndex = '9999';
+    rootElement.style.pointerEvents = 'none';
+    document.body.appendChild(rootElement);
 
-    ReactDOM.render(<CharacterOverlay />, root);
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<CharacterOverlay />);
 }
 
 // 공통 로직 실행
