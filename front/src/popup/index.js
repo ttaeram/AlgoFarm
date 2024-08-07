@@ -16,3 +16,6 @@ root.render(
     <App />
   </ThemeProvider>
 );
+if (module.hot) {
+    module.hot.accept();
+}

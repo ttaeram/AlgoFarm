@@ -6,7 +6,8 @@ import MemberInfo from './MyPages/MemberInfo';
 import MemberManage from './MyPages/MemberManage';
 import Settings from './MyPages/Settings';
 import Chat from './MyPages/Chat';
-import Character from '../components/Character';
+import ToggleEnableButton from '../components/ToggleEnableButton';
+import PopupCharacter from '../components/PopupCharacter';
 import * as styles from "./MyPage.module.css";
 import { Box } from '@mui/material';
 import { SmsOutlined } from '@mui/icons-material';
@@ -22,7 +23,7 @@ const MyPage = () => {
     <Box className={styles.container}>
       <Box className={styles.topSection}>
         <Box className={styles.characterBox}>
-          <Character />
+            <PopupCharacter />
         </Box>
         <Nav />
       </Box>
