@@ -1,75 +1,48 @@
-import React, {useEffect, useState, useCallback} from 'react';
-import {Canvas} from '@react-three/fiber';
-import {OrbitControls} from '@react-three/drei';
+import React from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import ModelViewer from './ModelViewer';
-import useCharacterMovement from './useCharacterMovement';
-import useCharacterDrag from './useCharacterDrag';
+import useCharacter from './useCharacter';
 
-const SIZE = 120;
-
-const CharacterOverlay = (initialVisibility ) => {
-    const [isVisible, setIsVisible] = useState(initialVisibility);
-    const [model, setModel] = useState(null);
-    const [currentCharacter, setCurrentCharacter] = useState('Cat');
+const CharacterOverlay = ({
+                              initialVisibility = true,
+                              size = 120,
+                              onPositionChange,
+                              onAnimationChange,
+                              onCharacterChange,
+                              style,
+                          }) => {
     const {
+        isVisible,
+        model,
+        currentCharacter,
         position,
-        setPosition,
         direction,
         animation,
-        setAnimation,
-        speed,
-        startDragging,
-        stopDragging
-    } = useCharacterMovement(SIZE);
+        isDragging,
+        handleMouseDown,
+        handleMouseMove,
+        handleMouseUp,
+        handleAnimationComplete,
+    } = useCharacter(initialVisibility, size);
 
-    const {isDragging, handleMouseDown, handleMouseMove, handleMouseUp} = useCharacterDrag(
-        SIZE,
-        setPosition,
-        startDragging,
-        stopDragging
-    );
-
-    const handleAnimationComplete = useCallback(() => {
-        if (animation === 'Death') {
-            setTimeout(() => setAnimation('Walk'), 2000);
+    React.useEffect(() => {
+        if (onPositionChange) {
+            onPositionChange(position);
         }
-    }, [animation, setAnimation]);
+    }, [position, onPositionChange]);
 
-    const loadModel = useCallback((character) => {
-        fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => {
-                setModel(arrayBuffer);
-            });
-    }, []);
+    React.useEffect(() => {
+        if (onAnimationChange) {
+            onAnimationChange(animation);
+        }
+    }, [animation, onAnimationChange]);
 
-    useEffect(() => {
-        loadModel(currentCharacter);
-        const messageListener = (request, sender, sendResponse) => {
-            if (request.action === "playAnimation") {
-                setAnimation(request.animation);
-                if (request.animation !== 'Death') {
-                    setTimeout(() => setAnimation('Walk'), 3000);
-                }
-            } else if (request.action === "changeCharacter") {
-                setCurrentCharacter(request.character);
-                loadModel(request.character);
-            } else if (request.action === "toggleVisibility") {
-                setIsVisible(request.isVisible);
-            }
-        };
-
-        chrome.runtime.onMessage.addListener(messageListener);
-
-        return () => {
-            chrome.runtime.onMessage.removeListener(messageListener);
-        };
-    }, [setAnimation, loadModel]);
-
-    const handleMouseDownWrapper = useCallback((e) => {
-        e.stopPropagation();
-        handleMouseDown(e);
-    }, [handleMouseDown]);
+    React.useEffect(() => {
+        if (onCharacterChange) {
+            onCharacterChange(currentCharacter);
+        }
+    }, [currentCharacter, onCharacterChange]);
 
     if (!isVisible) return null;
 
@@ -79,25 +52,26 @@ const CharacterOverlay = (initialVisibility ) => {
                 position: 'fixed',
                 top: position.y,
                 left: position.x,
-                width: `${SIZE}px`,
-                height: `${SIZE}px`,
+                width: `${size}px`,
+                height: `${size}px`,
                 cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
                 pointerEvents: 'auto',
+                ...style,
             }}
-            onMouseDown={handleMouseDownWrapper}
+            onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
         >
             <Canvas>
-                <OrbitControls enabled={false}/>
-                <ambientLight intensity={2}/>
-                <directionalLight color={0xffffff} intensity={3} position={[5, 5, 5]}/>
+                <OrbitControls enabled={false} />
+                <ambientLight intensity={2} />
+                <directionalLight color={0xffffff} intensity={3} position={[5, 5, 5]} />
                 {model && (
                     <ModelViewer
                         modelData={model}
-                        cameraDistanceFactor={0.7} // 카메라와 모델의 거리 줄어들면 크게 보임
+                        cameraDistanceFactor={0.7}
                         cameraHorizontalAngle={30}
                         scale={3}
                         animation={animation}
