@@ -2,6 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+// 현재 환경이 Chrome 확장 프로그램인지 확인하는 함수
+const isChromeExtension = () => {
+  return typeof chrome !== "undefined" && typeof chrome.storage !== "undefined";
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [jwt, setJwt] = useState(localStorage.getItem('jwt'));
@@ -23,9 +28,20 @@ export const AuthProvider = ({ children }) => {
     if (jwt) {
       localStorage.setItem('jwt', jwt);
       handleSave(jwt);
+    
+      if(isChromeExtension()) {
+        setIsLogined(true); // 로그인 상태를 true로 설정
+      chrome.storage.local.set({ isLogined: true });
+      } // 로그인 상태를 chrome.storage.local에 저장
+      
     } else {
       localStorage.removeItem('jwt');
       handleDelete('jwt')
+       
+      if(isChromeExtension()) {
+        setIsLogined(false); // 로그아웃 상태를 false로 설정
+      chrome.storage.local.set({ isLogined: false });
+      } // 로그아웃 상태를 chrome.storage.local에 저장
     }
   }, [jwt]);
 
@@ -57,6 +73,9 @@ export const AuthProvider = ({ children }) => {
   
       putRequest.onsuccess = () => {
         console.log('Token saved to IndexedDB');
+        if(isChromeExtension()) {
+        chrome.storage.local.set({ isLogined: true });
+        }
       };
   
       putRequest.onerror = (event) => {
@@ -89,10 +108,15 @@ export const AuthProvider = ({ children }) => {
   
       deleteRequest.onsuccess = () => {
         console.log('Token deleted from IndexedDB');
+        // 로그아웃 상태를 저장
+        if(isChromeExtension()) {
+          chrome.storage.local.set({ isLogined: false });
+        }
       };
   
       deleteRequest.onerror = (event) => {
         console.error('Error deleting token from IndexedDB', event);
+        
       };
   
       transaction.oncomplete = () => {
