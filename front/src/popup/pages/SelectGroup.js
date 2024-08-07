@@ -24,7 +24,7 @@ const SelectGroup = () => {
         variant="h4"
         sx={{ mb: 2, fontWeight: 'bold', color: '#4caf50' }}
       >
-        AlgoFarm
+        알고팜
       </Typography>
 
       <Paper
