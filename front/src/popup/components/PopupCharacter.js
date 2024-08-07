@@ -35,7 +35,7 @@ const PopupCharacter = () => {
     const handleControlsUpdate = () => {
         if (controlsRef.current) {
             // 최소 줌 거리 (더 멀리 볼 수 있음)
-            controlsRef.current.minDistance = 2;
+            controlsRef.current.minDistance = 1;
             // 최대 줌 거리 (더 가까이 볼 수 있음)
             controlsRef.current.maxDistance = 10;
             // 줌 속도 조절 (기본값은 1, 작을수록 줌 속도가 느려짐)
@@ -63,7 +63,7 @@ const PopupCharacter = () => {
                 {model && (
                     <ModelViewer
                         modelData={model}
-                        cameraDistanceFactor={1.5}
+                        cameraDistanceFactor={0.5}
                         cameraHorizontalAngle={0}
                         scale={3}
                         animation="Idle_A"

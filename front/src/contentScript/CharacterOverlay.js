@@ -1,48 +1,97 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from './ModelViewer';
-import useCharacter from './useCharacter';
+import useCharacterMovement from './useCharacterMovement';
+import useCharacterDrag from './useCharacterDrag';
 
-const CharacterOverlay = ({
-                              initialVisibility = true,
-                              size = 120,
-                              onPositionChange,
-                              onAnimationChange,
-                              onCharacterChange,
-                              style,
-                          }) => {
+const SIZE = 120;
+
+const CharacterOverlay = ({ initialVisibility }) => {
+    const [isVisible, setIsVisible] = useState(initialVisibility);
+    const [model, setModel] = useState(null);
+    const [currentCharacter, setCurrentCharacter] = useState('Cat');
+    const canvasRef = useRef(null);
+    const modelLoadedRef = useRef(false);
+
     const {
-        isVisible,
-        model,
-        currentCharacter,
         position,
+        setPosition,
         direction,
         animation,
-        isDragging,
-        handleMouseDown,
-        handleMouseMove,
-        handleMouseUp,
-        handleAnimationComplete,
-    } = useCharacter(initialVisibility, size);
+        setAnimation,
+        speed,
+        startDragging,
+        stopDragging
+    } = useCharacterMovement(SIZE);
 
-    React.useEffect(() => {
-        if (onPositionChange) {
-            onPositionChange(position);
-        }
-    }, [position, onPositionChange]);
+    const {isDragging, handleMouseDown, handleMouseMove, handleMouseUp} = useCharacterDrag(
+        SIZE,
+        setPosition,
+        startDragging,
+        stopDragging
+    );
 
-    React.useEffect(() => {
-        if (onAnimationChange) {
-            onAnimationChange(animation);
+    const handleAnimationComplete = useCallback(() => {
+        if (animation === 'Death') {
+            setTimeout(() => setAnimation('Walk'), 2000);
         }
-    }, [animation, onAnimationChange]);
+    }, [animation, setAnimation]);
 
-    React.useEffect(() => {
-        if (onCharacterChange) {
-            onCharacterChange(currentCharacter);
-        }
-    }, [currentCharacter, onCharacterChange]);
+    const loadModel = useCallback((character) => {
+        if (modelLoadedRef.current) return; // 이미 모델이 로드되었다면 중복 로드 방지
+        fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+                setModel(arrayBuffer);
+                modelLoadedRef.current = true;
+            });
+    }, []);
+
+    useEffect(() => {
+        loadModel(currentCharacter);
+
+        const messageListener = (request, sender, sendResponse) => {
+            if (request.action === "playAnimation") {
+                setAnimation(request.animation);
+                if (request.animation !== 'Death') {
+                    setTimeout(() => setAnimation('Walk'), 3000);
+                }
+            } else if (request.action === "changeCharacter") {
+                setCurrentCharacter(request.character);
+                modelLoadedRef.current = false; // 캐릭터 변경 시 모델 재로드 허용
+                loadModel(request.character);
+            } else if (request.action === "toggleVisibility") {
+                setIsVisible(request.isVisible);
+            }
+        };
+
+        chrome.runtime.onMessage.addListener(messageListener);
+
+        return () => {
+            chrome.runtime.onMessage.removeListener(messageListener);
+        };
+    }, [setAnimation, loadModel]);
+
+    const handleMouseDownWrapper = useCallback((e) => {
+        e.stopPropagation();
+        handleMouseDown(e);
+    }, [handleMouseDown]);
+
+    const memoizedModelViewer = useMemo(() => (
+        model && (
+            <ModelViewer
+                modelData={model}
+                cameraDistanceFactor={0.5}
+                cameraHorizontalAngle={0}
+                scale={3}
+                animation={animation}
+                rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
+                pauseAnimation={false}
+                onAnimationComplete={handleAnimationComplete}
+            />
+        )
+    ), [model, animation, direction, handleAnimationComplete]);
 
     if (!isVisible) return null;
 
@@ -52,34 +101,22 @@ const CharacterOverlay = ({
                 position: 'fixed',
                 top: position.y,
                 left: position.x,
-                width: `${size}px`,
-                height: `${size}px`,
+                width: `${SIZE}px`,
+                height: `${SIZE}px`,
                 cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
                 pointerEvents: 'auto',
-                ...style,
             }}
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleMouseDownWrapper}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
         >
-            <Canvas>
+            <Canvas ref={canvasRef}>
                 <OrbitControls enabled={false} />
                 <ambientLight intensity={2} />
                 <directionalLight color={0xffffff} intensity={3} position={[5, 5, 5]} />
-                {model && (
-                    <ModelViewer
-                        modelData={model}
-                        cameraDistanceFactor={0.7}
-                        cameraHorizontalAngle={30}
-                        scale={3}
-                        animation={animation}
-                        rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
-                        pauseAnimation={false}
-                        onAnimationComplete={handleAnimationComplete}
-                    />
-                )}
+                {memoizedModelViewer}
             </Canvas>
         </div>
     );

@@ -8,3 +8,6 @@ root.render(
   <App />
 
 );
+if (module.hot) {
+    module.hot.accept();
+}
