@@ -5,6 +5,8 @@ import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.solution.entity.AlgorithmSolution;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "users") // "user"는 예약어일 수 있으므로 "users"로 변경
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,7 +28,7 @@ public class User {
     private Long id;
 
     @Column(name = "oauth_id")
-    private String oAuthId;  // 이 필드가 있는지 확인하세요
+    private String oAuthId;
 
     @Column(nullable = false)
     private String name;
@@ -35,20 +38,17 @@ public class User {
     @Column(name = "role")
     private Set<String> roles = new HashSet<>();
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
-    }
     @Column(nullable = false)
     private boolean accountNonExpired = true;
 
@@ -60,24 +60,19 @@ public class User {
 
     @Column(nullable = false)
     private boolean enabled = true;
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = Instant.now();
-    }
+
     @Column(name = "is_email_verified")
     private Boolean isEmailVerified;
 
     @Column(name = "provider")
     private String provider;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "user")
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AlgorithmSolution> solutions = new ArrayList<>();
-
-
 }

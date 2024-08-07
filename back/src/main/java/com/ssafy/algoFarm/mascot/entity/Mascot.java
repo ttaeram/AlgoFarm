@@ -51,12 +51,15 @@ public class Mascot {
     private Integer accuracy = 100;
 
     @OneToOne(mappedBy = "mascot")
+    @JoinColumn(name = "group_id")
     private Group group;
 
     public void setGroup(Group group) {
-        this.group = group;
-        if (group != null && group.getMascot() != this) {
-            group.setMascot(this);
+        if (this.group != group) {
+            this.group = group;
+            if (group != null && group.getMascot() != this) {
+                group.setMascot(this);
+            }
         }
     }
 }
