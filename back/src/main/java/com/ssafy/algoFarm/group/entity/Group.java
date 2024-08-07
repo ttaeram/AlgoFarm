@@ -59,9 +59,11 @@ public class Group {
     private Map<AlgorithmType, Integer> algorithmSolvedCount = new EnumMap<>(AlgorithmType.class);
 
     public void setMascot(Mascot mascot) {
-        this.mascot = mascot;
-        if (mascot != null && mascot.getGroup() != this) {
-            mascot.setGroup(this);
+        if (this.mascot != mascot) {
+            this.mascot = mascot;
+            if (mascot != null && mascot.getGroup() != this) {
+                mascot.setGroup(this);
+            }
         }
     }
 }
