@@ -1,129 +1,111 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 성공</title>
+    <title>Login Success - AlgoFarm</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
         h1 {
             color: #4CAF50;
         }
         #tokenDisplay {
-            background-color: #f1f1f1;
+            background-color: #f9f9f9;
             border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 20px;
+            padding: 1rem;
+            margin: 1rem 0;
             word-break: break-all;
-            user-select: all;
         }
-        button {
+        .login-button {
+            display: inline-block;
             background-color: #4CAF50;
-            border: none;
             color: white;
             padding: 10px 20px;
-            text-align: center;
             text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
+            border-radius: 5px;
+            margin-top: 1rem;
         }
         #toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 2px;
-            padding: 16px;
             position: fixed;
-            z-index: 1;
+            bottom: 20px;
             left: 50%;
-            bottom: 30px;
-            font-size: 17px;
-        }
-        #toast.show {
-            visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
         }
     </style>
 </head>
 <body>
-<h1>로그인 성공!</h1>
-
-<p>아래의 토큰이 클립보드에 복사되었습니다.</p>
-<p>자동으로 swagger 로 이동합니다. </p>
-
-<div id="tokenDisplay"></div>
-
-<button onclick="location.href='/swagger-ui/index.html'">수동으로 Swagger UI 이동</button>
+<div class="container">
+    <h1>로그인 성공!</h1>
+    <p>JWT 토큰 생성 중...</p>
+    <div id="tokenDisplay"></div>
+    <p>토큰이 생성되면 5초 후 자동으로 Swagger UI로 이동합니다.</p>
+    <a href="/swagger-ui.html" class="login-button">수동으로 Swagger UI 이동</a>
+</div>
 
 <div id="toast">토큰이 클립보드에 복사되었습니다!</div>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var token = /*[[${token}]]*/ 'default';
-    document.getElementById('tokenDisplay').textContent = token;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const googleToken = urlParams.get('token');
 
-    function copyTokenToClipboard() {
-        if (document.hasFocus()) {
-            navigator.clipboard.writeText(token).then(function() {
-                // 클립보드에 복사 성공
-                showToast();
-                setTimeout(function() {
-                    window.location.href = '/swagger-ui/index.html';
-                }, 500); // 토스트 알림이 사라진 후에 이동
-            }).catch(function(err) {
-                console.error('토큰을 클립보드에 복사하는 데 실패했습니다.', err);
-            });
+        if (googleToken) {
+            // Google 토큰을 서버로 전송하여 JWT로 교환
+            fetch('/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: googleToken }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    const jwtToken = data.jwt;
+                    document.getElementById('tokenDisplay').textContent = jwtToken;
+                    localStorage.setItem('jwtToken', jwtToken);
+
+                    // 클립보드에 토큰 복사
+                    navigator.clipboard.writeText(jwtToken).then(() => {
+                        document.getElementById('toast').style.display = 'block';
+                        setTimeout(() => {
+                            document.getElementById('toast').style.display = 'none';
+                        }, 1000);
+                    });
+
+                    // 5초 후 Swagger UI로 리다이렉트
+                    setTimeout(() => {
+                        window.location.href = '/swagger-ui.html';
+                    }, 5000);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('tokenDisplay').textContent = 'JWT 토큰 생성 중 오류가 발생했습니다.';
+                });
         } else {
-            // 포커스가 없는 경우 일정 시간 후 다시 시도
-            setTimeout(copyTokenToClipboard, 100);
+            document.getElementById('tokenDisplay').textContent = 'Google 토큰을 받아오지 못했습니다.';
         }
-    }
-
-    function showToast() {
-        var toast = document.getElementById("toast");
-        toast.className = "show";
-        setTimeout(function() {
-            toast.className = toast.className.replace("show", "");
-        }, 3000);
-    }
-
-    // 페이지 로드 시 토큰을 클립보드에 복사하고 이동
-    document.addEventListener('DOMContentLoaded', (event) => {
-        copyTokenToClipboard();
     });
-    /*]]>*/
 </script>
 </body>
 </html>

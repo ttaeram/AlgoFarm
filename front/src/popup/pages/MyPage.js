@@ -8,6 +8,7 @@ import MemberManage from './MyPages/MemberManage';
 import Settings from './MyPages/Settings';
 import Chat from './MyPages/Chat';
 import ToggleEnableButton from '../components/ToggleEnableButton';
+import Character from '../components/Character';
 import * as styles from "./MyPage.module.css";
 
 const MyPage = () => {
@@ -82,7 +83,7 @@ const MyPage = () => {
           <ToggleEnableButton />
         </div>
         <div className={styles.characterBox}>
-          <div className={styles.character}>캐릭터 150px*150px</div>
+          <Character />
         </div>
         <Nav />
       </div>
