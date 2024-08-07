@@ -1,12 +1,15 @@
+/* GroupLeaveButton.module.css */
 .groupLeaveButton {
-  background-color: #ff4d4d;
+  background-color: #f44336; /* Red */
   color: white;
+  padding: 8px 16px;
   border: none;
-  padding: 5px 10px; /* 패딩 조정 */
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 5px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 }
 
 .groupLeaveButton:hover {
-  background-color: #ff3333;
+  background-color: #d32f2f; /* Darker Red */
 }

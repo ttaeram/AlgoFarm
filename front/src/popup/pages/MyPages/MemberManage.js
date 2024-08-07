@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/context";
+import { Box, Button, Typography, List, ListItem, ListItemText, Snackbar, IconButton } from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 
 function MemberManage() {
   const { groupId, groupInfo, jwt, members, fetchMembers: originalFetchMembers } = useAuth();
@@ -14,7 +16,7 @@ function MemberManage() {
       }
     };
     loadMembers();
-  }, [groupId, jwt]); // 여기서 fetchMembers를 의존성 배열에서 제거
+  }, [groupId, jwt]);
 
   const handleGenerateInviteCode = async () => {
     if (!groupId) {
@@ -40,7 +42,7 @@ function MemberManage() {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-      }, 3000);  // 3초 후에 성공 메시지 숨기기
+      }, 3000);
     } catch (error) {
       console.error('Error generating invite code:', error);
     }
@@ -61,34 +63,64 @@ function MemberManage() {
       }
 
       // 멤버 리스트를 새로고침
-      await originalFetchMembers(jwt, groupId); // fetchMembers를 바로 호출
+      await originalFetchMembers(jwt, groupId);
     } catch (error) {
       console.error('Error kicking member:', error);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setShowSuccess(false);
+  };
+
   return (
-    <div>
-      <h1>MemberManage</h1>
+    <Box p={3}>
       {groupInfo?.isLeader && (
-        <div>
-          <button onClick={handleGenerateInviteCode}>Generate Invite Code</button>
-          {inviteCode && <p>Invite Code: {inviteCode}</p>}
-          {showSuccess && <p>Invite code generated successfully!</p>}
-        </div>
+        <Box mb={2}>
+          <Button variant="contained" color="primary" onClick={handleGenerateInviteCode}>
+            Generate Invite Code
+          </Button>
+          {inviteCode && (
+            <Typography variant="body1" mt={2}>
+              Invite Code: {inviteCode}
+            </Typography>
+          )}
+        </Box>
       )}
-      <h2>Group Members</h2>
-      <ul>
+      <Typography variant="h4" gutterBottom>
+        스터디 구성원
+      </Typography>
+      <List>
         {members.map(member => (
-          <li key={member.memberId}>
-            {member.nickname} {member.isLeader && <strong>(스터디장)</strong>}
+          <ListItem key={member.memberId} divider>
+            <ListItemText
+              primary={`${member.nickname} ${member.isLeader ? '(스터디장)' : ''}`}
+            />
             {groupInfo?.isLeader && !member.isLeader && (
-              <button onClick={() => handleKickMember(member.userId)}>Kick</button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => handleKickMember(member.userId)}
+              >
+                Kick
+              </Button>
             )}
-          </li>
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message="Invite code generated successfully!"
+        action={
+          <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+    </Box>
   );
 }
 
