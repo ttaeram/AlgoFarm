@@ -69,7 +69,8 @@ function startLoader() {
           //Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
           chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
             if (response && response.token) {
-              console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
+              console.log("토큰을 가져왔습니다.")
+              // console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
               // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
               fetch("https://i11a302.p.ssafy.io/api/commits", {
               // fetch("http:localhost:8080/api/commits", {

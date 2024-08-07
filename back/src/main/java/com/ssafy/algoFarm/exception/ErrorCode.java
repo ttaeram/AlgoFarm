@@ -8,16 +8,15 @@ public enum ErrorCode {
 
     // Mascot
     MASCOT_NOT_FOUND(HttpStatus.BAD_REQUEST, "M001", "해당 마스코트에 대한 마스코트 정보가 없습니다."),
-
     // Group
     GROUP_NOT_FOUND(HttpStatus.BAD_REQUEST, "G001", "해당 코드의 그룹이 없습니다."),
     MEMBER_NOT_EXIST(HttpStatus.FORBIDDEN, "G002", "해당 그룹에 멤버가 존재하지 않습니다."),
-
     // User
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "U001", "해당하는 ID의 유저가 없습니다."),
-
     // Solution
-    SOLUTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "S001", "유저ID와 문제ID에 해당하는 문제 정보가 없습니다.");
+    SOLUTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "S001", "유저ID와 문제ID에 해당하는 문제 정보가 없습니다."),
+    // Internal Server Error
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "내부 서버 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;

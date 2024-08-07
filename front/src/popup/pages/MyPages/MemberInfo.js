@@ -44,9 +44,9 @@ const GroupContributions = () => {
   }, [groupId, jwt]);
 
   const combinedData = members.map(member => {
-    const contribution = contributions.find(c => c.nickname === member.name);
+    const contribution = contributions.find(c => c.nickname === member.nickname);
     return {
-      nickname: member.name,
+      nickname: member.nickname,
       individualContribution: contribution ? contribution.individualContribution : 0
     };
   });

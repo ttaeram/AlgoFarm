@@ -1,23 +1,14 @@
 package com.ssafy.algoFarm.algo.auth.controller;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DebugController {
 
-    @GetMapping("/debug/server-info")
-    @SecurityRequirement(name = "bearerAuth")
-    public String getServerInfo(HttpServletRequest request) {
-        StringBuilder info = new StringBuilder();
-        info.append("Server Name: ").append(request.getServerName()).append("\n");
-        info.append("Server Port: ").append(request.getServerPort()).append("\n");
-        info.append("Scheme: ").append(request.getScheme()).append("\n");
-        info.append("X-Forwarded-Proto: ").append(request.getHeader("X-Forwarded-Proto")).append("\n");
-        info.append("X-Forwarded-Host: ").append(request.getHeader("X-Forwarded-Host")).append("\n");
-        info.append("X-Forwarded-Port: ").append(request.getHeader("X-Forwarded-Port")).append("\n");
-        return info.toString();
+    @GetMapping("/debug-sentry")
+    public String triggerException() {
+        // 의도적으로 예외 발생
+        throw new RuntimeException("테스트용 예외입니다!");
     }
 }

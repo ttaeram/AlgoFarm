@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/context';
 import BackButton from '../components/BackButton';  // BackButton 컴포넌트 import
 import { useNavigate } from 'react-router-dom';
+import CharacterChoice from '../components/CharacterChoice';
 import * as styles from "./CreateGroup.module.css";
 
 function CreateGroup() {
@@ -76,6 +77,7 @@ function CreateGroup() {
           {showWarning && <div className={styles.warning}>그룹 이름을 입력하세요.</div>}
         </div>
       </form>
+      <CharaterChoice />
     </div>
   );
 }

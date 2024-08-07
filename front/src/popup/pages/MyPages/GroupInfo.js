@@ -53,15 +53,6 @@ function GroupInfo() {
   return (
     <div>
       <h1>GroupInfo</h1>
-      <h2>Group Members</h2>
-      <ul>
-        {members.map(member => (
-          <li key={member.memberId}>
-            {member.nickname} {member.isLeader && <strong>(스터디장)</strong>}
-            {member.userId}
-          </li>
-        ))}
-      </ul>
       <h2>Activity Streak</h2>
       <GrassGraph data={grassData} />
     </div>
