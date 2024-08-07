@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { signIn, getServerUserInfo, exchangeTokenForJwt } from '../auth/auth';
 import { useAuth } from '../context/context';
 import * as styles from "./Login.module.css";
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+
+
 
 const Popup = () => {
   const { user, setIsLogined, setUser, setJwt, isLogined, jwt, setGroupId, setGroupInfo, fetchGroupInfo } = useAuth();
@@ -96,16 +102,29 @@ const Popup = () => {
   };
 
   return (
-    <div>
-      {isLogined && user ? (
-        <div className={styles.loading}>로딩 중...</div>
-      ) : (
-        <div className={styles.login}>
-          <h1 className={styles.title}>알고팜</h1>
-          <div className={styles.algoFarm}>
-            <img src='' alt='algoFarm' />
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#f0f0f0',
+      }}
+    >
+      <Paper elevation={3} sx={{ padding: 4, maxWidth: 400, width: '100%', textAlign: 'center' }}>
+        {isLogined && user ? (
+          <div className={styles.loading}>
+            <Typography variant="h6">로딩 중...</Typography>
           </div>
-          <button onClick={handleSignIn} disabled={isLoading} className={styles.oauthButton}>
+        ) : (
+          <div className={styles.login}>
+            <Typography variant="h4" component="h1" gutterBottom className={styles.title} sx={{color :'#4caf50'}}>
+              AlgoFarm
+            </Typography>
+            <div className={styles.algoFarm}>
+              <img src='/assets/models.Cat_Animations.glb' alt='algoFarm' />
+            </div>
+            <Button color="success" variant="outlined" onClick={handleSignIn} disabled={isLoading} className={styles.oauthButton}>
             <svg className={styles.icon} viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
@@ -114,10 +133,11 @@ const Popup = () => {
                 <path d="M1 1h22v22H1z" fill="none"></path>
             </svg>
             {isLoading ? 'Signing In...' : 'Sign In with Google'}
-          </button>
-        </div>
-      )}
-    </div>
+           </Button>
+          </div>
+        )}
+      </Paper>
+    </Box>
   );
 };
 
