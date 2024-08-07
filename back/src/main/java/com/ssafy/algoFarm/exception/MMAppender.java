@@ -3,6 +3,7 @@ package com.ssafy.algoFarm.exception;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.gson.Gson;
+import lombok.NoArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -15,23 +16,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@NoArgsConstructor
 public class MMAppender extends AppenderBase<ILoggingEvent> {
-
-    private final Environment env;
     private static final String WEBHOOK_URL = "https://meeting.ssafy.com/hooks/wm77yto8kfd98mudd9z6pm51ca";
 
-    public MMAppender(Environment env) {
-        this.env = env;
-    }
 
     @Override
     protected void append(ILoggingEvent event) {
-        if (isLocalProfileActive()) {
-            // 로컬 프로파일에서는 메시지를 전송하지 않음
-            return;
-        }
-
         if (event.getLevel().isGreaterOrEqual(ch.qos.logback.classic.Level.ERROR)) {
             String message = formatLogMessage(event);
             try {
@@ -40,16 +31,6 @@ public class MMAppender extends AppenderBase<ILoggingEvent> {
                 e.printStackTrace();
             }
         }
-    }
-
-    private boolean isLocalProfileActive() {
-        String[] activeProfiles = env.getActiveProfiles();
-        for (String profile : activeProfiles) {
-            if ("local".equals(profile)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private String formatLogMessage(ILoggingEvent event) {
