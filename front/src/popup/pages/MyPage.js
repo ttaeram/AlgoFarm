@@ -12,7 +12,7 @@ import Character from '../components/Character';
 import * as styles from "./MyPage.module.css";
 
 const MyPage = () => {
-  const { groupInfo, jwt, setGroupInfo } = useAuth();
+  const { groupInfo, jwt, setGroupInfo, groupId } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
@@ -43,7 +43,7 @@ const MyPage = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
         },
-        body: JSON.stringify({ groupId: groupInfo.data.groupId, newGroupName: newGroupName })
+        body: JSON.stringify({ groupId: groupId, newGroupName: newGroupName })
       });
 
       if (!response.ok) {
