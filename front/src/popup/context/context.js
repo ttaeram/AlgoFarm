@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         const db = event.target.result;
         const transaction = db.transaction('MyStore', 'readwrite');
         const store = transaction.objectStore('MyStore');
-        store.put({ id: 'myData', value: jwt });
+        store.put({ id: 'jwt', value: jwt });
 
         transaction.oncomplete = () => {
             console.log('Data saved to IndexedDB');

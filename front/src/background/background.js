@@ -77,7 +77,7 @@ function getDataFromIndexedDB() {
       const db = event.target.result;
       const transaction = db.transaction('MyStore', 'readonly');
       const store = transaction.objectStore('MyStore');
-      const getRequest = store.get('myData');
+      const getRequest = store.get('jwt');
 
       getRequest.onsuccess = (event) => {
         resolve(event.target.result?.value);
