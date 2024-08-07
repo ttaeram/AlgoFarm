@@ -25,8 +25,42 @@ export const AuthProvider = ({ children }) => {
       handleSave(jwt);
     } else {
       localStorage.removeItem('jwt');
+      handleDelete('jwt')
     }
   }, [jwt]);
+
+  //로그아웃시 jwt토큰을 삭제하는 로직
+  const handleDelete = (key) => {
+    const request = indexedDB.open('MyDatabase', 1);
+
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction('MyStore', 'readwrite');
+        const store = transaction.objectStore('MyStore');
+        const deleteRequest = store.delete(key);
+
+        deleteRequest.onsuccess = () => {
+            console.log('Data deleted from IndexedDB');
+        };
+
+        deleteRequest.onerror = (event) => {
+            console.error('Error deleting data from IndexedDB', event);
+        };
+
+        transaction.oncomplete = () => {
+            console.log('Transaction completed');
+        };
+
+        transaction.onerror = (event) => {
+            console.error('Transaction error', event);
+        };
+    };
+
+    request.onerror = (event) => {
+        console.error('Error opening IndexedDB', event);
+    };
+  };
+
 
   //jwt토큰이 존재하면 indexDB에 토큰을 저장하는 로직
   const handleSave = (jwt) => {
