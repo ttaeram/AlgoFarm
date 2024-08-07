@@ -50,6 +50,7 @@ const useCharacter = (initialVisibility = true, size = 120) => {
         }
     }, [setAnimation]);
 
+
     const changeCharacter = useCallback((character) => {
         setCurrentCharacter(character);
         loadModel(character);
