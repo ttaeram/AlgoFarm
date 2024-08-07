@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 300px;
+            height: 400px;
+            overflow-y: scroll;
+        }
+        #messageInput {
+            width: 240px;
+        }
+        #sendButton {
+            width: 50px;
+        }
+    </style>
+</head>
+<body>
+<h1>Chat Room</h1>
+<div id="chatRoomInfo"></div>
+<div id="chat"></div>
+<input type="text" id="messageInput" placeholder="Type a message...">
+<button id="sendButton">Send</button>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+    // 랜덤한 채팅방 ID 생성 (1~5)
+    const chatroomId = Math.floor(Math.random() * 5) + 1;
+    const userId = Math.floor(Math.random() * 15) + 1;
+    document.getElementById('chatRoomInfo').innerText = 'Connected to Chat Room: ' + chatroomId;
+
+    const socket = new SockJS('/chat-websocket');
+    const stompClient = Stomp.over(socket);
+
+    // WebSocket 연결 설정
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/chat/' + chatroomId, function (message) {
+            showMessage(JSON.parse(message.body).nickname+":"+JSON.parse(message.body).content+"  "+JSON.parse(message.body).date);
+        });
+    });
+
+    // 메시지 전송 버튼 클릭 이벤트
+    document.getElementById('sendButton').onclick = function () {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value;
+        if (message) {
+            const chatMessage = {
+                content: message,
+                groupId: chatroomId,
+                userId: userId,
+                nickname: 'User'+userId, // 예시 사용자 이름
+                date: new Date()
+            };
+            fetch(`/api/chat/${chatroomId}/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(chatMessage)
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Message sent: ', data);
+                    messageInput.value = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    };
+
+    // 기존 채팅 메시지 로드
+    window.onload = function() {
+        fetch(`/api/chat/${chatroomId}/all`)
+            .then(response => response.json())
+            .then(messages => {
+                messages.forEach(message => {
+                    showMessage(message.nickname+":"+message.content+"  "+message.date);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    };
+
+    // 메시지를 채팅창에 표시
+    function showMessage(message) {
+        const chat = document.getElementById('chat');
+        const messageElement = document.createElement('div');
+        messageElement.textContent = message;
+        chat.appendChild(messageElement);
+        chat.scrollTop = chat.scrollHeight;
+    }
+</script>
+</body>
+</html>
