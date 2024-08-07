@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [jwt]);
 
+  //login시 indexdb의 토큰 넣기
   const handleSave = (jwt) => {
     const request = indexedDB.open('MyDatabase', 1);
   
@@ -68,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     };
   };
   
+  //로그아웃시 indexdb의 토큰삭제
   const handleDelete = (key) => {
     const request = indexedDB.open('MyDatabase', 1);
   
@@ -107,57 +109,6 @@ export const AuthProvider = ({ children }) => {
     };
   };
   
-
-  // //로그아웃시 jwt토큰을 삭제하는 로직
-  // const handleDelete = (key) => {
-  //   const request = indexedDB.open('MyDatabase', 1);
-  //   request.onsuccess = (event) => {
-  //       const db = event.target.result;
-  //       const transaction = db.transaction('MyStore', 'readwrite');
-  //       const store = transaction.objectStore('MyStore');
-  //       const deleteRequest = store.delete(key);
-  //       deleteRequest.onsuccess = () => {
-  //           console.log('Data deleted from IndexedDB');
-  //       };
-  //       deleteRequest.onerror = (event) => {
-  //           console.error('Error deleting data from IndexedDB', event);
-  //       };
-  //       transaction.oncomplete = () => {
-  //           console.log('Transaction completed');
-  //       };
-  //       transaction.onerror = (event) => {
-  //           console.error('Transaction error', event);
-  //       };
-  //   };
-  //   request.onerror = (event) => {
-  //       console.error('Error opening IndexedDB', event);
-  //   };
-  // };
-
-  // //jwt토큰이 존재하면 indexDB에 토큰을 저장하는 로직
-  // const handleSave = (jwt) => {
-  //   const request = indexedDB.open('MyDatabase', 1);
-
-  //   request.onupgradeneeded = (event) => {
-  //       const db = event.target.result;
-  //       db.createObjectStore('MyStore', { keyPath: 'id' });
-  //   };
-
-  //   request.onsuccess = (event) => {
-  //       const db = event.target.result;
-  //       const transaction = db.transaction('MyStore', 'readwrite');
-  //       const store = transaction.objectStore('MyStore');
-  //       store.put({ id: 'jwt', value: jwt });
-
-  //       transaction.oncomplete = () => {
-  //           console.log('Data saved to IndexedDB');
-  //       };
-  //   };
-
-  //   request.onerror = (event) => {
-  //       console.error('Error opening IndexedDB', event);
-  //   };
-  // };
 
   useEffect(() => {
     localStorage.setItem('isLogined', isLogined);
