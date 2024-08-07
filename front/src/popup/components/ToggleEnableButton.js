@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Switch, FormControlLabel } from '@mui/material';
+import { styled } from '@mui/system';
 import * as styles from './ToggleEnableButton.module.css';
 
 // 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
@@ -41,6 +43,19 @@ const isChromeExtension = () => {
   return typeof chrome !== "undefined" && typeof chrome.storage !== "undefined";
 }
 
+// 커스터마이징한 스위치 컴포넌트
+const GreenSwitch = styled(Switch)(({ theme }) => ({
+  '& .MuiSwitch-switchBase.Mui-checked': {
+    color: '#76ff03',
+    '&:hover': {
+      backgroundColor: 'rgba(118, 255, 3, 0.08)',
+    },
+  },
+  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+    backgroundColor: '#76ff03',
+  },
+}));
+
 const ToggleButton = () => {
   const [enabled, setEnabled] = useState(false);
 
@@ -66,9 +81,13 @@ const ToggleButton = () => {
   };
 
   return (
-    <button onClick={handleToggle} className={`${styles.button} ${enabled ? styles.active : ''}`}>
-      {enabled ? 'Disable' : 'Enable'}
-    </button>
+    <div className={styles.button}>
+      <FormControlLabel
+        control={<GreenSwitch checked={enabled} onChange={handleToggle} />}
+        label={enabled ? 'Disable' : 'Enable'}
+        className={enabled ? styles.active : ''}
+      />
+    </div>
   );
 }
 
