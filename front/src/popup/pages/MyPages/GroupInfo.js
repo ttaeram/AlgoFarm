@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/context";
 import GrassGraph from "../../components/GrassGraph";
+import { Box, Typography, CircularProgress } from '@mui/material';
 
 function GroupInfo() {
-  const { groupId, jwt, members, fetchMembers } = useAuth();
+  const { groupId, jwt, members, fetchMembers, groupInfo } = useAuth();
   const [loading, setLoading] = useState(true);
   const [grassData, setGrassData] = useState([]);
 
@@ -43,19 +44,27 @@ function GroupInfo() {
   }, [groupId, jwt]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="white">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (members.length === 0) {
-    return <div>No members found.</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="white">
+        <Typography variant="h6">No members found.</Typography>
+      </Box>
+    );
   }
 
   return (
-    <div>
-      <h1>GroupInfo</h1>
-      <h2>Activity Streak</h2>
+    <Box p={3} bgcolor="white">
+      <Typography variant="h4" gutterBottom>그룹 이름</Typography>
+      <Typography variant="h5" gutterBottom>스터디 스트릭</Typography>
       <GrassGraph data={grassData} />
-    </div>
+    </Box>
   );
 }
 
