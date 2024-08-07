@@ -4,8 +4,6 @@ import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.gson.Gson;
 import lombok.NoArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
