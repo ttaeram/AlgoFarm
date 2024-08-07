@@ -29,65 +29,135 @@ export const AuthProvider = ({ children }) => {
     }
   }, [jwt]);
 
-  //로그아웃시 jwt토큰을 삭제하는 로직
-  const handleDelete = (key) => {
-    const request = indexedDB.open('MyDatabase', 1);
-
-    request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction('MyStore', 'readwrite');
-        const store = transaction.objectStore('MyStore');
-        const deleteRequest = store.delete(key);
-
-        deleteRequest.onsuccess = () => {
-            console.log('Data deleted from IndexedDB');
-        };
-
-        deleteRequest.onerror = (event) => {
-            console.error('Error deleting data from IndexedDB', event);
-        };
-
-        transaction.oncomplete = () => {
-            console.log('Transaction completed');
-        };
-
-        transaction.onerror = (event) => {
-            console.error('Transaction error', event);
-        };
-    };
-
-    request.onerror = (event) => {
-        console.error('Error opening IndexedDB', event);
-    };
-  };
-
-
-  //jwt토큰이 존재하면 indexDB에 토큰을 저장하는 로직
   const handleSave = (jwt) => {
     const request = indexedDB.open('MyDatabase', 1);
-
+  
     request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('MyStore')) {
         db.createObjectStore('MyStore', { keyPath: 'id' });
+      }
     };
-
+  
     request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction('MyStore', 'readwrite');
-        const store = transaction.objectStore('MyStore');
-        store.put({ id: 'jwt', value: jwt });
-
-        transaction.oncomplete = () => {
-            console.log('Data saved to IndexedDB');
-        };
+      const db = event.target.result;
+  
+      if (!db.objectStoreNames.contains('MyStore')) {
+        db.close();
+        indexedDB.deleteDatabase('MyDatabase');
+        console.error('Object store "MyStore" not found. Database will be recreated.');
+        handleSave(jwt); // 데이터베이스 재생성 후 재시도
+        return;
+      }
+  
+      const transaction = db.transaction('MyStore', 'readwrite');
+      const store = transaction.objectStore('MyStore');
+      const putRequest = store.put({ id: 'jwt', value: jwt });
+  
+      putRequest.onsuccess = () => {
+        console.log('Token saved to IndexedDB');
+      };
+  
+      putRequest.onerror = (event) => {
+        console.error('Error saving token to IndexedDB', event);
+      };
     };
-
+  
     request.onerror = (event) => {
-        console.error('Error opening IndexedDB', event);
+      console.error('Error opening IndexedDB', event);
     };
   };
+  
+  const handleDelete = (key) => {
+    const request = indexedDB.open('MyDatabase', 1);
+  
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+  
+      if (!db.objectStoreNames.contains('MyStore')) {
+        db.close();
+        indexedDB.deleteDatabase('MyDatabase');
+        console.error('Object store "MyStore" not found. Database will be recreated.');
+        return;
+      }
+  
+      const transaction = db.transaction('MyStore', 'readwrite');
+      const store = transaction.objectStore('MyStore');
+      const deleteRequest = store.delete(key);
+  
+      deleteRequest.onsuccess = () => {
+        console.log('Token deleted from IndexedDB');
+      };
+  
+      deleteRequest.onerror = (event) => {
+        console.error('Error deleting token from IndexedDB', event);
+      };
+  
+      transaction.oncomplete = () => {
+        console.log('Transaction completed');
+      };
+  
+      transaction.onerror = (event) => {
+        console.error('Transaction error', event);
+      };
+    };
+  
+    request.onerror = (event) => {
+      console.error('Error opening IndexedDB', event);
+    };
+  };
+  
 
+  // //로그아웃시 jwt토큰을 삭제하는 로직
+  // const handleDelete = (key) => {
+  //   const request = indexedDB.open('MyDatabase', 1);
+  //   request.onsuccess = (event) => {
+  //       const db = event.target.result;
+  //       const transaction = db.transaction('MyStore', 'readwrite');
+  //       const store = transaction.objectStore('MyStore');
+  //       const deleteRequest = store.delete(key);
+  //       deleteRequest.onsuccess = () => {
+  //           console.log('Data deleted from IndexedDB');
+  //       };
+  //       deleteRequest.onerror = (event) => {
+  //           console.error('Error deleting data from IndexedDB', event);
+  //       };
+  //       transaction.oncomplete = () => {
+  //           console.log('Transaction completed');
+  //       };
+  //       transaction.onerror = (event) => {
+  //           console.error('Transaction error', event);
+  //       };
+  //   };
+  //   request.onerror = (event) => {
+  //       console.error('Error opening IndexedDB', event);
+  //   };
+  // };
 
+  // //jwt토큰이 존재하면 indexDB에 토큰을 저장하는 로직
+  // const handleSave = (jwt) => {
+  //   const request = indexedDB.open('MyDatabase', 1);
+
+  //   request.onupgradeneeded = (event) => {
+  //       const db = event.target.result;
+  //       db.createObjectStore('MyStore', { keyPath: 'id' });
+  //   };
+
+  //   request.onsuccess = (event) => {
+  //       const db = event.target.result;
+  //       const transaction = db.transaction('MyStore', 'readwrite');
+  //       const store = transaction.objectStore('MyStore');
+  //       store.put({ id: 'jwt', value: jwt });
+
+  //       transaction.oncomplete = () => {
+  //           console.log('Data saved to IndexedDB');
+  //       };
+  //   };
+
+  //   request.onerror = (event) => {
+  //       console.error('Error opening IndexedDB', event);
+  //   };
+  // };
 
   useEffect(() => {
     localStorage.setItem('isLogined', isLogined);

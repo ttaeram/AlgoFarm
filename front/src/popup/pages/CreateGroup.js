@@ -77,7 +77,7 @@ function CreateGroup() {
           {showWarning && <div className={styles.warning}>그룹 이름을 입력하세요.</div>}
         </div>
       </form>
-      <CharaterChoice />
+      {/* <CharaterChoice /> */}
     </div>
   );
 }
