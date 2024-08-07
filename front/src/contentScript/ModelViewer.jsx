@@ -1,29 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 
 const ModelViewer = ({
                        modelData,
-                       animation = 'Walk',
+                       animation = 'Idle_A',
                        rotation = 0,
-                       pauseAnimation = false,
-                       onAnimationComplete,
-                       cameraDistanceFactor = 2,
-                       cameraHorizontalAngle = 0
+                       scale = 1,
+                       cameraDistanceFactor = 1.5,
+                       isPopup = false
                      }) => {
   const groupRef = useRef();
   const { scene, camera } = useThree();
-  const [gltf, setGltf] = useState(null);
   const mixerRef = useRef();
-  const currentAnimationRef = useRef(null);
-  const [isDeathAnimationComplete, setIsDeathAnimationComplete] = useState(false);
-
-  const animationMap = {
-    Attack: 0, Bounce: 1, Clicked: 2, Death: 3, Eat: 4, Fear: 5, Fly: 6, Hit: 7,
-    Idle_A: 8, Idle_B: 9, Idle_C: 10, Jump: 11, Roll: 12, Run: 13, Sit: 14,
-    Spin: 15, Swim: 16, Walk: 17
-  };
 
   useEffect(() => {
     const loader = new GLTFLoader();
@@ -32,131 +22,53 @@ const ModelViewer = ({
         '',
         (loadedGltf) => {
           console.log('GLTF loaded successfully:', loadedGltf);
-          setGltf(loadedGltf);
+          scene.add(loadedGltf.scene);
 
           const mixer = new THREE.AnimationMixer(loadedGltf.scene);
           mixerRef.current = mixer;
 
-          const defaultAnimationIndex = animationMap['Walk'];
-          if (loadedGltf.animations[defaultAnimationIndex]) {
-            const action = mixer.clipAction(loadedGltf.animations[defaultAnimationIndex]);
+          const animationIndex = loadedGltf.animations.findIndex(anim => anim.name === animation);
+          if (animationIndex !== -1) {
+            const action = mixer.clipAction(loadedGltf.animations[animationIndex]);
             action.play();
-            currentAnimationRef.current = action;
           }
 
-          // Reset model position and scale
-          loadedGltf.scene.position.set(0, 0, 0);
-          loadedGltf.scene.scale.set(1, 1, 1);
+          // 모델 크기 조정
+          loadedGltf.scene.scale.set(scale, scale, scale);
 
-          // Adjust camera and model
-          adjustModelAndCamera(loadedGltf.scene);
+          // 모델 중앙 정렬
+          const box = new THREE.Box3().setFromObject(loadedGltf.scene);
+          const center = box.getCenter(new THREE.Vector3());
+          loadedGltf.scene.position.sub(center);
+
+          groupRef.current = loadedGltf.scene;
+
+          // 팝업에서 사용될 때 카메라 위치 조정
+          if (isPopup) {
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const fov = camera.fov * (Math.PI / 180);
+            const cameraZ = Math.abs(maxDim / Math.sin(fov / 2)) * cameraDistanceFactor;
+            camera.position.set(0, 0, cameraZ);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+          }
         },
         (error) => {
           console.error('An error occurred while loading the model:', error);
         }
     );
-  }, [modelData]);
-
-  const adjustModelAndCamera = (model) => {
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-
-    // Scale the model to fit within a 1x1x1 cube
-    const scale = 1 / Math.max(size.x, size.y, size.z);
-    model.scale.multiplyScalar(scale);
-
-    // Recalculate the bounding box after scaling
-    box.setFromObject(model);
-    box.getCenter(center);
-    box.getSize(size);
-
-    // Center the model
-    model.position.sub(center.multiplyScalar(scale));
-
-    // Position the camera
-    const distance = Math.max(size.x, size.y, size.z) * cameraDistanceFactor;
-    const fov = camera.fov * (Math.PI / 180);
-    const cameraZ = Math.abs(distance / Math.tan(fov / 2));
-
-    // Calculate camera position with horizontal angle
-    const angleRad = cameraHorizontalAngle * (Math.PI / 180);
-    const cameraX = Math.sin(angleRad) * cameraZ;
-    const cameraZAdjusted = Math.cos(angleRad) * cameraZ;
-
-    camera.position.set(cameraX, 0, cameraZAdjusted);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-    // Adjust near and far planes
-    camera.near = distance / 100;
-    camera.far = distance * 100;
-    camera.updateProjectionMatrix();
-
-    console.log('Model positioned:', model.position);
-    console.log('Camera positioned:', camera.position);
-    console.log('Model size:', size);
-    console.log('Camera distance:', distance);
-    console.log('Camera angle:', cameraHorizontalAngle);
-  };
-
-  useEffect(() => {
-    if (gltf && mixerRef.current) {
-      const animationIndex = animationMap[animation];
-      if (typeof animationIndex !== 'undefined' && gltf.animations[animationIndex]) {
-        if (currentAnimationRef.current) {
-          currentAnimationRef.current.fadeOut(0.5);
-        }
-        const newAction = mixerRef.current.clipAction(gltf.animations[animationIndex]);
-
-        if (animation === 'Death') {
-          newAction.setLoop(THREE.LoopOnce);
-          newAction.clampWhenFinished = true;
-          setIsDeathAnimationComplete(false);
-
-          newAction.reset().fadeIn(0.5).play();
-
-          newAction.onFinished = () => {
-            setIsDeathAnimationComplete(true);
-            if (onAnimationComplete) {
-              onAnimationComplete();
-            }
-          };
-        } else {
-          newAction.reset().fadeIn(0.5).play();
-        }
-
-        currentAnimationRef.current = newAction;
-
-        if (pauseAnimation && animation === 'Jump') {
-          newAction.paused = true;
-          newAction.time = newAction.getClip().duration * 0.25;
-        } else {
-          newAction.paused = false;
-        }
-      } else {
-        console.warn(`Animation "${animation}" not found.`);
-      }
-    }
-  }, [gltf, animation, pauseAnimation, onAnimationComplete]);
+  }, [modelData, animation, scale, scene, camera, cameraDistanceFactor, isPopup]);
 
   useFrame((state, delta) => {
-    if (mixerRef.current && !isDeathAnimationComplete) {
+    if (mixerRef.current) {
       mixerRef.current.update(delta);
     }
-    if (groupRef.current) {
+    if (groupRef.current && !isPopup) {
       groupRef.current.rotation.y = rotation;
     }
   });
 
-  if (!gltf) {
-    return null;
-  }
-
-  return (
-      <group ref={groupRef}>
-        <primitive object={gltf.scene} />
-      </group>
-  );
+  return null;
 };
 
 export default ModelViewer;

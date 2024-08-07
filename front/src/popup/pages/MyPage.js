@@ -8,7 +8,7 @@ import MemberManage from './MyPages/MemberManage';
 import Settings from './MyPages/Settings';
 import Chat from './MyPages/Chat';
 import ToggleEnableButton from '../components/ToggleEnableButton';
-import Character from '../components/Character';
+import PopupCharacter from '../components/PopupCharacter';
 import * as styles from "./MyPage.module.css";
 
 const MyPage = () => {
@@ -83,7 +83,7 @@ const MyPage = () => {
           <ToggleEnableButton />
         </div>
         <div className={styles.characterBox}>
-          <Character />
+          <PopupCharacter />
         </div>
         <Nav />
       </div>
