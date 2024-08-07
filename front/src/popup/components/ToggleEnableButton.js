@@ -64,10 +64,20 @@ const ToggleButton = () => {
       const enable = isChromeExtension() ? await getObjectFromChromeStorage('bjhEnable') : await getObjectFromLocalStorage('bjhEnable');
       setEnabled(enable === 'true');
       console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
+        toggleCharacterVisibility(enable !== false);
+
     };
 
     fetchEnable();
   }, []);
+
+  const toggleCharacterVisibility = (isVisible) => {
+    if (isChromeExtension()) {
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {action: "toggleVisibility", isVisible: isVisible});
+      });
+    }
+  };
 
   const handleToggle = async () => {
     const newEnabled = !enabled;
@@ -77,7 +87,8 @@ const ToggleButton = () => {
       await setObjectToLocalStorage('bjhEnable', newEnabled);
     }
     setEnabled(newEnabled);
-    console.log(newEnabled ? "on" : "off"); // 토글 시 콘솔 메시지 출력
+    toggleCharacterVisibility(newEnabled);
+    console.log(newEnabled ? "on" : "off");
   };
 
   return (
