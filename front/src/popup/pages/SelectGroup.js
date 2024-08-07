@@ -48,7 +48,7 @@ const SelectGroup = () => {
     >
       <Typography
         variant="h4"
-        sx={{ mb: 2, fontWeight: 'bold', color: '#333' }}
+        sx={{ mb: 2, fontWeight: 'bold', color: '#4caf50' }}
       >
         AlgoFarm
       </Typography>
@@ -74,7 +74,7 @@ const SelectGroup = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Button
           variant="contained"
-          color="primary"
+          color="success"
           onClick={() => navigate('/create-group')}
           sx={{width:'340px'}}
         >
@@ -82,7 +82,7 @@ const SelectGroup = () => {
         </Button>
         <Button
           variant="outlined"
-          color="primary"
+          color="success"
           onClick={() => navigate('/join-group')}
           sx={{width:'340px'}}
         >
