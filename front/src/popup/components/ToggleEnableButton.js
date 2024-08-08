@@ -62,7 +62,7 @@ const ToggleButton = () => {
 
   useEffect(() => {
     const fetchEnable = async () => {
-      const enable = isChromeExtension() ? await getObjectFromChromeStorage('bjhEnable') : await getObjectFromLocalStorage('bjhEnable');
+      const enable = isChromeExtension() ? await getObjectFromChromeStorage('Enable') : await getObjectFromLocalStorage('bjhEnable');
       setEnabled(enable);
       console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
       const now = new Date();
@@ -85,9 +85,9 @@ const ToggleButton = () => {
   const handleToggle = async () => {
     const newEnabled = !enabled;
     if (isChromeExtension()) {
-      await setObjectToChromeStorage('bjhEnable', newEnabled);
+      await setObjectToChromeStorage('Enable', newEnabled);
     } else {
-      await setObjectToLocalStorage('bjhEnable', newEnabled);
+      await setObjectToLocalStorage('Enable', newEnabled);
     }
     setEnabled(newEnabled);
     toggleCharacterVisibility(newEnabled);

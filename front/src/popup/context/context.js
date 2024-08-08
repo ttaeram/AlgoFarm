@@ -32,8 +32,8 @@ export const AuthProvider = ({ children }) => {
       if(isChromeExtension()) {
         setIsLogined(true); // 로그인 상태를 true로 설정
         chrome.storage.local.set({ isLogined: true });
-        if(!getObjectFromChromeStorage('bjhEnable')){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
-          setObjectToChromeStorage('bjhEnable', true);
+        if(!getObjectFromChromeStorage('Enable')){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
+          setObjectToChromeStorage('Enable', true);
         }
         const now = new Date();
         console.log(now + "로그인햇음니다.");
