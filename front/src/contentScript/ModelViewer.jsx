@@ -5,16 +5,17 @@ import * as THREE from 'three';
 
 const ModelViewer = ({
                          modelData,
-                         animation,
+                         animationConfig,
                          rotation,
                          scale,
                          cameraDistanceFactor,
                          isPopup,
-                         onAnimationComplete
+                         onAnimationComplete,
                      }) => {
     const groupRef = useRef();
     const { scene, camera } = useThree();
     const mixerRef = useRef();
+    const actionRef = useRef();
     const modelLoadedRef = useRef(false);
 
     const memoizedModelData = useMemo(() => modelData, [modelData]);
@@ -36,9 +37,11 @@ const ModelViewer = ({
                 const mixer = new THREE.AnimationMixer(loadedGltf.scene);
                 mixerRef.current = mixer;
 
-                const animationIndex = loadedGltf.animations.findIndex(anim => anim.name === animation);
+                const animationIndex = loadedGltf.animations.findIndex(anim => anim.name === animationConfig.name);
                 if (animationIndex !== -1) {
-                    const action = mixer.clipAction(loadedGltf.animations[animationIndex]);
+                    const clip = loadedGltf.animations[animationIndex];
+                    const action = mixer.clipAction(clip);
+                    actionRef.current = action;
                     action.play();
                 }
 
@@ -75,11 +78,31 @@ const ModelViewer = ({
             }
             modelLoadedRef.current = false;
         };
-    }, [memoizedModelData, animation, scale, scene, camera, cameraDistanceFactor, isPopup]);
+    }, [memoizedModelData, animationConfig.name, scale, scene, camera, cameraDistanceFactor, isPopup]);
+
+    useEffect(() => {
+        if (actionRef.current) {
+            actionRef.current.stop();
+            const animationIndex = actionRef.current.getClip().tracks.findIndex(track => track.name === animationConfig.name);
+            if (animationIndex !== -1) {
+                const newAction = mixerRef.current.clipAction(actionRef.current.getClip());
+                newAction.play();
+                actionRef.current = newAction;
+            }
+        }
+    }, [animationConfig.name]);
 
     useFrame((state, delta) => {
         if (mixerRef.current) {
-            mixerRef.current.update(delta);
+            if (animationConfig.pauseAtTime !== null && actionRef.current) {
+                if (actionRef.current.time >= animationConfig.pauseAtTime) {
+                    actionRef.current.paused = true;
+                } else {
+                    mixerRef.current.update(delta);
+                }
+            } else {
+                mixerRef.current.update(delta);
+            }
         }
         if (groupRef.current && !isPopup) {
             groupRef.current.rotation.y = rotation;
