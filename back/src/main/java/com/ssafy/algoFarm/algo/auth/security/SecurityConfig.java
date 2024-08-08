@@ -1,5 +1,6 @@
 package com.ssafy.algoFarm.algo.auth.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Spring Security 설정을 담당하는 클래스
@@ -37,6 +39,10 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final OAuth2AuthorizedClientService authorizedClientService;
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
+    }
     /**
      * 보안 필터 체인을 구성
      * 이 메소드는 HTTP 보안 설정, CORS, CSRF, 인증, 인가 등을 정의
@@ -45,6 +51,7 @@ public class SecurityConfig {
      * @return 구성된 SecurityFilterChain
      * @throws Exception 보안 구성 중 발생할 수 있는 예외
      */
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.headers(headers -> headers
@@ -78,14 +85,15 @@ public class SecurityConfig {
                         .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                 )
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            String errorMessage = "Authentication failed: " + authException.getMessage();
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of("error", errorMessage)));
+                        })
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
     }
 
     /**
