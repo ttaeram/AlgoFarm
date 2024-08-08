@@ -94,7 +94,7 @@ function ChatPopup({ onClose }) {
         setChatMessages((_chatMessages) => [..._chatMessages, message]);
       } catch (error) {
         console.error('Failed to parse message as JSON:', error);
-        setChatMessages((_chatMessages) => [..._chatMessages, { content: body.content, nickname: body.nickname, createAt: body.createAt }]);
+        setChatMessages((_chatMessages) => [..._chatMessages, { userId: body.userId, content: body.content, nickname: body.nickname, createAt: body.createAt }]);
       }
     });
   };
@@ -105,7 +105,7 @@ function ChatPopup({ onClose }) {
       return;
     }
     const newMessage = {
-      userId: user.userId,
+      userId: user.sub,
       roomSeq: groupId,
       content: message,
       nickname: user.name,
@@ -113,7 +113,7 @@ function ChatPopup({ onClose }) {
     };
 
     const serverLogMessage = {
-      userId: user.userId,
+      userId: user.sub,
       groupId,
       content: message,
       nickname: user.name,
@@ -181,12 +181,12 @@ function ChatPopup({ onClose }) {
               disableGutters 
               sx={{ 
                 display: 'flex', 
-                justifyContent: _chatMessage.userId === user.userId ? 'flex-end' : 'flex-start' 
+                justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
               }}>
               <Card sx={{
                 maxWidth: '80%',
                 mb: 1,
-                backgroundColor: _chatMessage.userId === user.userId ? 'lightblue' : 'white'
+                backgroundColor: _chatMessage.userId === user.sub ? 'lightblue' : 'white'
               }}>
                 <CardContent>
                   <Typography variant="body2" color="textSecondary">
@@ -205,12 +205,12 @@ function ChatPopup({ onClose }) {
               disableGutters 
               sx={{ 
                 display: 'flex', 
-                justifyContent: _chatMessage.userId === user.userId ? 'flex-end' : 'flex-start' 
+                justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
               }}>
               <Card sx={{
                 maxWidth: '80%',
                 mb: 1,
-                backgroundColor: _chatMessage.userId === user.userId ? 'lightblue' : 'white'
+                backgroundColor: _chatMessage.userId === user.sub ? 'lightblue' : 'white'
               }}>
                 <CardContent>
                   <Typography variant="body2" color="textSecondary">
