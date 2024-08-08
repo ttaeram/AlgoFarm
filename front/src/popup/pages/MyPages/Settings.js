@@ -67,20 +67,48 @@ function Settings() {
               onChange={handleGroupNameChange}
               size="small"
             />
-            <Button type="submit" variant="contained" color="primary">
-              저장
-            </Button>
-            <Button variant="outlined" onClick={() => setIsEditing(false)}>
-              취소
-            </Button>
+           <Button
+  type="submit"
+  variant="contained"
+  sx={{
+    backgroundColor: '#ee8097',
+    color: 'white',
+    '&:hover': {
+      backgroundColor: '#d46b7f', // 호버 시 더 어두운 음영
+      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)', // 호버 시 약간의 그림자 추가
+    },
+  }}
+>
+  저장
+</Button>
+
+<Button
+  variant="outlined"
+  onClick={() => setIsEditing(false)}
+  sx={{
+    borderColor: '#f7d3db',
+    color: '#ee8097',
+    '&:hover': {
+      backgroundColor: '#fbe5e9', // 호버 시 연한 핑크색 배경
+      borderColor: '#f7d3db', // 테두리 색상 유지
+      color: '#ee8097', // 텍스트 색상 유지
+    },
+  }}
+>
+  취소
+</Button>
           </form>
         ) : (
           <Box display="flex" alignItems="center" gap="10px">
             <Typography variant="h6"><strong>그룹 이름 : </strong>{groupInfo?.name || '그룹명'}</Typography>
             {!isEditing && groupInfo?.isLeader && (
-              <Button variant="contained" color="primary" onClick={handleEditClick}>
-                변경
-              </Button>
+             <Button
+             variant="contained"
+             onClick={handleEditClick}
+             style={{ backgroundColor: '#f19cac', color: 'white' }}  // 배경색과 텍스트 색상 지정
+           >
+             변경
+           </Button>
             )}
           </Box>
         )}
