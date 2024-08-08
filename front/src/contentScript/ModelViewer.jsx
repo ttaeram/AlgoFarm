@@ -26,7 +26,7 @@ const ModelViewer = ({
             memoizedModelData,
             '',
             (loadedGltf) => {
-                console.log('GLTF loaded successfully:', loadedGltf);
+                //console.log('GLTF loaded successfully:', loadedGltf);
 
                 // 기존 모델 제거
                 if (groupRef.current) {
@@ -60,7 +60,7 @@ const ModelViewer = ({
                     const maxDim = Math.max(size.x, size.y, size.z);
                     const fov = camera.fov * (Math.PI / 180);
                     const cameraZ = Math.abs(maxDim / Math.sin(fov / 2)) * cameraDistanceFactor;
-                    camera.position.set(0, maxDim / 4, cameraZ);
+                    camera.position.set(0, maxDim / 3, cameraZ);
                     camera.lookAt(new THREE.Vector3(0, 0, 0));
                 }
 
