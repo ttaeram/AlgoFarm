@@ -1,0 +1,34 @@
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendarCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border-radius: 10px; /* 모서리가 둥근 사각형으로 변경 */
+  transition: background-color 0.3s;
+}
+
+.level0 {
+  background-color: #F5F3F0 !important;
+}
+
+.level1 {
+  background-color: #FCE6E0 !important;
+}
+
+.level2 {
+  background-color: #FFC8C6 !important;
+}
+
+.level3 {
+  background-color: #FD88A0 !important;
+}
+
+.level4 {
+  background-color: #EB4A52 !important;
+}
