@@ -49,10 +49,7 @@ function handleMessage(request, sender, sendResponse) {
   }
   return true;
 }
-
 chrome.runtime.onMessage.addListener(handleMessage);
-
-
 
 
 /* 커밋 요청시 헤더에 Authorization 토큰을 넣기 위한 background*/
@@ -60,6 +57,7 @@ chrome.runtime.onMessage.addListener(handleMessage);
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getToken') {
     getDataFromIndexedDB().then(token => {
+      // getDataFromLocalStorage().then(token => {
       sendResponse({ token: token });
     }).catch(error => {
       sendResponse({ token: null });
@@ -68,6 +66,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+
+//localstorage에서 jwt토큰을 가져오는 코드
+function getDataFromLocalStorage() {
+  return new Promise((resolve, reject) => {
+    try {
+      const token = localStorage.getItem('jwt');
+      if (token !== null) {
+        resolve(token);
+      } else {
+        reject('No token found in localStorage');
+      }
+    } catch (error) {
+      reject('Error accessing localStorage');
+    }
+  });
+}
 
 function getDataFromIndexedDB() {
   return new Promise((resolve, reject) => {

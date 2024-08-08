@@ -2,6 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+// 현재 환경이 Chrome 확장 프로그램인지 확인하는 함수
+const isChromeExtension = () => {
+  return typeof chrome !== "undefined" && typeof chrome.storage !== "undefined";
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [jwt, setJwt] = useState(localStorage.getItem('jwt'));
@@ -23,37 +28,111 @@ export const AuthProvider = ({ children }) => {
     if (jwt) {
       localStorage.setItem('jwt', jwt);
       handleSave(jwt);
+    
+      if(isChromeExtension()) {
+        setIsLogined(true); // 로그인 상태를 true로 설정
+      chrome.storage.local.set({ isLogined: true });
+      } // 로그인 상태를 chrome.storage.local에 저장
+      
     } else {
       localStorage.removeItem('jwt');
+      handleDelete('jwt')
+       
+      if(isChromeExtension()) {
+        setIsLogined(false); // 로그아웃 상태를 false로 설정
+      chrome.storage.local.set({ isLogined: false });
+      } // 로그아웃 상태를 chrome.storage.local에 저장
     }
   }, [jwt]);
 
-  //jwt토큰이 존재하면 indexDB에 토큰을 저장하는 로직
+  //login시 indexdb의 토큰 넣기
   const handleSave = (jwt) => {
     const request = indexedDB.open('MyDatabase', 1);
-
+  
     request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('MyStore')) {
         db.createObjectStore('MyStore', { keyPath: 'id' });
+      }
     };
-
+  
     request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction('MyStore', 'readwrite');
-        const store = transaction.objectStore('MyStore');
-        store.put({ id: 'myData', value: jwt });
-
-        transaction.oncomplete = () => {
-            console.log('Data saved to IndexedDB');
-        };
+      const db = event.target.result;
+  
+      if (!db.objectStoreNames.contains('MyStore')) {
+        db.close();
+        indexedDB.deleteDatabase('MyDatabase');
+        console.error('Object store "MyStore" not found. Database will be recreated.');
+        handleSave(jwt); // 데이터베이스 재생성 후 재시도
+        return;
+      }
+  
+      const transaction = db.transaction('MyStore', 'readwrite');
+      const store = transaction.objectStore('MyStore');
+      const putRequest = store.put({ id: 'jwt', value: jwt });
+  
+      putRequest.onsuccess = () => {
+        console.log('Token saved to IndexedDB');
+        if(isChromeExtension()) {
+        chrome.storage.local.set({ isLogined: true });
+        }
+      };
+  
+      putRequest.onerror = (event) => {
+        console.error('Error saving token to IndexedDB', event);
+      };
     };
-
+  
     request.onerror = (event) => {
-        console.error('Error opening IndexedDB', event);
+      console.error('Error opening IndexedDB', event);
     };
   };
-
-
+  
+  //로그아웃시 indexdb의 토큰삭제
+  const handleDelete = (key) => {
+    const request = indexedDB.open('MyDatabase', 1);
+  
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+  
+      if (!db.objectStoreNames.contains('MyStore')) {
+        db.close();
+        indexedDB.deleteDatabase('MyDatabase');
+        console.error('Object store "MyStore" not found. Database will be recreated.');
+        return;
+      }
+  
+      const transaction = db.transaction('MyStore', 'readwrite');
+      const store = transaction.objectStore('MyStore');
+      const deleteRequest = store.delete(key);
+  
+      deleteRequest.onsuccess = () => {
+        console.log('Token deleted from IndexedDB');
+        // 로그아웃 상태를 저장
+        if(isChromeExtension()) {
+          chrome.storage.local.set({ isLogined: false });
+        }
+      };
+  
+      deleteRequest.onerror = (event) => {
+        console.error('Error deleting token from IndexedDB', event);
+        
+      };
+  
+      transaction.oncomplete = () => {
+        console.log('Transaction completed');
+      };
+  
+      transaction.onerror = (event) => {
+        console.error('Transaction error', event);
+      };
+    };
+  
+    request.onerror = (event) => {
+      console.error('Error opening IndexedDB', event);
+    };
+  };
+  
 
   useEffect(() => {
     localStorage.setItem('isLogined', isLogined);

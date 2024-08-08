@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/context';
+import { Button } from '@mui/material';
 import * as styles from './GroupLeaveButton.module.css';
 
 const GroupLeaveButton = () => {
@@ -38,9 +39,14 @@ const GroupLeaveButton = () => {
   };
 
   return (
-    <button onClick={handleLeaveGroup} className={styles.groupLeaveButton}>
+    <Button
+      onClick={handleLeaveGroup}
+      className={styles.groupLeaveButton}
+      variant="contained"
+      color="secondary"
+    >
       그룹 탈퇴
-    </button>
+    </Button>
   );
 };
 

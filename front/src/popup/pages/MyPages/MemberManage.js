@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/context";
+import { Box, Typography, List, ListItem, ListItemText, Snackbar, IconButton, Button } from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
+import { styled } from '@mui/system';
+import * as styles from './MemberManage.module.css';
+
+const CustomButton = styled(Button)(({ theme }) => ({
+  marginTop: '16px',
+  backgroundColor: '#76ff03',
+  color: 'white',
+  '&:hover': {
+    backgroundColor: '#64dd17',
+  },
+}));
 
 function MemberManage() {
   const { groupId, groupInfo, jwt, members, fetchMembers: originalFetchMembers } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // useEffect에서 fetchMembers 호출
   useEffect(() => {
     const loadMembers = async () => {
       if (groupId && jwt) {
@@ -14,7 +26,7 @@ function MemberManage() {
       }
     };
     loadMembers();
-  }, [groupId, jwt]); // 여기서 fetchMembers를 의존성 배열에서 제거
+  }, [groupId, jwt]);
 
   const handleGenerateInviteCode = async () => {
     if (!groupId) {
@@ -40,7 +52,7 @@ function MemberManage() {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-      }, 3000);  // 3초 후에 성공 메시지 숨기기
+      }, 3000);
     } catch (error) {
       console.error('Error generating invite code:', error);
     }
@@ -60,35 +72,69 @@ function MemberManage() {
         throw new Error('Failed to kick member');
       }
 
-      // 멤버 리스트를 새로고침
-      await originalFetchMembers(jwt, groupId); // fetchMembers를 바로 호출
+      await originalFetchMembers(jwt, groupId);
     } catch (error) {
       console.error('Error kicking member:', error);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setShowSuccess(false);
+  };
+
   return (
-    <div>
-      <h1>MemberManage</h1>
-      {groupInfo?.isLeader && (
-        <div>
-          <button onClick={handleGenerateInviteCode}>Generate Invite Code</button>
-          {inviteCode && <p>Invite Code: {inviteCode}</p>}
-          {showSuccess && <p>Invite code generated successfully!</p>}
-        </div>
-      )}
-      <h2>Group Members</h2>
-      <ul>
+    <Box className={styles.container}>
+      <Typography variant="h4" gutterBottom>
+        스터디 구성원
+      </Typography>
+      <List className={styles.memberList}>
         {members.map(member => (
-          <li key={member.memberId}>
-            {member.nickname} {member.isLeader && <strong>(스터디장)</strong>}
+          <ListItem key={member.memberId} divider>
+            <ListItemText
+              primary={`${member.nickname} ${member.isLeader ? '(스터디장)' : ''}`}
+              />
             {groupInfo?.isLeader && !member.isLeader && (
-              <button onClick={() => handleKickMember(member.userId)}>Kick</button>
+              <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => handleKickMember(member.userId)}
+              className={styles.kickButton}
+              >
+                추방
+              </Button>
             )}
-          </li>
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+      {groupInfo?.isLeader && (
+        <Box>
+          <CustomButton
+            variant="contained"
+            onClick={handleGenerateInviteCode}
+          >
+            초대 코드 생성
+          </CustomButton>
+          {inviteCode && (
+            <Typography variant="body1" className={styles.inviteCodeText}>
+              초대 코드 : {inviteCode}
+            </Typography>
+          )}
+        </Box>
+      )}
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message="초대코드가 생성되었습니다!"
+        className={styles.snackbar}
+        action={
+          <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar} className={styles.closeIcon}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+    </Box>
   );
 }
 

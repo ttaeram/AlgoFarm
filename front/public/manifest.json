@@ -48,15 +48,13 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "run_at": "document_idle",
       "js": [
         "static/js/contentScript.js"
-      ]
+      ],
+      "run_at": "document_idle"
     },
     {
-      "matches": [
-        "https://www.acmicpc.net/*"
-      ],
+      "matches": ["https://www.acmicpc.net/*"],
       "css": [
         "css/baekjoon/inject.css"
       ],
@@ -75,8 +73,19 @@
         "baekjoon/baekjoon.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.acmicpc.net/problem/*",
+        "https://www.acmicpc.net/submit/*",
+        "https://www.acmicpc.net/short/*",
+        "https://www.acmicpc.net/status?*"
+      ],
+      "js": [
+        "static/js/AICodeReview.js"
+      ],
+      "run_at": "document_start"
     }
-
   ],
   "oauth2": {
     "client_id": "791103562299-ebih2865pdmhgde8enq8ha96chi898da.apps.googleusercontent.com",

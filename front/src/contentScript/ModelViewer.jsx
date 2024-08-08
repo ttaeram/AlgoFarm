@@ -1,162 +1,97 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 
 const ModelViewer = ({
-                       modelData,
-                       animation = 'Walk',
-                       rotation = 0,
-                       pauseAnimation = false,
-                       onAnimationComplete,
-                       cameraDistanceFactor = 2,
-                       cameraHorizontalAngle = 0
+                         modelData,
+                         animation,
+                         rotation,
+                         scale ,
+                         cameraDistanceFactor,
+                         isPopup
                      }) => {
-  const groupRef = useRef();
-  const { scene, camera } = useThree();
-  const [gltf, setGltf] = useState(null);
-  const mixerRef = useRef();
-  const currentAnimationRef = useRef(null);
-  const [isDeathAnimationComplete, setIsDeathAnimationComplete] = useState(false);
+    const groupRef = useRef();
+    const { scene, camera } = useThree();
+    const mixerRef = useRef();
+    const modelLoadedRef = useRef(false);
 
-  const animationMap = {
-    Attack: 0, Bounce: 1, Clicked: 2, Death: 3, Eat: 4, Fear: 5, Fly: 6, Hit: 7,
-    Idle_A: 8, Idle_B: 9, Idle_C: 10, Jump: 11, Roll: 12, Run: 13, Sit: 14,
-    Spin: 15, Swim: 16, Walk: 17
-  };
+    const memoizedModelData = useMemo(() => modelData, [modelData]);
 
-  useEffect(() => {
-    const loader = new GLTFLoader();
-    loader.parse(
-        modelData,
-        '',
-        (loadedGltf) => {
-          console.log('GLTF loaded successfully:', loadedGltf);
-          setGltf(loadedGltf);
+    useEffect(() => {
+        if (modelLoadedRef.current) return;
 
-          const mixer = new THREE.AnimationMixer(loadedGltf.scene);
-          mixerRef.current = mixer;
+        const loader = new GLTFLoader();
+        loader.parse(
+            memoizedModelData,
+            '',
+            (loadedGltf) => {
+                console.log('GLTF loaded successfully:', loadedGltf);
 
-          const defaultAnimationIndex = animationMap['Walk'];
-          if (loadedGltf.animations[defaultAnimationIndex]) {
-            const action = mixer.clipAction(loadedGltf.animations[defaultAnimationIndex]);
-            action.play();
-            currentAnimationRef.current = action;
-          }
+                // 기존 모델 제거
+                if (groupRef.current) {
+                    scene.remove(groupRef.current);
+                }
 
-          // Reset model position and scale
-          loadedGltf.scene.position.set(0, 0, 0);
-          loadedGltf.scene.scale.set(1, 1, 1);
+                scene.add(loadedGltf.scene);
 
-          // Adjust camera and model
-          adjustModelAndCamera(loadedGltf.scene);
-        },
-        (error) => {
-          console.error('An error occurred while loading the model:', error);
-        }
-    );
-  }, [modelData]);
+                const mixer = new THREE.AnimationMixer(loadedGltf.scene);
+                mixerRef.current = mixer;
 
-  const adjustModelAndCamera = (model) => {
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
+                const animationIndex = loadedGltf.animations.findIndex(anim => anim.name === animation);
+                if (animationIndex !== -1) {
+                    const action = mixer.clipAction(loadedGltf.animations[animationIndex]);
+                    action.play();
+                }
 
-    // Scale the model to fit within a 1x1x1 cube
-    const scale = 1 / Math.max(size.x, size.y, size.z);
-    model.scale.multiplyScalar(scale);
+                // 모델 크기 조정
+                loadedGltf.scene.scale.set(scale, scale, scale);
 
-    // Recalculate the bounding box after scaling
-    box.setFromObject(model);
-    box.getCenter(center);
-    box.getSize(size);
+                // 모델 중앙 정렬
+                const box = new THREE.Box3().setFromObject(loadedGltf.scene);
+                const center = box.getCenter(new THREE.Vector3());
+                loadedGltf.scene.position.sub(center);
 
-    // Center the model
-    model.position.sub(center.multiplyScalar(scale));
+                groupRef.current = loadedGltf.scene;
 
-    // Position the camera
-    const distance = Math.max(size.x, size.y, size.z) * cameraDistanceFactor;
-    const fov = camera.fov * (Math.PI / 180);
-    const cameraZ = Math.abs(distance / Math.tan(fov / 2));
+                // 카메라 위치 조정 (팝업에서만)
+                if (isPopup) {
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const fov = camera.fov * (Math.PI / 180);
+                    const cameraZ = Math.abs(maxDim / Math.sin(fov / 2)) * cameraDistanceFactor;
+                    camera.position.set(0, maxDim / 4, cameraZ);
+                    camera.lookAt(new THREE.Vector3(0, 0, 0));
+                }
 
-    // Calculate camera position with horizontal angle
-    const angleRad = cameraHorizontalAngle * (Math.PI / 180);
-    const cameraX = Math.sin(angleRad) * cameraZ;
-    const cameraZAdjusted = Math.cos(angleRad) * cameraZ;
-
-    camera.position.set(cameraX, 0, cameraZAdjusted);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-    // Adjust near and far planes
-    camera.near = distance / 100;
-    camera.far = distance * 100;
-    camera.updateProjectionMatrix();
-
-    console.log('Model positioned:', model.position);
-    console.log('Camera positioned:', camera.position);
-    console.log('Model size:', size);
-    console.log('Camera distance:', distance);
-    console.log('Camera angle:', cameraHorizontalAngle);
-  };
-
-  useEffect(() => {
-    if (gltf && mixerRef.current) {
-      const animationIndex = animationMap[animation];
-      if (typeof animationIndex !== 'undefined' && gltf.animations[animationIndex]) {
-        if (currentAnimationRef.current) {
-          currentAnimationRef.current.fadeOut(0.5);
-        }
-        const newAction = mixerRef.current.clipAction(gltf.animations[animationIndex]);
-
-        if (animation === 'Death') {
-          newAction.setLoop(THREE.LoopOnce);
-          newAction.clampWhenFinished = true;
-          setIsDeathAnimationComplete(false);
-
-          newAction.reset().fadeIn(0.5).play();
-
-          newAction.onFinished = () => {
-            setIsDeathAnimationComplete(true);
-            if (onAnimationComplete) {
-              onAnimationComplete();
+                modelLoadedRef.current = true;
+            },
+            (error) => {
+                console.error('An error occurred while loading the model:', error);
             }
-          };
-        } else {
-          newAction.reset().fadeIn(0.5).play();
+        );
+
+        return () => {
+            if (mixerRef.current) {
+                mixerRef.current.stopAllAction();
+            }
+            if (groupRef.current) {
+                scene.remove(groupRef.current);
+            }
+            modelLoadedRef.current = false;
+        };
+    }, [memoizedModelData, animation, scale, scene, camera, cameraDistanceFactor, isPopup]);
+
+    useFrame((state, delta) => {
+        if (mixerRef.current) {
+            mixerRef.current.update(delta);
         }
-
-        currentAnimationRef.current = newAction;
-
-        if (pauseAnimation && animation === 'Jump') {
-          newAction.paused = true;
-          newAction.time = newAction.getClip().duration * 0.25;
-        } else {
-          newAction.paused = false;
+        if (groupRef.current && !isPopup) {
+            groupRef.current.rotation.y = rotation;
         }
-      } else {
-        console.warn(`Animation "${animation}" not found.`);
-      }
-    }
-  }, [gltf, animation, pauseAnimation, onAnimationComplete]);
+    });
 
-  useFrame((state, delta) => {
-    if (mixerRef.current && !isDeathAnimationComplete) {
-      mixerRef.current.update(delta);
-    }
-    if (groupRef.current) {
-      groupRef.current.rotation.y = rotation;
-    }
-  });
-
-  if (!gltf) {
     return null;
-  }
-
-  return (
-      <group ref={groupRef}>
-        <primitive object={gltf.scene} />
-      </group>
-  );
 };
 
-export default ModelViewer;
+export default React.memo(ModelViewer);
