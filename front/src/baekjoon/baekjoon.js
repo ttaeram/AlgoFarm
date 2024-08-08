@@ -1,5 +1,3 @@
-import { NoSim } from "@mui/icons-material";
-
 // Set to true to enable console log
 const debug = false;
 

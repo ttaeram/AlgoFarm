@@ -7,8 +7,7 @@ import useCharacterDrag from './useCharacterDrag';
 
 const SIZE = 120;
 
-const CharacterOverlay = ({ initialVisibility }) => {
-    const [isVisible, setIsVisible] = useState(initialVisibility);
+const CharacterOverlay = ({}) => {
     const [model, setModel] = useState(null);
     const [currentCharacter, setCurrentCharacter] = useState('Cat');
     const canvasRef = useRef(null);
@@ -65,8 +64,6 @@ const CharacterOverlay = ({ initialVisibility }) => {
             } else if (request.action === "changeCharacter") {
                 setCurrentCharacter(request.character);
                 modelLoadedRef.current = false;
-            } else if (request.action === "toggleCharacterVisibility") {
-                setIsVisible(request.isVisible);
             }
         };
 
@@ -81,8 +78,6 @@ const CharacterOverlay = ({ initialVisibility }) => {
         e.stopPropagation();
         handleMouseDown(e);
     }, [handleMouseDown]);
-
-    if (!isVisible) return null;
 
     return (
         <div

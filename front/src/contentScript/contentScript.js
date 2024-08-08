@@ -14,7 +14,7 @@ function renderOverlay() {
     rootElement.style.zIndex = '9999';
     rootElement.style.pointerEvents = 'none';
     document.body.appendChild(rootElement);
-
+    console.log('Rendered overlay');
     const root = ReactDOM.createRoot(rootElement);
     root.render(<CharacterOverlay />);
 }
@@ -40,7 +40,7 @@ function getStorageData(key) {
 // 초기 실행
 (async function init() {
     const showCharacter = true;
-    if (showCharacter !== false) {
+    if (showCharacter) {
         renderOverlay();
     }
     console.log('Content script loaded, character visibility:', showCharacter !== false);
