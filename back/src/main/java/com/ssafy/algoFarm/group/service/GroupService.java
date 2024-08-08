@@ -4,6 +4,7 @@ import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.exception.BusinessException;
 import com.ssafy.algoFarm.exception.ErrorCode;
+import com.ssafy.algoFarm.group.dto.request.ChangeNicknameReqDto;
 import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
@@ -219,5 +220,12 @@ public class GroupService {
 
     public long getUserGroupsCount(String email) {
         return memberRepository.countByUserEmail(email);
+    }
+
+    public void changeNickname(Long userId, ChangeNicknameReqDto changeNicknameReqDto) {
+        Member member = memberRepository.findByUserIdAndGroupId(userId, changeNicknameReqDto.getGroupId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        member.setNickname(changeNicknameReqDto.getNewNickname());
+
+        memberRepository.save(member);
     }
 }
