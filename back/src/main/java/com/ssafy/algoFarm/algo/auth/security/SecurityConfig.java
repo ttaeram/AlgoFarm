@@ -9,15 +9,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -32,12 +39,10 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final OAuth2AuthorizedClientService authorizedClientService;
-
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
     }
-
     /**
      * 보안 필터 체인을 구성
      * 이 메소드는 HTTP 보안 설정, CORS, CSRF, 인증, 인가 등을 정의
@@ -48,7 +53,7 @@ public class SecurityConfig {
      */
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.headers(headers -> headers
                 .frameOptions(frame -> frame.deny())
                 .xssProtection(xss -> xss.disable())
@@ -67,8 +72,8 @@ public class SecurityConfig {
                                 "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
                                 "/css/**", "/js/**", "/images/**", "/fonts/**",
                                 "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
-                                "/*.svg", "/*.html", "/*.ico", "/static/**", "/**").permitAll()
-                        .anyRequest().authenticated()
+                                "/*.svg", "/*.html", "/*.ico", "/static/**","/**").permitAll()
+                    .anyRequest().authenticated()
                 )
 
 
@@ -123,7 +128,6 @@ public class SecurityConfig {
             return http.build();
         }
     }
-
     @Configuration
     @Profile("local")
     public class LocalSecurityConfig {
@@ -131,20 +135,12 @@ public class SecurityConfig {
         public SecurityFilterChain localSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable)
-                    .cors(cors -> cors.disable())
-                    .sessionManagement(session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    )
+                    // .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 주석 처리
                     .authorizeHttpRequests(authorize -> authorize
                             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
-                                    "/css/**", "/js/**", "/images/**", "/fonts/**",
-                                    "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
-                                    "/*.svg", "/*.html", "/*.ico", "/static/**").permitAll()
+                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
                             .anyRequest().authenticated()
                     )
-
-
                     .oauth2Login(oauth2 -> oauth2
                             .loginPage("/home")
                             .userInfoEndpoint(userInfo -> userInfo
@@ -152,15 +148,14 @@ public class SecurityConfig {
                             )
                             .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                     )
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
                     .exceptionHandling(exceptions -> exceptions
-                            .authenticationEntryPoint((request, response, authException) -> {
-                                response.setContentType("application/json;charset=UTF-8");
-                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                                String errorMessage = "Authentication failed: " + authException.getMessage();
-                                response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of("error", errorMessage)));
-                            })
+                            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                     )
                     .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
             return http.build();
         }
     }

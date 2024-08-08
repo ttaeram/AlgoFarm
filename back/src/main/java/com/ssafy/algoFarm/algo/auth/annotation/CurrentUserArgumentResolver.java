@@ -44,12 +44,20 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
             throw new BadCredentialsException("No token found");
         }
 
-        if (!jwtUtil.validateToken(token)) {
-            logger.error("Invalid token");
-            throw new BadCredentialsException("Invalid token");
+        JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(token);
+        if (!validationResult.isValid()) {
+            logger.error("Invalid token: {}", validationResult.getMessage());
+            throw new BadCredentialsException("Invalid token: " + validationResult.getMessage());
         }
 
-        String email = jwtUtil.getEmailFromToken(token);
+        String email;
+        try {
+            email = jwtUtil.getEmailFromToken(token);
+        } catch (Exception e) {
+            logger.error("Failed to extract email from token", e);
+            throw new BadCredentialsException("Failed to extract email from token");
+        }
+
         if (email == null || email.isEmpty()) {
             logger.error("No email found in token");
             throw new BadCredentialsException("No email found in token");

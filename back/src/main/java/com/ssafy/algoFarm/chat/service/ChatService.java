@@ -37,7 +37,7 @@ public class ChatService {
         List<ChatMessage> chatMessages = chatMessageRepository.findByGroupId(groupId);
         List<ChatMessageResDTO> chatMessageResDTOList = new ArrayList<>();
         for (ChatMessage chatMessage : chatMessages) {
-            ChatMessageResDTO chatMessageResDTO = new ChatMessageResDTO(chatMessage.getNickname(), chatMessage.getContent(), chatMessage.getCreateAt());
+            ChatMessageResDTO chatMessageResDTO = new ChatMessageResDTO(chatMessage.getUser().getId(), chatMessage.getNickname(), chatMessage.getContent(), chatMessage.getCreateAt());
             chatMessageResDTOList.add(chatMessageResDTO);
         }
         return chatMessageResDTOList;
