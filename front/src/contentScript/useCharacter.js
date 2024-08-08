@@ -13,6 +13,7 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     const animationRef = useRef();
     const moveIntervalRef = useRef();
     const jumpRef = useRef();
+    const currentAnimationRef = useRef(null);
 
     const cancelCurrentMovement = useCallback(() => {
         clearTimeout(animationRef.current);
@@ -20,7 +21,7 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     }, []);
 
     const moveCharacter = useCallback(() => {
-        if (isDragging) return;
+        if (isDragging || currentAnimationRef.current) return;
 
         cancelCurrentMovement();
 
@@ -34,7 +35,7 @@ const useCharacter = (initialVisibility = true, size = 120) => {
         setSpeed(newSpeed);
 
         moveIntervalRef.current = setInterval(() => {
-            if (!isJumping && newAnimation !== 'Sit' && !isDragging) {
+            if (!isJumping && newAnimation !== 'Sit' && !isDragging && !currentAnimationRef.current) {
                 setPosition(prevPos => {
                     let newX = prevPos.x + newDirection * newSpeed;
                     if (newX <= 0 || newX >= window.innerWidth - size) {
@@ -55,7 +56,7 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     }, [size, isJumping, isDragging, cancelCurrentMovement]);
 
     const performJump = useCallback(() => {
-        if (isJumping || isDragging) return;
+        if (isJumping || isDragging || currentAnimationRef.current) return;
         setIsJumping(true);
         setAnimation('Jump');
 
@@ -85,7 +86,9 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     }, [position.y, speed, isDragging]);
 
     useEffect(() => {
-        moveCharacter();
+        if (!currentAnimationRef.current) {
+            moveCharacter();
+        }
         return cancelCurrentMovement;
     }, [moveCharacter, cancelCurrentMovement]);
 
@@ -97,11 +100,15 @@ const useCharacter = (initialVisibility = true, size = 120) => {
 
     const stopDragging = useCallback(() => {
         setIsDragging(false);
-        setAnimation('Walk');
-        moveCharacter();
+        if (!currentAnimationRef.current) {
+            setAnimation('Walk');
+            moveCharacter();
+        }
     }, [moveCharacter]);
 
     const handleMouseDown = useCallback((e) => {
+        if (currentAnimationRef.current) return;
+
         const rect = e.target.getBoundingClientRect();
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
@@ -127,10 +134,17 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     }, [size, startDragging, stopDragging]);
 
     const handleAnimationComplete = useCallback(() => {
+        if (currentAnimationRef.current) {
+            clearTimeout(currentAnimationRef.current.timeout);
+            currentAnimationRef.current = null;
+        }
         if (animation === 'Death') {
             setTimeout(() => setAnimation('Walk'), 2000);
+        } else if (!isDragging) {
+            setAnimation('Walk');
+            moveCharacter();
         }
-    }, [animation]);
+    }, [animation, isDragging, moveCharacter]);
 
     const loadModel = useCallback((character) => {
         fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
@@ -145,11 +159,22 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     }, [currentCharacter, loadModel]);
 
     const playAnimation = useCallback((newAnimation, duration = 3000) => {
-        setAnimation(newAnimation);
-        if (newAnimation !== 'Death') {
-            setTimeout(() => setAnimation('Walk'), duration);
+        if (currentAnimationRef.current) {
+            clearTimeout(currentAnimationRef.current.timeout);
         }
-    }, []);
+
+        setAnimation(newAnimation);
+        currentAnimationRef.current = {
+            animation: newAnimation,
+            timeout: setTimeout(() => {
+                currentAnimationRef.current = null;
+                if (!isDragging) {
+                    setAnimation('Walk');
+                    moveCharacter();
+                }
+            }, duration)
+        };
+    }, [isDragging, moveCharacter]);
 
     const changeCharacter = useCallback((character) => {
         setCurrentCharacter(character);
