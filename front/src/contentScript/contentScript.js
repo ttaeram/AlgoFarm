@@ -29,8 +29,8 @@ function getStorageData(key) {
 }
 // 초기 실행
 (async function init() {
-    const bjhEnable = await getStorageData('bjhEnable');
-    const isVisible = bjhEnable !== false; // undefined일 경우 true로 처리
+    const Enable = await getStorageData('Enable');
+    const isVisible = Enable !== false; // undefined일 경우 true로 처리
     renderOverlay(isVisible);
     console.log('Content script loaded, character visibility:', isVisible);
 })();
