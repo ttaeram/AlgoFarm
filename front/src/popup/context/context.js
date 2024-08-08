@@ -31,7 +31,12 @@ export const AuthProvider = ({ children }) => {
     
       if(isChromeExtension()) {
         setIsLogined(true); // 로그인 상태를 true로 설정
-      chrome.storage.local.set({ isLogined: true });
+        chrome.storage.local.set({ isLogined: true });
+        if(!getObjectFromChromeStorage('Enable')){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
+          setObjectToChromeStorage('Enable', true);
+        }
+        const now = new Date();
+        console.log(now + "로그인햇음니다.");
       } // 로그인 상태를 chrome.storage.local에 저장
       
     } else {
@@ -221,11 +226,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  
+// 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
+const getObjectFromChromeStorage = (key) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([key], (result) => {
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      resolve(result[key]);
+    });
+  });
+}
+
+// 로컬 스토리지에 객체 저장하기 (크롬 확장 프로그램용)
+const setObjectToChromeStorage = (key, value) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      resolve();
+    });
+  });
+}
+
+/*ToggleEnableButtons.js의 함수와 동일한 것을 사용 2024.08.08*/ 
+// 로컬 스토리지에서 객체 가져오기 (웹 애플리케이션용)
+const getObjectFromLocalStorage = (key) => {
+  return Promise.resolve(localStorage.getItem(key));
+}
+
+// 로컬 스토리지에 객체 저장하기 (웹 애플리케이션용)
+const setObjectToLocalStorage = (key, value) => {
+  localStorage.setItem(key, value);
+  return Promise.resolve();
+}
+/*ToggleEnableButtons.js의 함수와 동일한 것을 사용 2024.08.08*/ 
+
   return (
     <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, members, fetchGroupInfo, fetchMembers, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+
 
 export const useAuth = () => useContext(AuthContext);

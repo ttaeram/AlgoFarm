@@ -3,7 +3,7 @@
   가독성을 위해 따로 파일 분리함
 */
 async function checkEnable() {
-  const enable = await getObjectFromLocalStorage('bjhEnable');
+  const enable = await getObjectFromLocalStorage('Enable');
   if (!enable) {
     console.log("확장 off"); // 비활성화 시 콘솔 메시지 출력
   } else {

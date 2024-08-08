@@ -62,10 +62,10 @@ const ToggleButton = () => {
 
   useEffect(() => {
     const fetchEnable = async () => {
-      const enable = isChromeExtension() ? await getObjectFromChromeStorage('bjhEnable') : await getObjectFromLocalStorage('bjhEnable');
-      setEnabled(enable === 'true');
+      const enable = isChromeExtension() ? await getObjectFromChromeStorage('Enable') : await getObjectFromLocalStorage('Enable');
+      setEnabled(enable);
       console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
-        toggleCharacterVisibility(enable !== false);
+      toggleCharacterVisibility(enable !== false);
 
     };
 
@@ -83,9 +83,9 @@ const ToggleButton = () => {
   const handleToggle = async () => {
     const newEnabled = !enabled;
     if (isChromeExtension()) {
-      await setObjectToChromeStorage('bjhEnable', newEnabled);
+      await setObjectToChromeStorage('Enable', newEnabled);
     } else {
-      await setObjectToLocalStorage('bjhEnable', newEnabled);
+      await setObjectToLocalStorage('Enable', newEnabled);
     }
     setEnabled(newEnabled);
     toggleCharacterVisibility(newEnabled);
@@ -96,7 +96,7 @@ const ToggleButton = () => {
     <div className={styles.button}>
       <FormControlLabel
         control={<GreenSwitch checked={enabled} onChange={handleToggle} />}
-        label={enabled ? 'Disable' : 'Enable'}
+        label={enabled ? 'Enable' : 'Disable'}
         className={enabled ? styles.active : ''}
       />
     </div>
