@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Switch, FormControlLabel } from '@mui/material';
 import { styled } from '@mui/system';
 import * as styles from './ToggleEnableButton.module.css';
+import { deflate } from 'three/examples/jsm/libs/fflate.module.js';
 
 // 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
 const getObjectFromChromeStorage = (key) => {
