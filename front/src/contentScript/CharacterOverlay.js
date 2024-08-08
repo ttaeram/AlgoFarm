@@ -13,7 +13,7 @@ const CharacterOverlay = () => {
         currentCharacter,
         position,
         direction,
-        animation,
+        animationConfig,
         isDragging,
         handleMouseDown,
         handleMouseMove,
@@ -28,7 +28,14 @@ const CharacterOverlay = () => {
     useEffect(() => {
         const handleCustomPlayAnimation = (event) => {
             const { animation, duration } = event.detail;
-            playAnimation(animation, duration);
+            let pauseTime = null;
+
+            // 'Death' 애니메이션의 경우 0.3초에 멈춤
+            if (animation === 'Death') {
+                pauseTime = 0.40;
+            }
+
+            playAnimation(animation, duration, pauseTime);
         };
 
         document.addEventListener('playAnimation', handleCustomPlayAnimation);
@@ -74,10 +81,10 @@ const CharacterOverlay = () => {
                 {model && (
                     <ModelViewer
                         modelData={model}
+                        animationConfig={animationConfig}
                         cameraDistanceFactor={0.5}
                         cameraHorizontalAngle={0}
                         scale={3}
-                        animation={animation}
                         rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
                         onAnimationComplete={handleAnimationComplete}
                     />
