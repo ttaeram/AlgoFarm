@@ -186,12 +186,7 @@ public class GroupController {
     @Operation(summary = "그룹 내 닉네임 변경", description = "현재 사용자가 그룹 내에서 사용할 닉네임을 변경합니다.")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse> changeNickname(ChangeNicknameReqDto changeNicknameReqDto, @Parameter(hidden = true) @CurrentUser User user){
-        try {
-            groupService.changeNickname(user.getId(), changeNicknameReqDto);
-        }catch(Exception e) {
-            return new ResponseEntity<>(MessageResponse.of(HttpStatus.FORBIDDEN, "해당 그룹에 해당 유저가 없습니다."), HttpStatus.FORBIDDEN);
-        }
-
+        groupService.changeNickname(user.getId(), changeNicknameReqDto);
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "닉네임이 변경되었습니다."), HttpStatus.OK);
     }
 

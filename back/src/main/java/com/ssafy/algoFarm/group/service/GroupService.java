@@ -223,8 +223,8 @@ public class GroupService {
     }
 
     public void changeNickname(Long userId, ChangeNicknameReqDto changeNicknameReqDto) {
-        Member member = memberRepository.findByUserIdAndGroupId(userId, changeNicknameReqDto.getGroupId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        member.setNickname(changeNicknameReqDto.getNewNickname());
+        Member member = memberRepository.findByUserIdAndGroupId(userId, changeNicknameReqDto.groupId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        member.setNickname(changeNicknameReqDto.newNickname());
 
         memberRepository.save(member);
     }
