@@ -7,9 +7,10 @@ const ModelViewer = ({
                          modelData,
                          animation,
                          rotation,
-                         scale ,
+                         scale,
                          cameraDistanceFactor,
-                         isPopup
+                         isPopup,
+                         onAnimationComplete
                      }) => {
     const groupRef = useRef();
     const { scene, camera } = useThree();
@@ -26,9 +27,6 @@ const ModelViewer = ({
             memoizedModelData,
             '',
             (loadedGltf) => {
-                //console.log('GLTF loaded successfully:', loadedGltf);
-
-                // 기존 모델 제거
                 if (groupRef.current) {
                     scene.remove(groupRef.current);
                 }
@@ -37,7 +35,6 @@ const ModelViewer = ({
 
                 const mixer = new THREE.AnimationMixer(loadedGltf.scene);
                 mixerRef.current = mixer;
-                //console.log('Available animations:', loadedGltf.animations.map(anim => anim.name));
 
                 const animationIndex = loadedGltf.animations.findIndex(anim => anim.name === animation);
                 if (animationIndex !== -1) {
@@ -45,17 +42,14 @@ const ModelViewer = ({
                     action.play();
                 }
 
-                // 모델 크기 조정
                 loadedGltf.scene.scale.set(scale, scale, scale);
 
-                // 모델 중앙 정렬
                 const box = new THREE.Box3().setFromObject(loadedGltf.scene);
                 const center = box.getCenter(new THREE.Vector3());
                 loadedGltf.scene.position.sub(center);
 
                 groupRef.current = loadedGltf.scene;
 
-                // 카메라 위치 조정 (팝업에서만)
                 if (isPopup) {
                     const size = box.getSize(new THREE.Vector3());
                     const maxDim = Math.max(size.x, size.y, size.z);
