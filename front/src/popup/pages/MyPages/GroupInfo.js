@@ -62,8 +62,6 @@ function GroupInfo() {
 
   return (
     <Box className={styles.container}>
-      <Typography variant="h4" className={styles.title}>그룹 이름</Typography>
-      <Typography variant="h5" className={styles.subtitle}>스터디 스트릭</Typography>
       <GrassGraph data={grassData} />
     </Box>
   );
