@@ -33,7 +33,7 @@ const CharacterOverlay = ({}) => {
 
     const handleAnimationComplete = useCallback(() => {
         if (animation === 'Death') {
-            setTimeout(() => setAnimation('Walk'), 2000);
+            setAnimation('Walk');
         }
     }, [animation, setAnimation]);
 
@@ -53,6 +53,22 @@ const CharacterOverlay = ({}) => {
             modelLoadedRef.current = true;
         }
     }, [currentCharacter, loadModel]);
+
+    useEffect(() => {
+        const handleCustomPlayAnimation = (event) => {
+            const { animation, duration } = event.detail;
+            setAnimation(animation);
+            if (animation !== 'Death') {
+                setTimeout(() => setAnimation('Walk'), duration);
+            }
+        };
+
+        document.addEventListener('playAnimation', handleCustomPlayAnimation);
+
+        return () => {
+            document.removeEventListener('playAnimation', handleCustomPlayAnimation);
+        };
+    }, [setAnimation]);
 
     useEffect(() => {
         const messageListener = (request, sender, sendResponse) => {
