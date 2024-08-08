@@ -28,7 +28,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
                 oauthToken.getAuthorizedClientRegistrationId(),
                 oauthToken.getName());
-
+        System.out.println("client: " + client);
         String accessToken = client.getAccessToken().getTokenValue();
         System.out.println("google accessToken: " + accessToken);
         // 액세스 토큰을 URL 파라미터로 전달

@@ -7,8 +7,7 @@ import useCharacterDrag from './useCharacterDrag';
 
 const SIZE = 120;
 
-const CharacterOverlay = ({ initialVisibility }) => {
-    const [isVisible, setIsVisible] = useState(initialVisibility);
+const CharacterOverlay = ({}) => {
     const [model, setModel] = useState(null);
     const [currentCharacter, setCurrentCharacter] = useState('Cat');
     const canvasRef = useRef(null);
@@ -34,12 +33,12 @@ const CharacterOverlay = ({ initialVisibility }) => {
 
     const handleAnimationComplete = useCallback(() => {
         if (animation === 'Death') {
-            setTimeout(() => setAnimation('Walk'), 2000);
+            setAnimation('Walk');
         }
     }, [animation, setAnimation]);
 
     const loadModel = useCallback((character) => {
-        if (modelLoadedRef.current) return; // 이미 모델이 로드되었다면 중복 로드 방지
+        if (modelLoadedRef.current) return;
         fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
             .then(response => response.arrayBuffer())
             .then(arrayBuffer => {
@@ -48,15 +47,29 @@ const CharacterOverlay = ({ initialVisibility }) => {
             });
     }, []);
 
-    // 모델 로딩을 위한 useEffect
     useEffect(() => {
         if (!modelLoadedRef.current) {
             loadModel(currentCharacter);
-            modelLoadedRef.current = true; // 모델이 로드된 후 플래그 설정
+            modelLoadedRef.current = true;
         }
     }, [currentCharacter, loadModel]);
 
-    // 메시지 리스너를 위한 useEffect
+    useEffect(() => {
+        const handleCustomPlayAnimation = (event) => {
+            const { animation, duration } = event.detail;
+            setAnimation(animation);
+            if (animation !== 'Death') {
+                setTimeout(() => setAnimation('Walk'), duration);
+            }
+        };
+
+        document.addEventListener('playAnimation', handleCustomPlayAnimation);
+
+        return () => {
+            document.removeEventListener('playAnimation', handleCustomPlayAnimation);
+        };
+    }, [setAnimation]);
+
     useEffect(() => {
         const messageListener = (request, sender, sendResponse) => {
             if (request.action === "playAnimation") {
@@ -66,9 +79,7 @@ const CharacterOverlay = ({ initialVisibility }) => {
                 }
             } else if (request.action === "changeCharacter") {
                 setCurrentCharacter(request.character);
-                modelLoadedRef.current = false; // 캐릭터 변경 시 모델 재로드 허용
-            } else if (request.action === "toggleVisibility") {
-                setIsVisible(request.isVisible);
+                modelLoadedRef.current = false;
             }
         };
 
@@ -83,8 +94,6 @@ const CharacterOverlay = ({ initialVisibility }) => {
         e.stopPropagation();
         handleMouseDown(e);
     }, [handleMouseDown]);
-
-    if (!isVisible) return null;
 
     return (
         <div
