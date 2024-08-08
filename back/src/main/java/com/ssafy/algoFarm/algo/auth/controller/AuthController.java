@@ -97,7 +97,7 @@ public class AuthController {
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 Map<String, Object> userInfo = Map.of(
-                        "sub", user.getOAuthId(),
+                        "sub", user.getId(),
                         "name", user.getName(),
                         "email", user.getEmail(),
                         "provider", user.getProvider(),
