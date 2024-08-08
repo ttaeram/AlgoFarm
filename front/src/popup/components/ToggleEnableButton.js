@@ -58,7 +58,7 @@ const GreenSwitch = styled(Switch)(({ theme }) => ({
 }));
 
 const ToggleButton = () => {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     const fetchEnable = async () => {
