@@ -1,14 +1,24 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/context";
-import { Box, Button, Typography, List, ListItem, ListItemText, Snackbar, IconButton } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Snackbar, IconButton, Button } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
+import { styled } from '@mui/system';
+import * as styles from './MemberManage.module.css';
+
+const CustomButton = styled(Button)(({ theme }) => ({
+  marginTop: '16px',
+  backgroundColor: '#76ff03',
+  color: 'white',
+  '&:hover': {
+    backgroundColor: '#64dd17',
+  },
+}));
 
 function MemberManage() {
   const { groupId, groupInfo, jwt, members, fetchMembers: originalFetchMembers } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // useEffect에서 fetchMembers 호출
   useEffect(() => {
     const loadMembers = async () => {
       if (groupId && jwt) {
@@ -62,7 +72,6 @@ function MemberManage() {
         throw new Error('Failed to kick member');
       }
 
-      // 멤버 리스트를 새로고침
       await originalFetchMembers(jwt, groupId);
     } catch (error) {
       console.error('Error kicking member:', error);
@@ -74,48 +83,53 @@ function MemberManage() {
   };
 
   return (
-    <Box p={3}>
-      {groupInfo?.isLeader && (
-        <Box mb={2}>
-          <Button variant="contained" color="primary" onClick={handleGenerateInviteCode}>
-            Generate Invite Code
-          </Button>
-          {inviteCode && (
-            <Typography variant="body1" mt={2}>
-              Invite Code: {inviteCode}
-            </Typography>
-          )}
-        </Box>
-      )}
+    <Box className={styles.container}>
       <Typography variant="h4" gutterBottom>
         스터디 구성원
       </Typography>
-      <List>
+      <List className={styles.memberList}>
         {members.map(member => (
           <ListItem key={member.memberId} divider>
             <ListItemText
               primary={`${member.nickname} ${member.isLeader ? '(스터디장)' : ''}`}
-            />
+              />
             {groupInfo?.isLeader && !member.isLeader && (
               <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => handleKickMember(member.userId)}
+              variant="contained"
+              color="secondary"
+              onClick={() => handleKickMember(member.userId)}
+              className={styles.kickButton}
               >
-                Kick
+                추방
               </Button>
             )}
           </ListItem>
         ))}
       </List>
+      {groupInfo?.isLeader && (
+        <Box>
+          <CustomButton
+            variant="contained"
+            onClick={handleGenerateInviteCode}
+          >
+            초대 코드 생성
+          </CustomButton>
+          {inviteCode && (
+            <Typography variant="body1" className={styles.inviteCodeText}>
+              초대 코드 : {inviteCode}
+            </Typography>
+          )}
+        </Box>
+      )}
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         open={showSuccess}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        message="Invite code generated successfully!"
+        message="초대코드가 생성되었습니다!"
+        className={styles.snackbar}
         action={
-          <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar}>
+          <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar} className={styles.closeIcon}>
             <CloseIcon fontSize="small" />
           </IconButton>
         }

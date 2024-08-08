@@ -3,7 +3,8 @@ import { useAuth } from "../../context/context";
 import LogoutButton from "../../components/LogoutButton";
 import GroupLeaveButton from '../../components/GroupLeaveButton';
 import ToggleEnableButton from '../../components/ToggleEnableButton';
-import { TextField, Button, Box, Typography, Container } from '@mui/material';
+import { TextField, Button, Box, Typography } from '@mui/material';
+import * as styles from './settings.module.css';
 
 function Settings() {
   const { user, groupInfo, jwt, setGroupInfo, groupId } = useAuth();
@@ -48,19 +49,19 @@ function Settings() {
   };
 
   return (
-    <Box p={3} maxWidth="md">
+    <Box className={styles.container}>
       <Typography variant="h4" gutterBottom>설정</Typography>
-      <Box mb={3} className="groupName">
-      {user ? (
-        <Box mb={3}>
-          <Typography variant="h6"><strong>닉네임 : </strong> {user.name}</Typography>
-          <Typography variant="h6"><strong>Email : </strong> {user.email}</Typography>
-        </Box>
-      ) : (
-        <Typography>유저 정보 로딩중...</Typography>
-      )}
+      <Box className={styles.groupName}>
+        {user ? (
+          <Box mb={3}>
+            <Typography variant="h6"><strong>닉네임 : </strong> {user.name}</Typography>
+            <Typography variant="h6"><strong>Email : </strong> {user.email}</Typography>
+          </Box>
+        ) : (
+          <Typography>유저 정보 로딩중...</Typography>
+        )}
         {isEditing ? (
-          <form onSubmit={handleGroupNameSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <form onSubmit={handleGroupNameSubmit} className={styles.form}>
             <TextField
               value={newGroupName}
               onChange={handleGroupNameChange}
@@ -84,16 +85,16 @@ function Settings() {
           </Box>
         )}
       </Box>
-      <Box mb={3}>
-        <Typography variant="h6"><strong>기능 On/Off</strong></Typography>
+      <Box className={styles.toggleSection}>
+        <Typography variant="h6" className={styles.sectionTitle}><strong>기능 On/Off</strong></Typography>
         <ToggleEnableButton />
       </Box>
-      <Box mb={3}>
-      <Typography variant="h6"><strong>로그아웃</strong></Typography>
+      <Box className={styles.logoutSection}>
+        <Typography variant="h6" className={styles.sectionTitle}><strong>로그아웃</strong></Typography>
         <LogoutButton />
       </Box>
-      <Box>
-      <Typography variant="h6"><strong>그룹 나가기</strong></Typography>
+      <Box className={styles.leaveSection}>
+        <Typography variant="h6" className={styles.sectionTitle}><strong>그룹 나가기</strong></Typography>
         <GroupLeaveButton />
       </Box>
     </Box>

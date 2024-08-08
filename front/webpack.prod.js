@@ -9,6 +9,7 @@ module.exports = merge(common, {
     popup: './src/popup/index.js',
     background: './src/background/background.js',
     contentScript: './src/contentScript/contentScript.js',
+    AICodeReview: './src/AICodeReview/AICodeReview.js',
   },
   plugins: [
     new HtmlWebpackPlugin({
