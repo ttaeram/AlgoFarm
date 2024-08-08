@@ -4,6 +4,7 @@ import LogoutButton from "../../components/LogoutButton";
 import GroupLeaveButton from '../../components/GroupLeaveButton';
 import ToggleEnableButton from '../../components/ToggleEnableButton';
 import { TextField, Button, Box, Typography } from '@mui/material';
+import ToggleCharacterButton from '../../components/ToggleCharacterButton';
 import { styled } from '@mui/system';
 import * as styles from './settings.module.css';
 
@@ -193,6 +194,7 @@ function Settings() {
       <Box className={styles.toggleSection}>
         <SectionTitle variant="h6" className={styles.sectionTitle}>기능 On/Off</SectionTitle>
         <ToggleEnableButton />
+        <ToggleCharacterButton />
       </Box>
       <Box className={styles.logoutSection}>
         <SectionTitle variant="h6" className={styles.sectionTitle}>로그아웃</SectionTitle>
