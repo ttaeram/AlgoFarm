@@ -1,99 +1,54 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from './ModelViewer';
-import useCharacterMovement from './useCharacterMovement';
-import useCharacterDrag from './useCharacterDrag';
+import useCharacter from './useCharacter';
 
 const SIZE = 120;
 
-const CharacterOverlay = ({}) => {
-    const [model, setModel] = useState(null);
-    const [currentCharacter, setCurrentCharacter] = useState('Cat');
-    const canvasRef = useRef(null);
-    const modelLoadedRef = useRef(false);
-
+const CharacterOverlay = () => {
     const {
+        isVisible,
+        model,
+        currentCharacter,
         position,
-        setPosition,
         direction,
         animation,
-        setAnimation,
-        speed,
-        startDragging,
-        stopDragging
-    } = useCharacterMovement(SIZE);
+        isDragging,
+        handleMouseDown,
+        handleMouseMove,
+        handleMouseUp,
+        handleAnimationComplete,
+        playAnimation,
+        changeCharacter,
+    } = useCharacter(true, SIZE);
 
-    const {isDragging, handleMouseDown, handleMouseMove, handleMouseUp} = useCharacterDrag(
-        SIZE,
-        setPosition,
-        startDragging,
-        stopDragging
-    );
-
-    const handleAnimationComplete = useCallback(() => {
-        if (animation === 'Death') {
-            setAnimation('Walk');
-        }
-    }, [animation, setAnimation]);
-
-    const loadModel = useCallback((character) => {
-        if (modelLoadedRef.current) return;
-        fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => {
-                setModel(arrayBuffer);
-                modelLoadedRef.current = true;
-            });
-    }, []);
-
-    useEffect(() => {
-        if (!modelLoadedRef.current) {
-            loadModel(currentCharacter);
-            modelLoadedRef.current = true;
-        }
-    }, [currentCharacter, loadModel]);
+    const canvasRef = useRef(null);
 
     useEffect(() => {
         const handleCustomPlayAnimation = (event) => {
             const { animation, duration } = event.detail;
-            setAnimation(animation);
-            if (animation !== 'Death') {
-                setTimeout(() => setAnimation('Walk'), duration);
-            }
+            playAnimation(animation, duration);
         };
 
         document.addEventListener('playAnimation', handleCustomPlayAnimation);
-
-        return () => {
-            document.removeEventListener('playAnimation', handleCustomPlayAnimation);
-        };
-    }, [setAnimation]);
+        return () => document.removeEventListener('playAnimation', handleCustomPlayAnimation);
+    }, [playAnimation]);
 
     useEffect(() => {
         const messageListener = (request, sender, sendResponse) => {
             if (request.action === "playAnimation") {
-                setAnimation(request.animation);
-                if (request.animation !== 'Death') {
-                    setTimeout(() => setAnimation('Walk'), 3000);
-                }
+                playAnimation(request.animation);
             } else if (request.action === "changeCharacter") {
-                setCurrentCharacter(request.character);
-                modelLoadedRef.current = false;
+                changeCharacter(request.character);
             }
         };
 
         chrome.runtime.onMessage.addListener(messageListener);
+        return () => chrome.runtime.onMessage.removeListener(messageListener);
+    }, [playAnimation, changeCharacter]);
 
-        return () => {
-            chrome.runtime.onMessage.removeListener(messageListener);
-        };
-    }, [setAnimation]);
-
-    const handleMouseDownWrapper = useCallback((e) => {
-        e.stopPropagation();
-        handleMouseDown(e);
-    }, [handleMouseDown]);
+    if (!isVisible) return null;
 
     return (
         <div
@@ -107,7 +62,7 @@ const CharacterOverlay = ({}) => {
                 userSelect: 'none',
                 pointerEvents: 'auto',
             }}
-            onMouseDown={handleMouseDownWrapper}
+            onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
@@ -124,7 +79,6 @@ const CharacterOverlay = ({}) => {
                         scale={3}
                         animation={animation}
                         rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
-                        pauseAnimation={false}
                         onAnimationComplete={handleAnimationComplete}
                     />
                 )}
