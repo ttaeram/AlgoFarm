@@ -1,8 +1,8 @@
 import React from 'react';
 import * as styles from './GaugeBar.module.css';
 
-const GaugeBar = ({ contribution }) => {
-  const percentage = Math.min(Math.max(contribution, 0), 100);
+const GaugeBar = ({ contribution, maxExperience }) => {
+  const percentage = Math.min(Math.max((contribution / maxExperience) * 100, 0), 100);
 
   return (
     <div className={styles.gauge_bar}>
@@ -12,7 +12,7 @@ const GaugeBar = ({ contribution }) => {
           style={{ width: `${percentage}%` }}
         ></div>
       </div>
-      <div className={styles.gauge_bar_value}>{percentage}%</div>
+      <div className={styles.gauge_bar_value}>{percentage.toFixed(2)}%</div>
     </div>
   );
 };
