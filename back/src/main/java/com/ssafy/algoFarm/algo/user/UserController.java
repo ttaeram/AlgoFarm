@@ -1,12 +1,9 @@
 package com.ssafy.algoFarm.algo.user;
 
-import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.algo.auth.annotation.CurrentUser;
+import com.ssafy.algoFarm.algo.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
