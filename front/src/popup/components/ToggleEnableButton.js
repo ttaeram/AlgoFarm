@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Switch, FormControlLabel } from '@mui/material';
 import { styled } from '@mui/system';
 import * as styles from './ToggleEnableButton.module.css';
+import { now } from 'three/examples/jsm/libs/tween.module.js';
 
 // 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
 const getObjectFromChromeStorage = (key) => {
@@ -62,9 +63,11 @@ const ToggleButton = () => {
   useEffect(() => {
     const fetchEnable = async () => {
       const enable = isChromeExtension() ? await getObjectFromChromeStorage('bjhEnable') : await getObjectFromLocalStorage('bjhEnable');
-      setEnabled(enable === 'true');
+      setEnabled(enable);
       console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
-        toggleCharacterVisibility(enable !== false);
+      const now = new Date();
+      console.log(now);
+      toggleCharacterVisibility(enable !== false);
 
     };
 
@@ -95,7 +98,7 @@ const ToggleButton = () => {
     <div className={styles.button}>
       <FormControlLabel
         control={<GreenSwitch checked={enabled} onChange={handleToggle} />}
-        label={enabled ? 'Disable' : 'Enable'}
+        label={enabled ? 'Enable' : 'Disable'}
         className={enabled ? styles.active : ''}
       />
     </div>

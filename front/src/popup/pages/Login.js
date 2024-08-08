@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
 
-
 const Popup = () => {
   const { user, setIsLogined, setUser, setJwt, isLogined, jwt, setGroupId, setGroupInfo, fetchGroupInfo } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
