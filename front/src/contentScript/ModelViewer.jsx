@@ -26,7 +26,7 @@ const ModelViewer = ({
             memoizedModelData,
             '',
             (loadedGltf) => {
-                console.log('GLTF loaded successfully:', loadedGltf);
+                // console.log('GLTF loaded successfully:', loadedGltf);
 
                 // 기존 모델 제거
                 if (groupRef.current) {

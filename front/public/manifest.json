@@ -41,7 +41,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["assets/models/*","static/js/*.chunk.js"],
+      "resources": ["assets/models/*","static/js/*.chunk.js","static/css/AICodeReview.css"],
       "matches": ["<all_urls>"]
     }
   ],
