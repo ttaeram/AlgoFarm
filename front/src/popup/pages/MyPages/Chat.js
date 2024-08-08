@@ -18,8 +18,33 @@ import {
   Box
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { styled } from '@mui/system';
 
-function ChatPopup({ onClose }) {
+const StyledButton = styled(Button)`
+  background-color: #f19cac;
+  color: white;
+  &:hover {
+    background-color: #FD88A0;
+  }
+`;
+
+const StyledCard = styled(Card)`
+  max-width: 80%;
+  margin-bottom: 1rem;
+  background-color: ${({ isOwnMessage }) => (isOwnMessage ? '#FCE6E0' : 'white')};
+`;
+
+const StyledDialogContent = styled(DialogContent)`
+  overflow-y: auto;
+  scrollbar-width: none;
+  ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const ChatPopup = ({ onClose }) => {
   const { jwt, groupId, user, groupInfo } = useAuth();
   const [chatMessages, setChatMessages] = useState([]);
   const [previousChatMessages, setPreviousChatMessages] = useState([]);
@@ -173,7 +198,7 @@ function ChatPopup({ onClose }) {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers sx={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+      <StyledDialogContent dividers>
         <List>
           {previousChatMessages.map((_chatMessage, index) => (
             <ListItem 
@@ -183,11 +208,7 @@ function ChatPopup({ onClose }) {
                 display: 'flex', 
                 justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
               }}>
-              <Card sx={{
-                maxWidth: '80%',
-                mb: 1,
-                backgroundColor: _chatMessage.userId === user.sub ? 'lightblue' : 'white'
-              }}>
+              <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
                 <CardContent>
                   <Typography variant="body2" color="textSecondary">
                     {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
@@ -196,7 +217,7 @@ function ChatPopup({ onClose }) {
                     {_chatMessage.content}
                   </Typography>
                 </CardContent>
-              </Card>
+              </StyledCard>
             </ListItem>
           ))}
           {chatMessages.map((_chatMessage, index) => (
@@ -207,11 +228,7 @@ function ChatPopup({ onClose }) {
                 display: 'flex', 
                 justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
               }}>
-              <Card sx={{
-                maxWidth: '80%',
-                mb: 1,
-                backgroundColor: _chatMessage.userId === user.sub ? 'lightblue' : 'white'
-              }}>
+              <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
                 <CardContent>
                   <Typography variant="body2" color="textSecondary">
                     {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
@@ -220,12 +237,12 @@ function ChatPopup({ onClose }) {
                     {_chatMessage.content}
                   </Typography>
                 </CardContent>
-              </Card>
+              </StyledCard>
             </ListItem>
           ))}
           <div ref={chatEndRef} />
         </List>
-      </DialogContent>
+      </StyledDialogContent>
       <DialogActions>
         <Box sx={{ display: 'flex', width: '100%' }}>
           <TextField
@@ -236,7 +253,7 @@ function ChatPopup({ onClose }) {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.which === 13 && publish(message)}
           />
-          <Button variant="contained" color="primary" onClick={() => publish(message)}>전송</Button>
+          <StyledButton variant="contained" onClick={() => publish(message)}>전송</StyledButton>
         </Box>
       </DialogActions>
     </Dialog>
