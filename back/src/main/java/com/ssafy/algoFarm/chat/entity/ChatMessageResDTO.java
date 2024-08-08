@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatMessageResDTO {
+    private Long userId;
     private String nickname;
     private String content;
     private LocalDateTime createAt;

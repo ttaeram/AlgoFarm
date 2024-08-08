@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SentChatMessageDTO {
+    private Long userId;
     private String content;
     private String nickname;
     private LocalDateTime createAt;
