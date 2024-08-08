@@ -1,5 +1,6 @@
 package com.ssafy.algoFarm.algo.auth.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -8,22 +9,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Spring Security 설정을 담당하는 클래스
@@ -37,6 +32,12 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final OAuth2AuthorizedClientService authorizedClientService;
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
+    }
+
     /**
      * 보안 필터 체인을 구성
      * 이 메소드는 HTTP 보안 설정, CORS, CSRF, 인증, 인가 등을 정의
@@ -45,8 +46,16 @@ public class SecurityConfig {
      * @return 구성된 SecurityFilterChain
      * @throws Exception 보안 구성 중 발생할 수 있는 예외
      */
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+        http.headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .xssProtection(xss -> xss.disable())
+                .httpStrictTransportSecurity(hsts -> hsts
+                        .includeSubDomains(true)
+                        .maxAgeInSeconds(31536000))
+        );
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.disable())
@@ -54,12 +63,14 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                            "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
-                            "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg", "/**/*.gif",
-                            "/**/*.svg", "/**/*.html", "/**/*.ico", "/static/**").permitAll()
-                    .anyRequest().authenticated()
-            )
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
+                                "/css/**", "/js/**", "/images/**", "/fonts/**",
+                                "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
+                                "/*.svg", "/*.html", "/*.ico", "/static/**", "/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+
 
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/home")
@@ -69,14 +80,15 @@ public class SecurityConfig {
                         .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                 )
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            String errorMessage = "Authentication failed: " + authException.getMessage();
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of("error", errorMessage)));
+                        })
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
     }
 
     /**
@@ -111,6 +123,7 @@ public class SecurityConfig {
             return http.build();
         }
     }
+
     @Configuration
     @Profile("local")
     public class LocalSecurityConfig {
@@ -118,12 +131,20 @@ public class SecurityConfig {
         public SecurityFilterChain localSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable)
-                    // .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 주석 처리
+                    .cors(cors -> cors.disable())
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
                     .authorizeHttpRequests(authorize -> authorize
                             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
+                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
+                                    "/css/**", "/js/**", "/images/**", "/fonts/**",
+                                    "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
+                                    "/*.svg", "/*.html", "/*.ico", "/static/**").permitAll()
                             .anyRequest().authenticated()
                     )
+
+
                     .oauth2Login(oauth2 -> oauth2
                             .loginPage("/home")
                             .userInfoEndpoint(userInfo -> userInfo
@@ -131,14 +152,15 @@ public class SecurityConfig {
                             )
                             .successHandler(new OAuth2LoginSuccessHandler(authorizedClientService))
                     )
-                    .sessionManagement(session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    )
                     .exceptionHandling(exceptions -> exceptions
-                            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                            .authenticationEntryPoint((request, response, authException) -> {
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                String errorMessage = "Authentication failed: " + authException.getMessage();
+                                response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of("error", errorMessage)));
+                            })
                     )
                     .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
             return http.build();
         }
     }
