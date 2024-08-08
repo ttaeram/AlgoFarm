@@ -4,17 +4,19 @@ import lombok.Getter;
 
 @Getter
 public class ErrorResponse {
-    private final String message;
-    private final int status;
     private final String code;
+    private final String message;
 
-    public ErrorResponse(ErrorCode errorCode) {
-        this.message = errorCode.getMessage();
-        this.status = errorCode.getStatus();
-        this.code = errorCode.getCode();
+    private ErrorResponse(String code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
     public static ErrorResponse of(ErrorCode errorCode) {
-        return new ErrorResponse(errorCode);
+        return new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+    }
+
+    public static ErrorResponse of(ErrorCode errorCode, String message) {
+        return new ErrorResponse(errorCode.getCode(), message);
     }
 }
