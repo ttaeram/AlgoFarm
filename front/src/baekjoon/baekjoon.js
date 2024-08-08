@@ -1,35 +1,7 @@
-// import { NoSim } from "@mui/icons-material";
-// 현재 페이지의 URL을 가져옴
-const submitUrl = window.location.href;
-
-// URL이 특정 패턴을 따르는지 검사하는 정규식
-const urlPattern = /^https:\/\/www\.acmicpc\.net\/submit\/\d+(\/\d+)?$/;
-
-// DOM이 로드되었는지 확인하고 이벤트 리스너 추가
-const submit_btn = document.querySelector('#submit_button');
-if(submit_btn){
-  submit_btn.addEventListener('click', function (event) {
-    // 제출 버튼이 클릭될 때 codeTextarea를 가져옴
-    const codeTextarea = document.querySelector('.cm-variable');
-  
-    if (codeTextarea) {
-        sessionStorage.setItem('codeTextarea', codeTextarea.innerHTML); // 코드를 세션 스토리지에 저장
-        console.log('코드가 세션 스토리지에 저장되었습니다:');
-    } else {
-        console.error('코드를 가져올 수 없습니다.');
-    }
-  });
-}
-
-
+import { NoSim } from "@mui/icons-material";
 
 // Set to true to enable console log
 const debug = false;
-
-
-
-
-
 
 
 /* 
