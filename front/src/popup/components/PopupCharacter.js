@@ -52,7 +52,11 @@ const PopupCharacter = () => {
             style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: 'black'
+                // backgroundColor: 'black'
+                backgroundImage: `url(${chrome.runtime.getURL('images/banner.png')})`,
+            backgroundSize: 'cover', // 이미지가 전체를 덮도록 설정
+            backgroundPosition: 'center', // 이미지가 중앙에 오도록 설정
+            backgroundRepeat: 'no-repeat', // 이미지 반복 방지
             }}
         >
             <Canvas>
