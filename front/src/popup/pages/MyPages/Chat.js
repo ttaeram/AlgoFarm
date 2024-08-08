@@ -204,12 +204,12 @@ function ChatPopup({ onClose }) {
               disableGutters 
               sx={{ 
                 display: 'flex', 
-                justifyContent: _chatMessage.nickname === user.name ? 'flex-end' : 'flex-start' 
+                justifyContent: _chatMessage.userId === user.userId ? 'flex-end' : 'flex-start' 
               }}>
               <Card sx={{
                 maxWidth: '80%',
                 mb: 1,
-                backgroundColor: _chatMessage.nickname === user.name ? 'lightblue' : 'white'
+                backgroundColor: _chatMessage.userId === user.userId ? 'lightblue' : 'white'
               }}>
                 <CardContent>
                   <Typography variant="body2" color="textSecondary">

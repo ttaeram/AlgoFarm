@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from '../../contentScript/ModelViewer';
+import {isChromeExtension} from "../auth/auth";
 
 const PopupCharacter = () => {
     const containerRef = useRef(null);
@@ -24,11 +25,13 @@ const PopupCharacter = () => {
 
     useEffect(() => {
         // 모델 로드
-        fetch(chrome.runtime.getURL(`assets/models/Cat_Animations.glb`))
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => {
-                setModel(arrayBuffer);
-            });
+        if(isChromeExtension()){
+            fetch(chrome.runtime.getURL(`assets/models/Cat_Animations.glb`))
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => {
+                    setModel(arrayBuffer);
+                });
+        }
     }, []);
 
     // OrbitControls의 줌 제한 설정

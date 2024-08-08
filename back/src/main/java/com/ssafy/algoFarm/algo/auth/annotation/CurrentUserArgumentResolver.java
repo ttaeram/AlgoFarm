@@ -4,6 +4,8 @@ import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,8 +15,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.server.ResponseStatusException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
@@ -44,12 +44,20 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
             throw new BadCredentialsException("No token found");
         }
 
-        if (!jwtUtil.validateToken(token)) {
-            logger.error("Invalid token");
-            throw new BadCredentialsException("Invalid token");
+        JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(token);
+        if (!validationResult.isValid()) {
+            logger.error("Invalid token: {}", validationResult.getMessage());
+            throw new BadCredentialsException("Invalid token: " + validationResult.getMessage());
         }
 
-        String email = jwtUtil.getEmailFromToken(token);
+        String email;
+        try {
+            email = jwtUtil.getEmailFromToken(token);
+        } catch (Exception e) {
+            logger.error("Failed to extract email from token", e);
+            throw new BadCredentialsException("Failed to extract email from token");
+        }
+
         if (email == null || email.isEmpty()) {
             logger.error("No email found in token");
             throw new BadCredentialsException("No email found in token");

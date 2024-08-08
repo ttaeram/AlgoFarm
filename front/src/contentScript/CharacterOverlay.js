@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from './ModelViewer';
@@ -48,9 +48,16 @@ const CharacterOverlay = ({ initialVisibility }) => {
             });
     }, []);
 
+    // 모델 로딩을 위한 useEffect
     useEffect(() => {
-        loadModel(currentCharacter);
+        if (!modelLoadedRef.current) {
+            loadModel(currentCharacter);
+            modelLoadedRef.current = true; // 모델이 로드된 후 플래그 설정
+        }
+    }, [currentCharacter, loadModel]);
 
+    // 메시지 리스너를 위한 useEffect
+    useEffect(() => {
         const messageListener = (request, sender, sendResponse) => {
             if (request.action === "playAnimation") {
                 setAnimation(request.animation);
@@ -60,7 +67,6 @@ const CharacterOverlay = ({ initialVisibility }) => {
             } else if (request.action === "changeCharacter") {
                 setCurrentCharacter(request.character);
                 modelLoadedRef.current = false; // 캐릭터 변경 시 모델 재로드 허용
-                loadModel(request.character);
             } else if (request.action === "toggleVisibility") {
                 setIsVisible(request.isVisible);
             }
@@ -71,27 +77,12 @@ const CharacterOverlay = ({ initialVisibility }) => {
         return () => {
             chrome.runtime.onMessage.removeListener(messageListener);
         };
-    }, [setAnimation, loadModel]);
+    }, [setAnimation]);
 
     const handleMouseDownWrapper = useCallback((e) => {
         e.stopPropagation();
         handleMouseDown(e);
     }, [handleMouseDown]);
-
-    const memoizedModelViewer = useMemo(() => (
-        model && (
-            <ModelViewer
-                modelData={model}
-                cameraDistanceFactor={0.5}
-                cameraHorizontalAngle={0}
-                scale={3}
-                animation={animation}
-                rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
-                pauseAnimation={false}
-                onAnimationComplete={handleAnimationComplete}
-            />
-        )
-    ), [model, animation, direction, handleAnimationComplete]);
 
     if (!isVisible) return null;
 
@@ -116,7 +107,18 @@ const CharacterOverlay = ({ initialVisibility }) => {
                 <OrbitControls enabled={false} />
                 <ambientLight intensity={2} />
                 <directionalLight color={0xffffff} intensity={3} position={[5, 5, 5]} />
-                {memoizedModelViewer}
+                {model && (
+                    <ModelViewer
+                        modelData={model}
+                        cameraDistanceFactor={0.5}
+                        cameraHorizontalAngle={0}
+                        scale={3}
+                        animation={animation}
+                        rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
+                        pauseAnimation={false}
+                        onAnimationComplete={handleAnimationComplete}
+                    />
+                )}
             </Canvas>
         </div>
     );

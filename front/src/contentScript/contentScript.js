@@ -43,4 +43,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             rootElement.style.display = request.isVisible ? 'block' : 'none';
         }
     }
+    if (request.action === "reloadContentScript") {
+        // 기존 요소 제거
+        const oldRoot = document.getElementById('chrome-extension-root');
+        if (oldRoot) oldRoot.remove();
+
+        // 오버레이 다시 렌더링
+        renderOverlay();
+
+        sendResponse({status: "reloaded"});
+    }
 });

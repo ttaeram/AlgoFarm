@@ -75,6 +75,7 @@ public class ChatController {
 
     private SentChatMessageDTO convertToSentChatMessageDTO(ChatMessageReqDTO chatMessageReqDTO) {
         SentChatMessageDTO sentChatMessageDTO = new SentChatMessageDTO();
+        sentChatMessageDTO.setUserId(chatMessageReqDTO.getUserId());
         sentChatMessageDTO.setNickname(chatMessageReqDTO.getNickname());
         sentChatMessageDTO.setContent(chatMessageReqDTO.getContent());
         sentChatMessageDTO.setCreateAt(chatMessageReqDTO.getCreateAt());
