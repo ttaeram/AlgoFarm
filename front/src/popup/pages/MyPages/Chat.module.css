@@ -44,7 +44,7 @@
 .sendButton {
   width: 50px;
   padding: 5px;
-  background-color: #007bff;
+  background-color: #f19cac;
   color: white;
   border: none;
   cursor: pointer;
@@ -52,5 +52,5 @@
 }
 
 .sendButton:hover {
-  background-color: #0056b3;
+  background-color: #FD88A0;
 }

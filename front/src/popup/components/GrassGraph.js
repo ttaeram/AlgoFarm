@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { format, addMonths, subMonths, isSameMonth, isSameDay } from 'date-fns';
-import { Box, Button, Typography, Grid } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import * as styles from './CalendarCell.module.css';
 import { generateCalendar, getFormattedDate } from './CalendarUtils';
 import { CalendarCell0, CalendarCell1, CalendarCell2, CalendarCell3, CalendarCell4 } from './CalendarCell';
@@ -52,13 +53,13 @@ const GrassGraph = ({ data }) => {
   return (
     <Box className={styles.grassGraph}>
       <Box display="flex" justifyContent="space-between" mb={2}>
-        <Button variant="contained" color="primary" onClick={handlePrevMonth}>
-          Previous Month
-        </Button>
+        <IconButton onClick={handlePrevMonth}>
+          <ChevronLeft />
+        </IconButton>
         <Typography variant="h6">{format(currentDate, 'yyyy년 MM월')}</Typography>
-        <Button variant="contained" color="primary" onClick={handleNextMonth}>
-          Next Month
-        </Button>
+        <IconButton onClick={handleNextMonth}>
+          <ChevronRight />
+        </IconButton>
       </Box>
       <Box className={styles.calendarGrid}>
         {calendarDays.map(day => renderDay(day))}
