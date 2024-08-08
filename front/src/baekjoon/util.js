@@ -30,7 +30,7 @@ function successAni() {
     fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
   }
   const event = new CustomEvent('playAnimation', {
-    detail: { animation: 'Spin', duration: 5000 }
+    detail: { animation: 'Spin', duration: 3000 }
   });
   document.dispatchEvent(event);
 

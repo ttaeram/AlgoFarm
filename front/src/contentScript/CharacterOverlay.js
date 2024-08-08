@@ -1,61 +1,99 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from './ModelViewer';
-import useCharacter from './useCharacter';
+import useCharacterMovement from './useCharacterMovement';
+import useCharacterDrag from './useCharacterDrag';
 
 const SIZE = 120;
 
-const CharacterOverlay = () => {
-    const {
-        isVisible,
-        model,
-        currentCharacter,
-        position,
-        direction,
-        animationConfig,
-        isDragging,
-        handleMouseDown,
-        handleMouseMove,
-        handleMouseUp,
-        handleAnimationComplete,
-        playAnimation,
-        changeCharacter,
-    } = useCharacter(true, SIZE);
-
+const CharacterOverlay = ({}) => {
+    const [model, setModel] = useState(null);
+    const [currentCharacter, setCurrentCharacter] = useState('Cat');
     const canvasRef = useRef(null);
+    const modelLoadedRef = useRef(false);
+
+    const {
+        position,
+        setPosition,
+        direction,
+        animation,
+        setAnimation,
+        speed,
+        startDragging,
+        stopDragging
+    } = useCharacterMovement(SIZE);
+
+    const {isDragging, handleMouseDown, handleMouseMove, handleMouseUp} = useCharacterDrag(
+        SIZE,
+        setPosition,
+        startDragging,
+        stopDragging
+    );
+
+    const handleAnimationComplete = useCallback(() => {
+        if (animation === 'Death') {
+            setAnimation('Walk');
+        }
+    }, [animation, setAnimation]);
+
+    const loadModel = useCallback((character) => {
+        if (modelLoadedRef.current) return;
+        fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+                setModel(arrayBuffer);
+                modelLoadedRef.current = true;
+            });
+    }, []);
+
+    useEffect(() => {
+        if (!modelLoadedRef.current) {
+            loadModel(currentCharacter);
+            modelLoadedRef.current = true;
+        }
+    }, [currentCharacter, loadModel]);
 
     useEffect(() => {
         const handleCustomPlayAnimation = (event) => {
             const { animation, duration } = event.detail;
-            let pauseTime = null;
-
-            // 'Death' 애니메이션의 경우 0.3초에 멈춤
-            if (animation === 'Death') {
-                pauseTime = 0.40;
+            setAnimation(animation);
+            if (animation !== 'Death') {
+                setTimeout(() => setAnimation('Walk'), duration);
             }
-
-            playAnimation(animation, duration, pauseTime);
         };
 
         document.addEventListener('playAnimation', handleCustomPlayAnimation);
-        return () => document.removeEventListener('playAnimation', handleCustomPlayAnimation);
-    }, [playAnimation]);
+
+        return () => {
+            document.removeEventListener('playAnimation', handleCustomPlayAnimation);
+        };
+    }, [setAnimation]);
 
     useEffect(() => {
         const messageListener = (request, sender, sendResponse) => {
             if (request.action === "playAnimation") {
-                playAnimation(request.animation);
+                setAnimation(request.animation);
+                if (request.animation !== 'Death') {
+                    setTimeout(() => setAnimation('Walk'), 3000);
+                }
             } else if (request.action === "changeCharacter") {
-                changeCharacter(request.character);
+                setCurrentCharacter(request.character);
+                modelLoadedRef.current = false;
             }
         };
 
         chrome.runtime.onMessage.addListener(messageListener);
-        return () => chrome.runtime.onMessage.removeListener(messageListener);
-    }, [playAnimation, changeCharacter]);
 
-    if (!isVisible) return null;
+        return () => {
+            chrome.runtime.onMessage.removeListener(messageListener);
+        };
+    }, [setAnimation]);
+
+    const handleMouseDownWrapper = useCallback((e) => {
+        e.stopPropagation();
+        handleMouseDown(e);
+    }, [handleMouseDown]);
 
     return (
         <div
@@ -69,7 +107,7 @@ const CharacterOverlay = () => {
                 userSelect: 'none',
                 pointerEvents: 'auto',
             }}
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleMouseDownWrapper}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
@@ -81,11 +119,12 @@ const CharacterOverlay = () => {
                 {model && (
                     <ModelViewer
                         modelData={model}
-                        animationConfig={animationConfig}
                         cameraDistanceFactor={0.5}
                         cameraHorizontalAngle={0}
                         scale={3}
+                        animation={animation}
                         rotation={direction === 1 ? Math.PI / 2 + Math.PI / 4 : -Math.PI / 2 + Math.PI / 4}
+                        pauseAnimation={false}
                         onAnimationComplete={handleAnimationComplete}
                     />
                 )}

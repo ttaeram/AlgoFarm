@@ -36,6 +36,7 @@ const ModelViewer = ({
 
                 const mixer = new THREE.AnimationMixer(loadedGltf.scene);
                 mixerRef.current = mixer;
+                //console.log('Available animations:', loadedGltf.animations.map(anim => anim.name));
 
                 const animationIndex = loadedGltf.animations.findIndex(anim => anim.name === animationConfig.name);
                 if (animationIndex !== -1) {
