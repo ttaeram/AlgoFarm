@@ -8,7 +8,7 @@ const CustomBottomNavigation = styled(BottomNavigation)`
   height: 50px;
   width: 500px;
   margin: 0 auto;
-  background-color: limegreen;
+  background-color: #fbb3b3;
 `;
 
 const CustomBottomNavigationAction = styled(BottomNavigationAction)`
