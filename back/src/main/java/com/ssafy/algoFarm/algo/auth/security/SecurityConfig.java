@@ -54,10 +54,12 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                            "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
+                            "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg", "/**/*.gif",
+                            "/**/*.svg", "/**/*.html", "/**/*.ico", "/static/**").permitAll()
+                    .anyRequest().authenticated()
+            )
 
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/home")
