@@ -6,7 +6,6 @@ import com.ssafy.algoFarm.algo.auth.model.GoogleTokenRequest;
 import com.ssafy.algoFarm.algo.auth.model.JwtResponse;
 import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
-import com.ssafy.algoFarm.algo.user.UserProfile;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,16 +13,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
