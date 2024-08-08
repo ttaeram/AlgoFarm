@@ -40,7 +40,7 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-    @DeleteMapping("/withdraw")
+    @DeleteMapping("/users/me")
     @Operation(summary = "회원 탈퇴", description = "현재 사용자의 회원탈퇴를 진행합니다.")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<MessageResponse> withdraw(@Parameter(hidden = true) @CurrentUser User user) {
