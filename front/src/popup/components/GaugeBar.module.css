@@ -1,4 +1,4 @@
-.gauge_bar {
+/* .gauge_bar {
   margin-bottom: 10px;
 }
 
@@ -23,4 +23,76 @@
   text-align: right;
   font-size: 0.9em;
   color: #333;
+} */
+
+.gauge_bar {
+  width: 80%; /* 게이지 바의 전체 너비를 80%로 줄임 */
+  max-width: 400px; /* 최대 너비를 400px로 설정 */
+  margin-bottom: 20px;
+  background-color: #fbe6e6;
+  padding: 20px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.089);
+}
+
+.gauge_bar h1 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.gauge_item {
+  transition: 0.4s;
+}
+
+.gauge_item:hover {
+  border-radius: 3px;
+  box-shadow: 7px 7px 10px rgba(0, 0, 0, 0.753);
+  transform: scale(1.02); /* 크기 확대 정도를 줄임 */
+}
+
+.gauge_item p {
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.gauge_item p span:nth-child(1) {
+  float: left;
+}
+
+.gauge_item p span:nth-child(2) {
+  float: right;
+  color: #000;
+}
+
+.gauge_progress {
+  border: 1px solid #6cd4c4;
+  padding: 5px;
+  border-radius: 3px;
+  width: 100%; /* 프로그레스 바의 너비를 100%로 설정 (gauge_bar에 맞춰짐) */
+  background-color: #fff; /* 게이지 바의 배경색을 #fde7e7로 변경 */
+}
+
+.gauge_progress_level {
+  height: 10px;
+  background: linear-gradient(to right, pink, #eb647e);
+  width: 0%; /* 초기 width를 0%로 설정 */
+  animation: fillGauge 5s forwards; /* 애니메이션 이름과 지속 시간 */
+  /* animation: ani 1s forwards; */
+}
+
+
+@keyframes fillGauge {
+  to {
+    width: 100%; /* width를 100%로 설정하지만, 이 값은 인라인 스타일로 덮어씌워질 예정입니다 */
+  }
+}
+
+@keyframes ani {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%; /* 이것은 인라인 스타일로 오버라이드됩니다 */
+  }
 }
