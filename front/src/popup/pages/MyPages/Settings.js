@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "../../context/context";
 import LogoutButton from "../../components/LogoutButton";
 import GroupLeaveButton from '../../components/GroupLeaveButton';
+import WithdrawButton from '../../components/WithdrawButton';
 import ToggleEnableButton from '../../components/ToggleEnableButton';
 import { TextField, Button, Box, Typography } from '@mui/material';
 import ToggleCharacterButton from '../../components/ToggleCharacterButton';
@@ -69,7 +70,7 @@ function Settings() {
     setNewNickname(getNicknameByUserId(user.sub, members));
     setNickname(getNicknameByUserId(user.sub, members));
     console.log(groupInfo);
-  }, [groupInfo, user, members, getNicknameByUserId]);
+  }, [groupInfo, user, members, getNicknameByUserId, nickname]);
 
   const handleEditGroupNameClick = () => {
     setIsEditingGroupName(true);
@@ -130,12 +131,12 @@ function Settings() {
         throw new Error('Failed to update nickname');
       }
   
-      const data = await response.json();
-  
-      await fetchMembers();
-      setNickname(getNicknameByUserId(user.sub, members));
-  
+      // 서버 응답을 받은 후 즉시 닉네임 상태를 업데이트
+      setNickname(newNickname);
       setIsEditingNickname(false);
+
+      // members를 다시 가져오는 부분은 필요에 따라 유지
+      await fetchMembers();
     } catch (error) {
       console.error('Error updating nickname:', error);
     }
@@ -214,6 +215,10 @@ function Settings() {
       <Box className={styles.leaveSection}>
         <SectionTitle variant="h6" className={styles.sectionTitle}>그룹 나가기</SectionTitle>
         <GroupLeaveButton />
+      </Box>
+      <Box className={styles.withdrawSection}>
+        <SectionTitle variant="h6" className={styles.sectionTitle}>회원 탈퇴</SectionTitle>
+        <WithdrawButton />
       </Box>
     </Container>
   );
