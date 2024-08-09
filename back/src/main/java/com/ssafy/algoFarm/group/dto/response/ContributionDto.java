@@ -2,6 +2,7 @@ package com.ssafy.algoFarm.group.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 
@@ -17,6 +18,7 @@ public class ContributionDto {
     private double individualContribution;
 
     @Schema(description = "그룹 내 전체 누적 경험치")
+    @Setter
     private double mascotExperience;
 
     public ContributionDto(String nickname, double individualContribution, double mascotExperience) {
