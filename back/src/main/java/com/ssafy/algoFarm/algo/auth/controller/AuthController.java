@@ -6,7 +6,6 @@ import com.ssafy.algoFarm.algo.auth.model.GoogleTokenRequest;
 import com.ssafy.algoFarm.algo.auth.model.JwtResponse;
 import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
-import com.ssafy.algoFarm.algo.user.UserProfile;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,16 +13,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -83,36 +79,49 @@ public class AuthController {
     @GetMapping("/userinfo")
     @Operation(summary = "사용자 정보 조회", description = "인증된 사용자의 정보를 조회합니다.")
     public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String token) {
-        logger.info("Received request for user info with token: " + token);
-        String jwt = token.replace("Bearer ", "");
-        if (jwtUtil.validateToken(jwt)) {
+        logger.info("Received request for user info");
+        String jwt = extractJwtFromToken(token);
+
+        JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(jwt);
+        if (!validationResult.isValid()) {
+            logger.warn("Invalid token: {}", validationResult.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid token: " + validationResult.getMessage()));
+        }
+
+        try {
             String email = jwtUtil.getEmailFromToken(jwt);
-            logger.info("Extracted email from token: " + email);
+            logger.info("Extracted email from token: {}", email);
+
             Optional<User> userOpt = userRepository.findByEmail(email);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-
-                Map<String, Object> attributes = new HashMap<>();
-                attributes.put("sub", user.getOAuthId());
-                attributes.put("name", user.getName());
-                attributes.put("email", user.getEmail());
-                attributes.put("provider", user.getProvider());
-                attributes.put("email_verified", user.getIsEmailVerified());
-
-                UserProfile userProfile = new UserProfile(
-                        user.getOAuthId(),
-                        user.getName(),
-                        user.getEmail(),
-                        attributes
+                Map<String, Object> userInfo = Map.of(
+                        "sub", user.getId(),
+                        "name", user.getName(),
+                        "email", user.getEmail(),
+                        "provider", user.getProvider(),
+                        "email_verified", user.getIsEmailVerified()
                 );
 
-                logger.info("Returning user info for email: " + email);
-                return ResponseEntity.ok(userProfile);
+                logger.info("Returning user info for email: {}", user.getEmail());
+                return ResponseEntity.ok(userInfo);
+            } else {
+                logger.warn("User not found for email: {}", email);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "User not found"));
             }
-            logger.warn("User not found for email: " + email);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("user_not_found", "User not found"));
+        } catch (Exception e) {
+            logger.error("Error processing user info request", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An internal error occurred"));
         }
-        logger.warn("Invalid token received");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("invalid_token", "The provided token is invalid"));
+    }
+
+    private String extractJwtFromToken(String token) {
+        if (token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+        return token;
     }
 }

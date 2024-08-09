@@ -16,6 +16,7 @@ public class HomeController {
     public String home() {
         return "home"; // home.html 뷰를 반환합니다.
     }
+
     @GetMapping("/oauth2-success")
     public String oauth2Success(@RequestParam String token, Model model) {
         model.addAttribute("token", token);

@@ -1,6 +1,7 @@
 // Set to true to enable console log
 const debug = false;
 
+
 /* 
   문제 제출 맞음 여부를 확인하는 함수
   2초마다 문제를 파싱하여 확인
@@ -68,8 +69,8 @@ chrome.storage.local.get('isLogined', (result) => {
             stopLoader();
   
             console.log('풀이가 맞았습니다. 업로드를 시작합니다.');
-            chrome.storage.local.get('bjhEnable', (result) => {
-              console.log('bjhEnable:', result.bjhEnable);
+            chrome.storage.local.get('Enable', (result) => {
+              console.log('Enable:', result.bjhEnable);
             });
   
             //startUpload();이거 뭔가요...?

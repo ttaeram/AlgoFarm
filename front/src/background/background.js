@@ -9,6 +9,48 @@ async function SolvedApiCall(problemId) {
   return fetch(`https://solved.ac/api/v3/problem/show?problemId=${problemId}`, { method: 'GET' })
       .then((query) => query.json());
 }
+// 팝업 상태를 저장하는 함수
+function savePopupState() {
+  chrome.storage.local.set({popupOpen: true});
+}
+
+// 팝업 상태를 복원하는 함수
+function restorePopupState() {
+  chrome.storage.local.get(['popupOpen'], (result) => {
+    if (result.popupOpen) {
+      chrome.action.openPopup();
+      chrome.storage.local.set({popupOpen: false});
+    }
+  });
+}
+
+// 변경 사항을 감지하여 익스텐션을 새로고침
+if (module.hot) {
+  module.hot.accept(() => {
+    savePopupState();
+    chrome.runtime.reload();
+    reloadContentScripts();
+  });
+}
+// 컨텐츠 스크립트 새로고침 함수
+function reloadContentScripts() {
+  chrome.tabs.query({}, (tabs) => {
+    for (let tab of tabs) {
+      if (tab.url.includes('chrome://')) continue; // chrome:// URLs에서는 스크립트를 실행할 수 없습니다.
+      chrome.tabs.sendMessage(tab.id, { action: "reloadContentScript" }, (response) => {
+        if (chrome.runtime.lastError) {
+          // 에러가 발생하면 탭을 새로고침합니다.
+          chrome.tabs.reload(tab.id);
+        } else {
+          console.log(`Content script reloaded in tab ${tab.id}`);
+        }
+      });
+    }
+  });
+}
+
+// 확장 프로그램이 시작될 때 팝업 상태 복원
+restorePopupState();
 
 function handleMessage(request, sender, sendResponse) {
   if (request && request.closeWebPage === true && request.isSuccess === true) {
@@ -113,4 +155,18 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ serverUrl: `${process.env.REACT_APP_SERVER_URL}` }, () => {
     console.log('Server URL is set.');
   });
+});
+
+//chrome.storage.local에 showCharacter가 true인 경우에만 동작한다.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("백그라운드의 characer함수가 실행됨")
+  if (message.action === 'getShowCharacter') {
+      chrome.storage.local.get('showCharacter', (result) => {
+        console.log("getShowCharacter에 요청이 들어왔습니다.", "result =" , result.showCharacter)
+      if(result.showCharacter === true) 
+        sendResponse({ showCharacter: true });
+      else
+        sendResponse({ showCharacter: false });
+    });
+  }
 });

@@ -38,14 +38,25 @@ const GroupLeaveButton = () => {
     }
   };
 
+  // return (
+  //   <Button
+  //     onClick={handleLeaveGroup}
+  //     className={styles.groupLeaveButton}
+  //     variant="contained"
+  //     color="#eb647e"
+
+  //   >
+  //     그룹탈퇴
+  //   </Button>
+  // );
   return (
     <Button
       onClick={handleLeaveGroup}
       className={styles.groupLeaveButton}
       variant="contained"
-      color="secondary"
+      style={{ backgroundColor: '#eb647e' }}  // style 속성을 사용하여 배경색을 직접 지정
     >
-      그룹 탈퇴
+      그룹탈퇴
     </Button>
   );
 };

@@ -14,6 +14,34 @@ const CustomButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+
+const CustomButton2 = styled(Button)(({ theme }) => ({
+  marginTop: '16px',
+  backgroundColor: '#f19cac',  // 기본 배경색 (핑크)
+  color: 'white',
+  borderRadius: '6px',
+  padding: '12px 24px',
+  boxShadow: '0px 6px 0px #d17f8b', // 기본 그림자 색상
+  textShadow: '0 1px 0 rgba(0, 0, 0, 0.15)', // 텍스트에 가벼운 그림자
+  transition: 'top 0.1s linear, box-shadow .1s linear, background-color 0.3s ease',
+
+  '&:hover': {
+    backgroundColor: '#e08394', // 호버 시 배경색
+    boxShadow: '0px 6px 0px #b26873', // 호버 시 그림자 색상 변경, 크기 동일
+  },
+
+  '&:active': {
+    top: '6px', // 클릭 시 더 많이 눌리는 효과
+    boxShadow: '0px 0px 0px #b26873', // 클릭 시 그림자 사라짐
+    backgroundColor: '#c16f7c', // 클릭 시 더 어두운 배경색
+  },
+
+  '&:focus': {
+    outline: 'none', // 포커스 시 아웃라인 제거
+  },
+}));
+
+
 function MemberManage() {
   const { groupId, groupInfo, jwt, members, fetchMembers: originalFetchMembers } = useAuth();
   const [inviteCode, setInviteCode] = useState('');
@@ -28,12 +56,42 @@ function MemberManage() {
     loadMembers();
   }, [groupId, jwt]);
 
+  // const handleGenerateInviteCode = async () => {
+  //   if (!groupId) {
+  //     console.error('Group ID is missing');
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/code/${groupId}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${jwt}`
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to generate invite code');
+  //     }
+
+  //     const data = await response.json();
+  //     setInviteCode(data.data.inviteCode);
+  //     setShowSuccess(true);
+  //     setTimeout(() => {
+  //       setShowSuccess(false);
+  //     }, 3000);
+  //   } catch (error) {
+  //     console.error('Error generating invite code:', error);
+  //   }
+  // };
+
   const handleGenerateInviteCode = async () => {
     if (!groupId) {
       console.error('Group ID is missing');
       return;
     }
-
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/code/${groupId}`, {
         method: 'GET',
@@ -42,13 +100,19 @@ function MemberManage() {
           'Authorization': `Bearer ${jwt}`
         },
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to generate invite code');
       }
-
+  
       const data = await response.json();
-      setInviteCode(data.data.inviteCode);
+      const inviteCode = data.data.inviteCode;
+      setInviteCode(inviteCode);
+  
+      // 클립보드에 초대코드 복사
+      await navigator.clipboard.writeText(inviteCode);
+      console.log('Invite code copied to clipboard:', inviteCode);
+  
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -57,6 +121,7 @@ function MemberManage() {
       console.error('Error generating invite code:', error);
     }
   };
+
 
   const handleKickMember = async (userId) => {
     try {
@@ -108,12 +173,14 @@ function MemberManage() {
       </List>
       {groupInfo?.isLeader && (
         <Box>
-          <CustomButton
+          <CustomButton2
             variant="contained"
             onClick={handleGenerateInviteCode}
           >
             초대 코드 생성
-          </CustomButton>
+          </CustomButton2>
+            {/* 10px 높이의 빈 공간 */}
+            <Box sx={{ height: '20px' }} />
           {inviteCode && (
             <Typography variant="body1" className={styles.inviteCodeText}>
               초대 코드 : {inviteCode}
@@ -126,7 +193,7 @@ function MemberManage() {
         open={showSuccess}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        message="초대코드가 생성되었습니다!"
+        message="초대코드가 클립보드에 복사되었습니다."
         className={styles.snackbar}
         action={
           <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar} className={styles.closeIcon}>

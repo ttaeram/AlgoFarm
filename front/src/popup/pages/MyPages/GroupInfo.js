@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/context";
 import GrassGraph from "../../components/GrassGraph";
 import { Box, Typography, CircularProgress } from '@mui/material';
+import * as styles from './GroupInfo.module.css';
 
 function GroupInfo() {
   const { groupId, jwt, members, fetchMembers, groupInfo } = useAuth();
@@ -45,7 +46,7 @@ function GroupInfo() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="white">
+      <Box className={styles.loadingContainer}>
         <CircularProgress />
       </Box>
     );
@@ -53,16 +54,14 @@ function GroupInfo() {
 
   if (members.length === 0) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="white">
-        <Typography variant="h6">No members found.</Typography>
+      <Box className={styles.noMembersContainer}>
+        <Typography variant="h6">구성원을 찾을 수 없습니다.</Typography>
       </Box>
     );
   }
 
   return (
-    <Box p={3} bgcolor="white">
-      <Typography variant="h4" gutterBottom>그룹 이름</Typography>
-      <Typography variant="h5" gutterBottom>스터디 스트릭</Typography>
+    <Box className={styles.container}>
       <GrassGraph data={grassData} />
     </Box>
   );

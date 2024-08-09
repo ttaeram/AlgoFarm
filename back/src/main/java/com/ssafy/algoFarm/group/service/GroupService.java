@@ -4,12 +4,14 @@ import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.algoFarm.exception.BusinessException;
 import com.ssafy.algoFarm.exception.ErrorCode;
+import com.ssafy.algoFarm.group.dto.request.ChangeNicknameReqDto;
 import com.ssafy.algoFarm.group.dto.response.*;
 import com.ssafy.algoFarm.group.entity.Group;
 import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.repository.GroupRepository;
 import com.ssafy.algoFarm.group.repository.MemberRepository;
 import com.ssafy.algoFarm.mascot.entity.Mascot;
+import com.ssafy.algoFarm.mascot.entity.MascotType;
 import com.ssafy.algoFarm.mascot.repository.MascotRepository;
 import com.ssafy.algoFarm.mascot.service.MascotService;
 import jakarta.persistence.EntityNotFoundException;
@@ -48,10 +50,11 @@ public class GroupService {
      */
 
 
-    public CreateGroupResDto createGroup(Long userPk, String nickname, String groupName) {
+    public CreateGroupResDto createGroup(Long userPk, String nickname, String groupName, MascotType mascotType) {
         Group newGroup = new Group();
         //그룹이 생성되면 마스코트도 생성시킨다.
         Mascot mascot = mascotService.createMascot();
+        mascot.setType(mascotType);
         newGroup.setMascot(mascot);
 
         //그룹을 생성한다.
@@ -219,5 +222,12 @@ public class GroupService {
 
     public long getUserGroupsCount(String email) {
         return memberRepository.countByUserEmail(email);
+    }
+
+    public void changeNickname(Long userId, ChangeNicknameReqDto changeNicknameReqDto) {
+        Member member = memberRepository.findByUserIdAndGroupId(userId, changeNicknameReqDto.groupId()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        member.setNickname(changeNicknameReqDto.newNickname());
+
+        memberRepository.save(member);
     }
 }

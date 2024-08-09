@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CharacterOverlay from './CharacterOverlay';
+import confetti from 'canvas-confetti';
 
 // React 컴포넌트를 렌더링하는 함수
-function renderOverlay(isVisible) {
+function renderOverlay() {
     const rootElement = document.createElement('div');
     rootElement.id = 'chrome-extension-root';
     rootElement.style.position = 'fixed';
@@ -13,34 +14,98 @@ function renderOverlay(isVisible) {
     rootElement.style.height = '100%';
     rootElement.style.zIndex = '9999';
     rootElement.style.pointerEvents = 'none';
-    rootElement.style.display = isVisible ? 'block' : 'none';
     document.body.appendChild(rootElement);
-
+    console.log('Rendered overlay');
     const root = ReactDOM.createRoot(rootElement);
-    root.render(<CharacterOverlay initialVisibility={isVisible} />);
+    root.render(<CharacterOverlay />);
 }
-// 로컬 스토리지에서 상태를 가져오는 함수
-function getStorageData(key) {
-    return new Promise((resolve) => {
-        chrome.storage.local.get(key, (result) => {
-            resolve(result[key]);
-        });
-    });
+// 오버레이를 제거하는 함수
+function removeOverlay() {
+    const rootElement = document.getElementById('chrome-extension-root');
+    if (rootElement) {
+        ReactDOM.unmountComponentAtNode(rootElement);
+        rootElement.remove();
+    }
 }
+
+// Shake 효과를 적용하는 함수
+function applyShakeEffect() {
+    document.body.classList.add('shake');
+    setTimeout(() => {
+        document.body.classList.remove('shake');
+    }, 500);
+}
+
 // 초기 실행
 (async function init() {
-    const bjhEnable = await getStorageData('bjhEnable');
-    const isVisible = bjhEnable !== false; // undefined일 경우 true로 처리
-    renderOverlay(isVisible);
-    console.log('Content script loaded, character visibility:', isVisible);
+
+    var showCharacter
+    chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    showCharacter = response.showCharacter;
+    console.log('캐릭터 response=',showCharacter)
+    if(response.showCharacter === true){
+        renderOverlay();
+    }
+  });
+
+    // const showCharacter = false;
+    // if (showCharacter) {
+    //     renderOverlay();
+    // }
+    // console.log('Content script loaded, character visibility:', showCharacter);
 })();
 
-// 메시지 리스너 추가
+// CustomEvent 리스너 추가
+document.addEventListener('baekjoonSuccess', (event) => {
+    console.log('백준 문제 풀이 성공!');
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+});
+
+document.addEventListener('baekjoonFail', (event) => {
+    applyShakeEffect();
+});
+
+// 메시지 리스너 추가 (크롬 API 사용 부분 유지)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "toggleVisibility") {
-        const rootElement = document.getElementById('chrome-extension-root');
-        if (rootElement) {
-            rootElement.style.display = request.isVisible ? 'block' : 'none';
-        }
+    switch (request.action) {
+        case "toggleCharacterVisibility":
+            if (request.isVisible) {
+                renderOverlay();
+            } else {
+                removeOverlay();
+            }
+            break;
+        case "reloadContentScript":
+            removeOverlay();
+            renderOverlay();
+            sendResponse({status: "reloaded"});
+            break;
     }
 });
+
+// CSS for shake effect
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
+    .shake {
+        animation: shake 0.5s;
+        animation-iteration-count: 1;
+    }
+`;
+document.head.appendChild(style);

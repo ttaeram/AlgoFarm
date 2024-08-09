@@ -9,10 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users") // "user"는 예약어일 수 있으므로 "users"로 변경
@@ -75,4 +72,21 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AlgorithmSolution> solutions = new ArrayList<>();
+
+    public Map<String, Object> getAttributes() {
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("sub", this.oAuthId);
+        attributes.put("name", this.name);
+        attributes.put("email", this.email);
+        attributes.put("provider", this.provider);
+        attributes.put("roles", this.roles);
+        attributes.put("created_at", this.createdAt.toString());
+        attributes.put("updated_at", this.updatedAt.toString());
+        attributes.put("is_email_verified", this.isEmailVerified);
+        attributes.put("account_non_expired", this.accountNonExpired);
+        attributes.put("account_non_locked", this.accountNonLocked);
+        attributes.put("credentials_non_expired", this.credentialsNonExpired);
+        attributes.put("enabled", this.enabled);
+        return attributes;
+    }
 }

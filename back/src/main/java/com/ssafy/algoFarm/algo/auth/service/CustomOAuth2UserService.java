@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,12 +69,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      * OAuth2 공급자의 속성에서 UserProfile을 추출합니다.
      *
      * @param registrationId OAuth2 공급자 ID
-     * @param attributes OAuth2 사용자 속성
+     * @param attributes     OAuth2 사용자 속성
      * @return UserProfile 객체
      * @throws OAuth2AuthenticationException 지원되지 않는 OAuth2 공급자일 경우
      */
     private UserProfile extractUserProfile(String registrationId, Map<String, Object> attributes) {
-        switch(registrationId) {
+        switch (registrationId) {
             case "google":
                 return new UserProfile(
                         (String) attributes.get("sub"),
@@ -188,8 +187,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             throw new OAuth2AuthenticationException("Failed to authenticate with " + provider);
         }
     }
+
     private String getUserInfoEndpoint(String provider) {
-        switch(provider.toLowerCase()) {
+        switch (provider.toLowerCase()) {
             case "google":
                 return "https://www.googleapis.com/oauth2/v3/userinfo";
             // 다른 제공자에 대한 case 추가
@@ -197,6 +197,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + provider);
         }
     }
+
     private User createNewUser(Map<String, Object> attributes, String provider) {
         User newUser = User.builder()
                 .email((String) attributes.get("email"))
@@ -207,10 +208,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .build();
         return userRepository.save(newUser);
     }
+
     /**
      * OAuth2 공급자로부터 사용자 정보를 가져옵니다.
      *
-     * @param token OAuth2 액세스 토큰
+     * @param token    OAuth2 액세스 토큰
      * @param provider OAuth2 공급자
      * @return UserProfile 객체
      * @throws OAuth2AuthenticationException 지원되지 않는 공급자이거나 사용자 정보를 가져오는데 실패한 경우
