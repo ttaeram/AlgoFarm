@@ -2,8 +2,9 @@ import React from 'react';
 import * as styles from './GaugeBar.module.css';
 
 const GaugeBar = ({ contribution, maxExperience }) => {
-  const percentage = Math.min(Math.max((contribution / maxExperience) * 100, 0), 100);
-
+  const percentage = maxExperience > 0 
+    ? Math.min(Math.max((contribution / maxExperience) * 100, 0), 100) 
+    : 0;
   return (
     <div className={styles.gauge_bar}>
       <div className={styles.gauge_bar_container}>
