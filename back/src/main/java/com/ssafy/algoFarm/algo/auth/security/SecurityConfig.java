@@ -3,6 +3,7 @@ package com.ssafy.algoFarm.algo.auth.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
+import com.ssafy.algoFarm.algo.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +40,12 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final OAuth2AuthorizedClientService authorizedClientService;
+    private final UserRepository userRepository;
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, customOAuth2UserService);
+        return new JwtAuthenticationFilter(jwtUtil, userRepository);
     }
+
     /**
      * 보안 필터 체인을 구성
      * 이 메소드는 HTTP 보안 설정, CORS, CSRF, 인증, 인가 등을 정의
@@ -61,6 +64,7 @@ public class SecurityConfig {
                         .includeSubDomains(true)
                         .maxAgeInSeconds(31536000))
         );
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.disable())
@@ -72,7 +76,7 @@ public class SecurityConfig {
                                 "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
                                 "/css/**", "/js/**", "/images/**", "/fonts/**",
                                 "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
-                                "/*.svg", "/*.html", "/*.ico", "/static/**","/**").permitAll()
+                                "/*.svg", "/*.html", "/*.ico", "/static/**").permitAll()
                     .anyRequest().authenticated()
                 )
 
@@ -138,7 +142,10 @@ public class SecurityConfig {
                     // .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 주석 처리
                     .authorizeHttpRequests(authorize -> authorize
                             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success", "/**").permitAll()
+                                    "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
+                                    "/css/**", "/js/**", "/images/**", "/fonts/**",
+                                    "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
+                                    "/*.svg", "/*.html", "/*.ico", "/static/**").permitAll()
                             .anyRequest().authenticated()
                     )
                     .oauth2Login(oauth2 -> oauth2
