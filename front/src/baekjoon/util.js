@@ -19,9 +19,11 @@ function startUpload() {
   startUploadCountDown();
 }
 function successAni() {
+
+  console.log("successAni가 실행됨.");
   // let elem = document.querySelector('.wrapper');
   // let fixedComponent = document.querySelector('.fixed-component');
-  //
+
   // if (elem !== null && !fixedComponent) {
   //   fixedComponent = document.createElement('div');
   //   fixedComponent.classList.add('fixed-component');
@@ -30,15 +32,25 @@ function successAni() {
   // } else if (elem !== null && fixedComponent) {
   //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
   // }
+
   // Confetti 효과를 위한 CustomEvent 발생
   document.dispatchEvent(new CustomEvent('baekjoonSuccess'));
+  // 캐릭터 애니메이션 변경
+  chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    if(response.showCharacter === true){
 
-
-  const event = new CustomEvent('playAnimation', {
-    detail: { animation: 'Spin', duration: 5000 }
+      const event = new CustomEvent('playAnimation', {
+        detail: { animation: 'Spin', duration: 5000 }
+      });
+      document.dispatchEvent(event);
+    
+      setTimeout(() => {
+        if (fixedComponent) {
+          elem.removeChild(fixedComponent);
+        }
+      }, 5000);
+    }
   });
-  document.dispatchEvent(event);
-
 }
 function failedAni() {
   // let elem = document.querySelector('.wrapper');
@@ -53,16 +65,28 @@ function failedAni() {
   //   fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
   // }
 
+
   // Shake 효과를 위한 CustomEvent 발생
   document.dispatchEvent(new CustomEvent('baekjoonFail'));
-
-
   // 캐릭터 애니메이션 변경
-  const event = new CustomEvent('playAnimation', {
-    detail: { animation: 'Death', duration: 3000 }
+  chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    console.log(response)
+    if(response == true){
+      const event = new CustomEvent('playAnimation', {
+        detail: { animation: 'Death', duration: 6000 }
+      });
+      document.dispatchEvent(event);
+    
+      setTimeout(() => {
+        if (fixedComponent) {
+          elem.removeChild(fixedComponent);
+        }
+      }, 5000);
+    }
   });
-  document.dispatchEvent(event);
+ 
 }
+
 // function uploadJudgingAni() {
 //   let elem = document.querySelector('.wrapper');
 //   let fixedComponent = document.querySelector('.fixed-component');

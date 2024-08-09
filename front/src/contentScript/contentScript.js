@@ -38,11 +38,21 @@ function applyShakeEffect() {
 
 // 초기 실행
 (async function init() {
-    const showCharacter = true;
-    if (showCharacter) {
+
+    var showCharacter
+    chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    showCharacter = response.showCharacter;
+    console.log('캐릭터 response=',showCharacter)
+    if(response.showCharacter === true){
         renderOverlay();
     }
-    console.log('Content script loaded, character visibility:', showCharacter !== false);
+  });
+
+    // const showCharacter = false;
+    // if (showCharacter) {
+    //     renderOverlay();
+    // }
+    // console.log('Content script loaded, character visibility:', showCharacter);
 })();
 
 // CustomEvent 리스너 추가

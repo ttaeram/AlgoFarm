@@ -156,3 +156,17 @@ chrome.runtime.onInstalled.addListener(() => {
     console.log('Server URL is set.');
   });
 });
+
+//chrome.storage.local에 showCharacter가 true인 경우에만 동작한다.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("백그라운드의 characer함수가 실행됨")
+  if (message.action === 'getShowCharacter') {
+      chrome.storage.local.get('showCharacter', (result) => {
+        console.log("getShowCharacter에 요청이 들어왔습니다.", "result =" , result.showCharacter)
+      if(result.showCharacter === true) 
+        sendResponse({ showCharacter: true });
+      else
+        sendResponse({ showCharacter: false });
+    });
+  }
+});
