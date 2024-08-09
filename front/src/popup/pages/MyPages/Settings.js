@@ -6,7 +6,6 @@ import ToggleEnableButton from '../../components/ToggleEnableButton';
 import { TextField, Button, Box, Typography } from '@mui/material';
 import ToggleCharacterButton from '../../components/ToggleCharacterButton';
 import { styled } from '@mui/system';
-import ToggleCharacterButton from '../../components/ToggleCharacterButton';
 import * as styles from './settings.module.css';
 
 const Container = styled(Box)`
