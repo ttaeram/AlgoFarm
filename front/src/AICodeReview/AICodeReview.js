@@ -133,8 +133,12 @@ async function loadSolveDetailsFromLocal() {
 
 // 문제 데이터를 가져와서 팝업 화면에 표시하는 컴포넌트
 const ProblemPopup = ({ problemData, solveData }) => {
+  if (!problemData || !solveData || problemData.problemId !== solveData.solveId) {
+    return <h2>문제 내용을 다시 확인하고<br/>새로운 코드를 제출해주세요.</h2>;
+  }
+
   const [answerFromAI, setAnswerFromAI] = useState(null);
-  
+
   useEffect(() => {
     // 향후 아래 3개를 비교하는 로직을 추가할 예정
     // - 현재 페이지의 문제 번호
@@ -214,10 +218,6 @@ const ProblemPopup = ({ problemData, solveData }) => {
       setAnswerFromAI(null);
     }
   }, [problemData, solveData]);
-
-  if (problemData.problemId !== solveData.solveId) {
-    return <h2>문제 내용을 다시 확인하고<br/>새로운 코드를 제출해주세요.</h2>;
-  }
 
   return (
     <div className="problem-popup">
