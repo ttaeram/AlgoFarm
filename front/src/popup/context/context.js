@@ -14,6 +14,31 @@ export const AuthProvider = ({ children }) => {
   const [groupId, setGroupId] = useState(localStorage.getItem('groupId'));
   const [groupInfo, setGroupInfo] = useState(JSON.parse(localStorage.getItem('groupInfo')));
   const [members, setMembers] = useState(JSON.parse(localStorage.getItem('members')) || []);
+  const [nickname, setNicknameState] = useState(null);
+
+  const setNickname = (newNickname) => {
+    setNicknameState(newNickname);
+
+    if (user && members.length > 0) {
+      const updateMembers = members.map(member =>
+        member.userId === user.sub
+        ? { ...member, nickname: newNickname }
+        : member
+      );
+      setMembers(updateMembers);
+    }
+  };
+
+  useEffect(() => {
+    if (user && members.length > 0) {
+      const userMember = members.find(member => member.userId === user.sub);
+      if (userMember) {
+        setNicknameState(userMember.nickname);
+      } else {
+        setNicknameState(null);
+      }
+    }
+  }, [user, members])
 
   useEffect(() => {
     if (user) {
@@ -175,6 +200,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, [members]);
 
+  useEffect(() => {
+    if (nickname) {
+      localStorage.setItem('nickname', nickname);
+    } else {
+      localStorage.removeItem('nickname');
+    }
+  }, [nickname]);
+
   //logout로직
   const signOut = () => {
     setUser(null);
@@ -183,6 +216,7 @@ export const AuthProvider = ({ children }) => {
     setGroupId(null);
     setGroupInfo(null);
     setMembers([]);
+    setNickname(null);
   };
 
   const fetchGroupInfo = async (jwt, groupId) => {
@@ -272,12 +306,10 @@ const setObjectToLocalStorage = (key, value) => {
 /*ToggleEnableButtons.js의 함수와 동일한 것을 사용 2024.08.08*/ 
 
   return (
-    <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, members, fetchGroupInfo, fetchMembers, signOut }}>
+    <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, members, setMembers, nickname, setNickname, fetchGroupInfo, fetchMembers, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-
 
 export const useAuth = () => useContext(AuthContext);
