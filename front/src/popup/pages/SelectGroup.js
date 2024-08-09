@@ -1,69 +1,92 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Paper, Typography, Button } from '@mui/material';
+import { styled } from '@mui/system';
+
+const StyledContainer = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 500,
+  height: 500,
+  backgroundColor: '#f5f5f5',
+  borderRadius: 8,
+  boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.16)',
+});
+
+const StyledTitle = styled(Typography)({
+  marginBottom: 16,
+  fontWeight: 'bold',
+  color: '#FD88A0',
+  textAlign: 'center',
+});
+
+const ImageContainer = styled(Paper)({
+  width: 340,
+  height: 210,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 24,
+  overflow: 'hidden',
+});
+
+const ButtonContainer = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+  width: '340px',
+});
+
+const StyledButton = styled(Button)({
+  width: '100%',
+  backgroundColor: '#FD88A0',
+  '&:hover': {
+    backgroundColor: '#EB4A52',
+  },
+});
+
+const OutlinedButton = styled(Button)(({ theme }) => ({
+  width: '100%',
+  borderColor: theme.palette.success.main,
+  color: '#FD88A0',
+  '&:hover': {
+    borderColor: theme.palette.success.dark,
+    color: '#EB4A52'
+  },
+}));
 
 const SelectGroup = () => {
   const navigate = useNavigate();
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 500,
-        height: 500,
-        p: 2,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 2,
-        boxShadow: 3,
-      }}
-    >
-      <Typography
-        variant="h4"
-        sx={{ mb: 2, fontWeight: 'bold', color: '#4caf50' }}
-      >
-        알고팜
-      </Typography>
+    <StyledContainer>
+      <StyledTitle variant="h4">알고팜</StyledTitle>
 
-      <Paper
-        sx={{
-          width: 340,
-          height: 210,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 3,
-          overflow: 'hidden',
-        }}
-      >
+      <ImageContainer>
         <img
           src="images/logo.jpeg"
           alt="algoFarm"
           style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
         />
-      </Paper>
+      </ImageContainer>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button
+      <ButtonContainer>
+        <StyledButton
           variant="contained"
-          color="success"
           onClick={() => navigate('/create-group')}
-          sx={{width:'340px'}}
         >
           그룹 생성
-        </Button>
-        <Button
+        </StyledButton>
+        <OutlinedButton
           variant="outlined"
-          color="success"
           onClick={() => navigate('/join-group')}
-          sx={{width:'340px'}}
         >
           그룹 참가
-        </Button>
-      </Box>
-    </Box>
+        </OutlinedButton>
+      </ButtonContainer>
+    </StyledContainer>
   );
 };
 

@@ -117,7 +117,7 @@ const Popup = () => {
           </div>
         ) : (
           <div className={styles.login}>
-            <Typography variant="h4" component="h1" gutterBottom className={styles.title} sx={{color :'#4caf50'}}>
+            <Typography variant="h4" component="h1" gutterBottom className={styles.title} sx={{color :'#FD88A0'}}>
               알고팜
             </Typography>
             <div className={styles.algoFarm}>
