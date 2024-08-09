@@ -28,11 +28,11 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserInfo> getCurrentUser(@Parameter(hidden = true) @CurrentUser User user) {
         UserInfo userInfo = UserInfo.builder()
-                .id(user.getOAuthId())
+                .user_id(user.getId())
+                .email_verified(user.getIsEmailVerified())
                 .email(user.getEmail())
-                .verified_email(user.getIsEmailVerified())
-                .name(user.getName())
-                .build();
+                .provider(user.getProvider())
+                .name(user.getName()).build();
 
         return ResponseEntity.ok(userInfo);
     }

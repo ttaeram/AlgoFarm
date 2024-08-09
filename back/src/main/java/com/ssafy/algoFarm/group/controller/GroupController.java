@@ -185,7 +185,7 @@ public class GroupController {
     @PostMapping("api/groups/members/nickname")
     @Operation(summary = "그룹 내 닉네임 변경", description = "현재 사용자가 그룹 내에서 사용할 닉네임을 변경합니다.")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<MessageResponse> changeNickname(ChangeNicknameReqDto changeNicknameReqDto, @Parameter(hidden = true) @CurrentUser User user){
+    public ResponseEntity<MessageResponse> changeNickname(@RequestBody ChangeNicknameReqDto changeNicknameReqDto, @Parameter(hidden = true) @CurrentUser User user){
         groupService.changeNickname(user.getId(), changeNicknameReqDto);
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "닉네임이 변경되었습니다."), HttpStatus.OK);
     }
