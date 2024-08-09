@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "../../context/context";
 import LogoutButton from "../../components/LogoutButton";
 import GroupLeaveButton from '../../components/GroupLeaveButton';
@@ -52,17 +52,24 @@ const SectionTitle = styled(Typography)`
 `;
 
 function Settings() {
-  const { user, groupInfo, jwt, setGroupInfo, groupId } = useAuth();
+  const { user, groupInfo, jwt, setGroupInfo, groupId, fetchMembers, members } = useAuth();
   const [isEditingGroupName, setIsEditingGroupName] = useState(false);
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
   const [newNickname, setNewNickname] = useState(user?.name || '');
+  const [nickname, setNickname] = useState('');
+
+  const getNicknameByUserId = useCallback((userSub, members) => {
+    const member = members.find(member => member.userId === userSub);
+    return member ? member.nickname : null;
+  }, []);
 
   useEffect(() => {
     setNewGroupName(groupInfo?.name || '');
-    setNewNickname(user?.name || '');
+    setNewNickname(getNicknameByUserId(user.sub, members));
+    setNickname(getNicknameByUserId(user.sub, members));
     console.log(groupInfo);
-  }, [groupInfo, user]);
+  }, [groupInfo, user, members, getNicknameByUserId]);
 
   const handleEditGroupNameClick = () => {
     setIsEditingGroupName(true);
@@ -106,6 +113,9 @@ function Settings() {
 
   const handleNicknameSubmit = async (e) => {
     e.preventDefault();
+    console.log("보내는 닉네임:", newNickname);
+    console.log("보내는 그룹 ID:", groupId);
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members/nickname`, {
         method: 'POST',
@@ -113,23 +123,24 @@ function Settings() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
         },
-        body: JSON.stringify({ groupId: groupId, newNickname: newNickname })
+        body: JSON.stringify({ newNickname: newNickname, groupId: groupId })
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to update nickname');
       }
-
+  
       const data = await response.json();
-      // Assuming the user context has a method to update user info
-      // This part depends on how the user context and update mechanism is implemented
-      // For instance, if there's a setUser function, it can be used like this:
-      setUser(prevUser => ({ ...prevUser, name: data.data.newNickname }));
+  
+      await fetchMembers();
+      setNickname(getNicknameByUserId(user.sub, members));
+  
       setIsEditingNickname(false);
     } catch (error) {
       console.error('Error updating nickname:', error);
     }
   };
+  
 
   return (
     <Container className={styles.container}>
@@ -153,7 +164,7 @@ function Settings() {
               </Form>
             ) : (
               <Box display="flex" alignItems="center" gap="10px">
-                <Typography variant="h6"><strong>닉네임 : </strong> {user.name}</Typography>
+                <Typography variant="h6"><strong>닉네임 : </strong> {nickname || '닉네임 없음'}</Typography>
                 {!isEditingNickname && (
                   <EditButton variant="contained" onClick={handleEditNicknameClick}>
                     변경
