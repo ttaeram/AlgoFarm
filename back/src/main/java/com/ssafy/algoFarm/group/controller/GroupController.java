@@ -76,7 +76,7 @@ public class GroupController {
         log.info("nickname={}", nickname);
 
         //TODO 정책, 한명당 하나의 그룹만 참여할 수 있다. -> 검증 로직 구현해야함.
-        CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName());
+        CreateGroupResDto response = groupService.createGroup(userPk, email, request.groupName(),request.mascotType());
         log.info("response={}", response);
         return new ResponseEntity<>(DataResponse.of(HttpStatus.OK, "그룹이 생성되었습니다.", response), HttpStatus.OK);
     }

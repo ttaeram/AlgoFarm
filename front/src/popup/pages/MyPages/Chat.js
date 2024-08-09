@@ -45,7 +45,7 @@ const StyledDialogContent = styled(DialogContent)`
 `;
 
 const ChatPopup = ({ onClose }) => {
-  const { jwt, groupId, user, groupInfo } = useAuth();
+  const { jwt, groupId, user, groupInfo, nickname } = useAuth();
   const [chatMessages, setChatMessages] = useState([]);
   const [previousChatMessages, setPreviousChatMessages] = useState([]);
   const [message, setMessage] = useState("");
@@ -133,7 +133,7 @@ const ChatPopup = ({ onClose }) => {
       userId: user.sub,
       roomSeq: groupId,
       content: message,
-      nickname: user.name,
+      nickname: nickname,
       createAt: new Date().toISOString()
     };
 
@@ -141,7 +141,7 @@ const ChatPopup = ({ onClose }) => {
       userId: user.sub,
       groupId,
       content: message,
-      nickname: user.name,
+      nickname: nickname,
       createAt: new Date().toISOString()
     };
 
