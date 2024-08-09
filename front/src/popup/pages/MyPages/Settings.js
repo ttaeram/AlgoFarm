@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "../../context/context";
 import LogoutButton from "../../components/LogoutButton";
 import GroupLeaveButton from '../../components/GroupLeaveButton';
+import WithdrawButton from '../../components/WithdrawButton';
 import ToggleEnableButton from '../../components/ToggleEnableButton';
 import { TextField, Button, Box, Typography } from '@mui/material';
 import ToggleCharacterButton from '../../components/ToggleCharacterButton';
@@ -52,17 +53,24 @@ const SectionTitle = styled(Typography)`
 `;
 
 function Settings() {
-  const { user, groupInfo, jwt, setGroupInfo, groupId } = useAuth();
+  const { user, groupInfo, jwt, setGroupInfo, groupId, fetchMembers, members } = useAuth();
   const [isEditingGroupName, setIsEditingGroupName] = useState(false);
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
   const [newNickname, setNewNickname] = useState(user?.name || '');
+  const [nickname, setNickname] = useState('');
+
+  const getNicknameByUserId = useCallback((userSub, members) => {
+    const member = members.find(member => member.userId === userSub);
+    return member ? member.nickname : null;
+  }, []);
 
   useEffect(() => {
     setNewGroupName(groupInfo?.name || '');
-    setNewNickname(user?.name || '');
+    setNewNickname(getNicknameByUserId(user.sub, members));
+    setNickname(getNicknameByUserId(user.sub, members));
     console.log(groupInfo);
-  }, [groupInfo, user]);
+  }, [groupInfo, user, members, getNicknameByUserId, nickname]);
 
   const handleEditGroupNameClick = () => {
     setIsEditingGroupName(true);
@@ -106,6 +114,9 @@ function Settings() {
 
   const handleNicknameSubmit = async (e) => {
     e.preventDefault();
+    console.log("보내는 닉네임:", newNickname);
+    console.log("보내는 그룹 ID:", groupId);
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members/nickname`, {
         method: 'POST',
@@ -113,23 +124,24 @@ function Settings() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwt}`
         },
-        body: JSON.stringify({ groupId: groupId, newNickname: newNickname })
+        body: JSON.stringify({ newNickname: newNickname, groupId: groupId })
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to update nickname');
       }
-
-      const data = await response.json();
-      // Assuming the user context has a method to update user info
-      // This part depends on how the user context and update mechanism is implemented
-      // For instance, if there's a setUser function, it can be used like this:
-      setUser(prevUser => ({ ...prevUser, name: data.data.newNickname }));
+  
+      // 서버 응답을 받은 후 즉시 닉네임 상태를 업데이트
+      setNickname(newNickname);
       setIsEditingNickname(false);
+
+      // members를 다시 가져오는 부분은 필요에 따라 유지
+      await fetchMembers();
     } catch (error) {
       console.error('Error updating nickname:', error);
     }
   };
+  
 
   return (
     <Container className={styles.container}>
@@ -153,7 +165,7 @@ function Settings() {
               </Form>
             ) : (
               <Box display="flex" alignItems="center" gap="10px">
-                <Typography variant="h6"><strong>닉네임 : </strong> {user.name}</Typography>
+                <Typography variant="h6"><strong>닉네임 : </strong> {nickname || '닉네임 없음'}</Typography>
                 {!isEditingNickname && (
                   <EditButton variant="contained" onClick={handleEditNicknameClick}>
                     변경
@@ -203,6 +215,10 @@ function Settings() {
       <Box className={styles.leaveSection}>
         <SectionTitle variant="h6" className={styles.sectionTitle}>그룹 나가기</SectionTitle>
         <GroupLeaveButton />
+      </Box>
+      <Box className={styles.withdrawSection}>
+        <SectionTitle variant="h6" className={styles.sectionTitle}>회원 탈퇴</SectionTitle>
+        <WithdrawButton />
       </Box>
     </Container>
   );
