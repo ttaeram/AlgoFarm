@@ -161,9 +161,10 @@ function MemberManage() {
             {groupInfo?.isLeader && !member.isLeader && (
               <Button
               variant="contained"
-              color="secondary"
+              // color="secondary"
               onClick={() => handleKickMember(member.userId)}
               className={styles.kickButton}
+              style={{ backgroundColor: '#eb647e' }}
               >
                 추방
               </Button>
