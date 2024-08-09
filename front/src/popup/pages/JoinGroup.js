@@ -3,10 +3,78 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/context';
 import BackButton from '../components/BackButton';
 import { Box, Typography, Button, TextField, IconButton, Alert } from '@mui/material';
+import { styled } from '@mui/system';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-function JoinGroup() {
+const StyledContainer = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 500,
+  height: 500,
+  backgroundColor: '#f5f5f5',
+  borderRadius: 8,
+  boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.16)',
+});
+
+const HeaderContainer = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  width: '100%',
+  marginBottom: 24,
+  position: 'relative',
+});
+
+const StyledTitle = styled(Typography)({
+  fontWeight: 'bold',
+  color: '#FD88A0',
+  textAlign: 'center',
+  position: 'absolute',
+  left: '50%',
+  transform: 'translateX(-50%)',
+});
+
+const ImageContainer = styled(Box)({
+  width: 340,
+  height: 210,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 24,
+  overflow: 'hidden',
+  backgroundColor: 'white',
+  borderRadius: 8,
+  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+});
+
+const StyledForm = styled('form')({
+  width: '100%',
+  maxWidth: '340px',
+});
+
+const FormRow = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: 16,
+  width: '100%',
+});
+
+const StyledTextField = styled(TextField)({
+  flexGrow: 1,
+});
+
+const StyledButton = styled(Button)({
+  marginBottom: 16,
+  backgroundColor: '#FD88A0',
+  '&:hover': {
+      backgroundColor: '#EB4A52',
+  },
+});
+
+const JoinGroup = () => {
   const [showCode, setShowCode] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [showWarning, setShowWarning] = useState(false);
@@ -61,100 +129,55 @@ function JoinGroup() {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 500,
-        height: 500,
-        p: 2,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 2,
-        boxShadow: 3,
-      }}
-    >
-   <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          width: '100%',
-          mb: 3,
-        }}
-      >
-        <BackButton/>
-        <Typography
-          variant="h4"
-          sx={{ ml: 15, fontWeight: 'bold', color: '#4caf50', textAlign: 'center'}}
-        >
+    <StyledContainer>
+      <HeaderContainer>
+        <BackButton />
+        <StyledTitle variant="h4">
           알고팜
-        </Typography>
-      </Box>
+        </StyledTitle>
+      </HeaderContainer>
 
-      <Box
-        sx={{
-          width: 340,
-          height: 210,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 3,
-          overflow: 'hidden',
-          backgroundColor: 'white',
-          borderRadius: 2,
-          boxShadow: 1,
-        }}
-      >
+      <ImageContainer>
         <img
           src="images/logo.jpeg"
           alt="algoFarm"
           style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
         />
-      </Box>
+      </ImageContainer>
 
-      <form onSubmit={handleSubmit}>
-        <Box
-          display="flex"
-          alignItems="center"
-          mb={2}
-          sx={{ width: '340px' }}
-        >
-          <Typography variant="h6" sx={{ mr: 2 }}>
+      <StyledForm onSubmit={handleSubmit}>
+        <FormRow>
+          <Typography variant="h6" sx={{ marginRight: 2, whiteSpace: 'nowrap' }}>
             그룹 참가
           </Typography>
-          <Box display="flex" alignItems="center" flexGrow={1}>
-            <TextField
-              type={showCode ? 'text' : 'password'}
-              value={inviteCode}
-              onChange={handleInputChange}
-              placeholder="초대 코드 입력"
-              fullWidth
-              variant="outlined"
-            />
-            <IconButton onClick={toggleShowCode}>
-              {showCode ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </Box>
-        </Box>
-        <Button
+          <StyledTextField
+            type={showCode ? 'text' : 'password'}
+            value={inviteCode}
+            onChange={handleInputChange}
+            placeholder="초대 코드 입력"
+            variant="outlined"
+            fullWidth
+          />
+          <IconButton onClick={toggleShowCode}>
+            {showCode ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+        </FormRow>
+
+        <StyledButton
           variant="contained"
-          color="success"
           type="submit"
           fullWidth
-          sx={{ mb: 1 }}
         >
           참가
-        </Button>
+        </StyledButton>
         {showWarning && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
+          <Alert severity="warning">
             유효하지 않은 초대 코드입니다.
           </Alert>
         )}
-      </form>
-    </Box>
+      </StyledForm>
+    </StyledContainer>
   );
-}
+};
 
 export default JoinGroup;
