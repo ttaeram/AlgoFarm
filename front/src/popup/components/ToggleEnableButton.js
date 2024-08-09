@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Switch, FormControlLabel } from '@mui/material';
 import { styled } from '@mui/system';
 import * as styles from './ToggleEnableButton.module.css';
+import { deflate } from 'three/examples/jsm/libs/fflate.module.js';
 
 // 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
 const getObjectFromChromeStorage = (key) => {
@@ -57,37 +58,27 @@ const GreenSwitch = styled(Switch)(({ theme }) => ({
 }));
 
 const ToggleButton = () => {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     const fetchEnable = async () => {
-      const enable = isChromeExtension() ? await getObjectFromChromeStorage('bjhEnable') : await getObjectFromLocalStorage('bjhEnable');
-      setEnabled(enable === 'true');
+      const enable = isChromeExtension() ? await getObjectFromChromeStorage('Enable') : await getObjectFromLocalStorage('Enable');
+      setEnabled(enable);
       console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
-        toggleCharacterVisibility(enable !== false);
-
     };
 
     fetchEnable();
   }, []);
 
-  const toggleCharacterVisibility = (isVisible) => {
-    if (isChromeExtension()) {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "toggleVisibility", isVisible: isVisible});
-      });
-    }
-  };
 
   const handleToggle = async () => {
     const newEnabled = !enabled;
     if (isChromeExtension()) {
-      await setObjectToChromeStorage('bjhEnable', newEnabled);
+      await setObjectToChromeStorage('Enable', newEnabled);
     } else {
-      await setObjectToLocalStorage('bjhEnable', newEnabled);
+      await setObjectToLocalStorage('Enable', newEnabled);
     }
     setEnabled(newEnabled);
-    toggleCharacterVisibility(newEnabled);
     console.log(newEnabled ? "on" : "off");
   };
 
@@ -95,7 +86,7 @@ const ToggleButton = () => {
     <div className={styles.button}>
       <FormControlLabel
         control={<GreenSwitch checked={enabled} onChange={handleToggle} />}
-        label={enabled ? 'Disable' : 'Enable'}
+        label={enabled ? 'Enable' : 'Disable'}
         className={enabled ? styles.active : ''}
       />
     </div>

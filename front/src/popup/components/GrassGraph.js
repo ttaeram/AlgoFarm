@@ -1,31 +1,70 @@
-import * as styles from './GrassGraph.module.css';
+import React, { useState } from 'react';
+import { format, addMonths, subMonths, isSameMonth, isSameDay } from 'date-fns';
+import { Box, IconButton, Typography } from '@mui/material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import * as styles from './CalendarCell.module.css';
+import { generateCalendar, getFormattedDate } from './CalendarUtils';
+import { CalendarCell0, CalendarCell1, CalendarCell2, CalendarCell3, CalendarCell4 } from './CalendarCell';
 
 const GrassGraph = ({ data }) => {
-  const getColor = (count) => {
-    if (count > 5) return styles.level4;
-    if (count > 3) return styles.level3;
-    if (count > 1) return styles.level2;
-    if (count > 0) return styles.level1;
-    return styles.level0;
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const calendarDays = generateCalendar(currentDate);
+
+  const handleNextMonth = () => {
+    setCurrentDate(addMonths(currentDate, 1));
   };
 
-  // 날짜 배열 생성
-  const dates = data.reduce((acc, curr) => {
-    const date = curr.submitTime.split('T')[0];
-    if (!acc.includes(date)) {
-      acc.push(date);
+  const handlePrevMonth = () => {
+    setCurrentDate(subMonths(currentDate, 1));
+  };
+
+  const renderDay = (day) => {
+    const dateString = getFormattedDate(day);
+    const dayData = data.find(d => d.submitTime.startsWith(dateString));
+    const commitCount = dayData ? dayData.commitCount : 0;
+    const isCurrentMonth = isSameMonth(day, currentDate);
+    const isToday = isSameDay(day, new Date());
+
+    let CalendarCell;
+    if (commitCount > 5) {
+      CalendarCell = CalendarCell4;
+    } else if (commitCount > 3) {
+      CalendarCell = CalendarCell3;
+    } else if (commitCount > 1) {
+      CalendarCell = CalendarCell2;
+    } else if (commitCount > 0) {
+      CalendarCell = CalendarCell1;
+    } else {
+      CalendarCell = CalendarCell0;
     }
-    return acc;
-  }, []);
+
+    return (
+      <CalendarCell
+        key={dateString}
+        isCurrentMonth={isCurrentMonth}
+        isToday={isToday}
+        title={`Date: ${dateString}, Commits: ${commitCount}`}
+      >
+        {day.getDate()}
+      </CalendarCell>
+    );
+  };
 
   return (
-    <div className={styles.grassGraph}>
-      {dates.map(date => {
-        const dayData = data.find(d => d.submitTime.startsWith(date));
-        const commitCount = dayData ? dayData.commitCount : 0;
-        return <div key={date} className={`${styles.grassCell} ${getColor(commitCount)}`} title={`Date: ${date}, Commits: ${commitCount}`}></div>;
-      })}
-    </div>
+    <Box className={styles.grassGraph}>
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <IconButton onClick={handlePrevMonth}>
+          <ChevronLeft />
+        </IconButton>
+        <Typography variant="h6">{format(currentDate, 'yyyy년 MM월')}</Typography>
+        <IconButton onClick={handleNextMonth}>
+          <ChevronRight />
+        </IconButton>
+      </Box>
+      <Box className={styles.calendarGrid}>
+        {calendarDays.map(day => renderDay(day))}
+      </Box>
+    </Box>
   );
 };
 

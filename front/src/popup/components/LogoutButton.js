@@ -13,12 +13,22 @@ const LogoutButton = () => {
     navigate('/');
   };
 
+  // return (
+  //   <Button
+  //     className={styles.logoutButton}
+  //     onClick={handleLogout}
+  //     variant="contained"
+  //     color="#eb647e"
+  //   >
+  //     로그아웃
+  //   </Button>
+  // );
   return (
     <Button
       className={styles.logoutButton}
       onClick={handleLogout}
       variant="contained"
-      color="secondary"
+      style={{ backgroundColor: '#eb647e' }}  // style 속성을 사용하여 배경색 지정
     >
       로그아웃
     </Button>

@@ -30,6 +30,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
     }
 
+    @ExceptionHandler(AsyncConnectionException.class)
+    public ResponseEntity<ErrorResponse> handleAsyncConnectionException(AsyncConnectionException e) throws IOException {
+        log.warn("Async connection exception occurred: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(e.getErrorCode());
+
+        // MMBotAdvice를 통해 예외 처리 및 로깅
+        ResponseEntity<String> mmBotResponse = mmBotAdvice.handleException(e);
+        log.info("MMBotAdvice response: {}", mmBotResponse.getBody());
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) throws IOException {
         log.error("Unhandled exception occurred: {}", e.getMessage());

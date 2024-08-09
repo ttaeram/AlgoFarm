@@ -29,6 +29,11 @@ function successAni() {
   } else if (elem !== null && fixedComponent) {
     fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
   }
+  const event = new CustomEvent('playAnimation', {
+    detail: { animation: 'Spin', duration: 5000 }
+  });
+  document.dispatchEvent(event);
+
   setTimeout(() => {
     if (fixedComponent) {
       elem.removeChild(fixedComponent);
@@ -47,6 +52,12 @@ function failedAni() {
   } else if (elem !== null && fixedComponent) {
     fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
   }
+  // 캐릭터 애니메이션 변경
+  const event = new CustomEvent('playAnimation', {
+    detail: { animation: 'Death', duration: 6000 }
+  });
+  document.dispatchEvent(event);
+
   setTimeout(() => {
     if (fixedComponent) {
       elem.removeChild(fixedComponent);

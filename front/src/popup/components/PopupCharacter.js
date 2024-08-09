@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from '../../contentScript/ModelViewer';
-import {isChromeExtension} from "../auth/auth";
+import { isChromeExtension } from "../auth/auth";
 
 const PopupCharacter = () => {
     const containerRef = useRef(null);
     const controlsRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const [model, setModel] = useState(null);
+    const [animationConfig, setAnimationConfig] = useState({ name: 'Idle_A', pauseAtTime: null });
 
     useEffect(() => {
         const updateSize = () => {
@@ -24,8 +25,7 @@ const PopupCharacter = () => {
     }, []);
 
     useEffect(() => {
-        // 모델 로드
-        if(isChromeExtension()){
+        if (isChromeExtension()) {
             fetch(chrome.runtime.getURL(`assets/models/Cat_Animations.glb`))
                 .then(response => response.arrayBuffer())
                 .then(arrayBuffer => {
@@ -34,16 +34,17 @@ const PopupCharacter = () => {
         }
     }, []);
 
-    // OrbitControls의 줌 제한 설정
     const handleControlsUpdate = () => {
         if (controlsRef.current) {
-            // 최소 줌 거리 (더 멀리 볼 수 있음)
             controlsRef.current.minDistance = 1;
-            // 최대 줌 거리 (더 가까이 볼 수 있음)
             controlsRef.current.maxDistance = 10;
-            // 줌 속도 조절 (기본값은 1, 작을수록 줌 속도가 느려짐)
             controlsRef.current.zoomSpeed = 0.1;
         }
+    };
+
+    const handleAnimationComplete = () => {
+        // 애니메이션 완료 후 처리 로직
+        console.log('Animation completed');
     };
 
     return (
@@ -52,7 +53,10 @@ const PopupCharacter = () => {
             style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: 'black'
+                backgroundImage: `url(${chrome.runtime.getURL('images/banner.png')})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
             }}
         >
             <Canvas>
@@ -66,13 +70,13 @@ const PopupCharacter = () => {
                 {model && (
                     <ModelViewer
                         modelData={model}
+                        animationConfig={animationConfig}
                         cameraDistanceFactor={0.5}
                         cameraHorizontalAngle={0}
                         scale={3}
-                        animation="Idle_A"
                         rotation={0}
-                        pauseAnimation={false}
                         isPopup={true}
+                        onAnimationComplete={handleAnimationComplete}
                     />
                 )}
             </Canvas>

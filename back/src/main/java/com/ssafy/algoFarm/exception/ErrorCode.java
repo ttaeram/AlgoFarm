@@ -16,7 +16,8 @@ public enum ErrorCode {
     // Solution
     SOLUTION_NOT_FOUND(HttpStatus.BAD_REQUEST, "S001", "유저ID와 문제ID에 해당하는 문제 정보가 없습니다."),
     // Internal Server Error
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "내부 서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E001", "내부 서버 오류가 발생했습니다."),
+    ASYNC_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "B999", "비동기 연결 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;
