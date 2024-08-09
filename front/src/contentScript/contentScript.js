@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CharacterOverlay from './CharacterOverlay';
+import confetti from 'canvas-confetti';
 
 // React 컴포넌트를 렌더링하는 함수
 function renderOverlay() {
@@ -28,13 +29,12 @@ function removeOverlay() {
     }
 }
 
-// 로컬 스토리지에서 상태를 가져오는 함수
-function getStorageData(key) {
-    return new Promise((resolve) => {
-        chrome.storage.local.get(key, (result) => {
-            resolve(result[key]);
-        });
-    });
+// Shake 효과를 적용하는 함수
+function applyShakeEffect() {
+    document.body.classList.add('shake');
+    setTimeout(() => {
+        document.body.classList.remove('shake');
+    }, 500);
 }
 
 // 초기 실행
@@ -46,18 +46,57 @@ function getStorageData(key) {
     console.log('Content script loaded, character visibility:', showCharacter !== false);
 })();
 
-// 메시지 리스너 추가
+// CustomEvent 리스너 추가
+document.addEventListener('baekjoonSuccess', (event) => {
+    console.log('백준 문제 풀이 성공!');
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+});
+
+document.addEventListener('baekjoonFail', (event) => {
+    applyShakeEffect();
+});
+
+// 메시지 리스너 추가 (크롬 API 사용 부분 유지)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "toggleCharacterVisibility") {
-        if (request.isVisible) {
-            renderOverlay();
-        } else {
+    switch (request.action) {
+        case "toggleCharacterVisibility":
+            if (request.isVisible) {
+                renderOverlay();
+            } else {
+                removeOverlay();
+            }
+            break;
+        case "reloadContentScript":
             removeOverlay();
-        }
-    }
-    if (request.action === "reloadContentScript") {
-        removeOverlay();
-        renderOverlay();
-        sendResponse({status: "reloaded"});
+            renderOverlay();
+            sendResponse({status: "reloaded"});
+            break;
     }
 });
+
+// CSS for shake effect
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
+    .shake {
+        animation: shake 0.5s;
+        animation-iteration-count: 1;
+    }
+`;
+document.head.appendChild(style);

@@ -1,6 +1,7 @@
 /**
  * 로딩 버튼 추가
  */
+
 function startUpload() {
   let elem = document.getElementById('BaekjoonHub_progress_anchor_element');
   if (elem !== undefined) {
@@ -18,63 +19,61 @@ function startUpload() {
   startUploadCountDown();
 }
 function successAni() {
-  let elem = document.querySelector('.wrapper');
-  let fixedComponent = document.querySelector('.fixed-component');
+  // let elem = document.querySelector('.wrapper');
+  // let fixedComponent = document.querySelector('.fixed-component');
+  //
+  // if (elem !== null && !fixedComponent) {
+  //   fixedComponent = document.createElement('div');
+  //   fixedComponent.classList.add('fixed-component');
+  //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
+  //   elem.appendChild(fixedComponent);
+  // } else if (elem !== null && fixedComponent) {
+  //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
+  // }
+  // Confetti 효과를 위한 CustomEvent 발생
+  document.dispatchEvent(new CustomEvent('baekjoonSuccess'));
 
-  if (elem !== null && !fixedComponent) {
-    fixedComponent = document.createElement('div');
-    fixedComponent.classList.add('fixed-component');
-    fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
-    elem.appendChild(fixedComponent);
-  } else if (elem !== null && fixedComponent) {
-    fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
-  }
+
   const event = new CustomEvent('playAnimation', {
     detail: { animation: 'Spin', duration: 5000 }
   });
   document.dispatchEvent(event);
 
-  setTimeout(() => {
-    if (fixedComponent) {
-      elem.removeChild(fixedComponent);
-    }
-  }, 5000);
 }
 function failedAni() {
-  let elem = document.querySelector('.wrapper');
-  let fixedComponent = document.querySelector('.fixed-component');
+  // let elem = document.querySelector('.wrapper');
+  // let fixedComponent = document.querySelector('.fixed-component');
+  //
+  // if (elem !== null && !fixedComponent) {
+  //   fixedComponent = document.createElement('div');
+  //   fixedComponent.classList.add('fixed-component');
+  //   fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
+  //   elem.appendChild(fixedComponent);
+  // } else if (elem !== null && fixedComponent) {
+  //   fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
+  // }
 
-  if (elem !== null && !fixedComponent) {
-    fixedComponent = document.createElement('div');
-    fixedComponent.classList.add('fixed-component');
-    fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
-    elem.appendChild(fixedComponent);
-  } else if (elem !== null && fixedComponent) {
-    fixedComponent.innerHTML = `<div>틀렸습니다.</div>`;
-  }
+  // Shake 효과를 위한 CustomEvent 발생
+  document.dispatchEvent(new CustomEvent('baekjoonFail'));
+
+
   // 캐릭터 애니메이션 변경
   const event = new CustomEvent('playAnimation', {
     detail: { animation: 'Death', duration: 6000 }
   });
   document.dispatchEvent(event);
-
-  setTimeout(() => {
-    if (fixedComponent) {
-      elem.removeChild(fixedComponent);
-    }
-  }, 5000);
 }
-function uploadJudgingAni() {
-  let elem = document.querySelector('.wrapper');
-  let fixedComponent = document.querySelector('.fixed-component');
-
-  if (elem !== null && !fixedComponent) {
-    fixedComponent = document.createElement('div');
-    fixedComponent.classList.add('fixed-component');
-    fixedComponent.innerHTML = `<div>채점중</div>`;
-    elem.appendChild(fixedComponent);
-  }
-}
+// function uploadJudgingAni() {
+//   let elem = document.querySelector('.wrapper');
+//   let fixedComponent = document.querySelector('.fixed-component');
+//
+//   if (elem !== null && !fixedComponent) {
+//     fixedComponent = document.createElement('div');
+//     fixedComponent.classList.add('fixed-component');
+//     fixedComponent.innerHTML = `<div>채점중</div>`;
+//     elem.appendChild(fixedComponent);
+//   }
+// }
 
 function errorTimeLimitAni() {
   let elem = document.querySelector('.wrapper');
