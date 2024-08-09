@@ -53,24 +53,16 @@ const SectionTitle = styled(Typography)`
 `;
 
 function Settings() {
-  const { user, groupInfo, jwt, setGroupInfo, groupId, fetchMembers, members } = useAuth();
+  const { user, groupInfo, jwt, setGroupInfo, groupId, fetchMembers, members, nickname, setNickname } = useAuth();
   const [isEditingGroupName, setIsEditingGroupName] = useState(false);
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
-  const [newNickname, setNewNickname] = useState(user?.name || '');
-  const [nickname, setNickname] = useState('');
-
-  const getNicknameByUserId = useCallback((userSub, members) => {
-    const member = members.find(member => member.userId === userSub);
-    return member ? member.nickname : null;
-  }, []);
+  const [newNickname, setNewNickname] = useState(nickname || '');
 
   useEffect(() => {
     setNewGroupName(groupInfo?.name || '');
-    setNewNickname(getNicknameByUserId(user.sub, members));
-    setNickname(getNicknameByUserId(user.sub, members));
-    console.log(groupInfo);
-  }, [groupInfo, user, members, getNicknameByUserId, nickname]);
+    setNewNickname(nickname || '');
+  }, [groupInfo, nickname]);
 
   const handleEditGroupNameClick = () => {
     setIsEditingGroupName(true);
@@ -114,9 +106,6 @@ function Settings() {
 
   const handleNicknameSubmit = async (e) => {
     e.preventDefault();
-    console.log("보내는 닉네임:", newNickname);
-    console.log("보내는 그룹 ID:", groupId);
-  
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members/nickname`, {
         method: 'POST',
