@@ -2,206 +2,192 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-const STORAGE_KEYS = {
-  USER: 'user',
-  JWT: 'jwt',
-  IS_LOGINED: 'isLogined',
-  GROUP_ID: 'groupId',
-  GROUP_INFO: 'groupInfo',
-  MEMBERS: 'members',
-  NICKNAME: 'nickname',
-};
-
-// 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
-const getObjectFromChromeStorage = (key) => {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get([key], (result) => {
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      resolve(result[key]);
-    });
-  });
-};
-
-// 로컬 스토리지에 객체 저장하기 (크롬 확장 프로그램용)
-const setObjectToChromeStorage = (key, value) => {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: value }, () => {
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      resolve();
-    });
-  });
-};
-
-// 크롬 스토리지에서 객체 삭제하기 (크롬 확장 프로그램용)
-const removeObjectFromChromeStorage = (key) => {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.remove(key, () => {
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      resolve();
-    });
-  });
-};
+// 현재 환경이 Chrome 확장 프로그램인지 확인하는 함수
+const isChromeExtension = () => {
+  return typeof chrome !== "undefined" && typeof chrome.storage !== "undefined";
+}
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [jwt, setJwt] = useState(null);
-  const [isLogined, setIsLogined] = useState(false);
-  const [groupId, setGroupId] = useState(null);
-  const [groupInfo, setGroupInfo] = useState(null);
-  const [members, setMembers] = useState([]);
-  const [nickname, setNicknameState] = useState(null);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [jwt, setJwt] = useState(localStorage.getItem('jwt'));
+  const [isLogined, setIsLogined] = useState(!!localStorage.getItem('isLogined'));
+  const [groupId, setGroupId] = useState(localStorage.getItem('groupId'));
+  const [groupInfo, setGroupInfo] = useState(JSON.parse(localStorage.getItem('groupInfo')));
+  const [members, setMembers] = useState(JSON.parse(localStorage.getItem('members')) || []);
 
   useEffect(() => {
-    getObjectFromChromeStorage(STORAGE_KEYS.USER).then((storedUser) => {
-      setUser(storedUser ? JSON.parse(storedUser) : null);
-    });
-
-    getObjectFromChromeStorage(STORAGE_KEYS.JWT).then((storedJwt) => {
-      setJwt(storedJwt || null);
-    });
-
-    getObjectFromChromeStorage(STORAGE_KEYS.IS_LOGINED).then((storedIsLogined) => {
-      setIsLogined(!!storedIsLogined);
-    });
-
-    getObjectFromChromeStorage(STORAGE_KEYS.GROUP_ID).then((storedGroupId) => {
-      setGroupId(storedGroupId || null);
-    });
-
-    getObjectFromChromeStorage(STORAGE_KEYS.GROUP_INFO).then((storedGroupInfo) => {
-      setGroupInfo(storedGroupInfo ? JSON.parse(storedGroupInfo) : null);
-    });
-
-    getObjectFromChromeStorage(STORAGE_KEYS.MEMBERS).then((storedMembers) => {
-      setMembers(storedMembers ? JSON.parse(storedMembers) : []);
-    });
-
-    getObjectFromChromeStorage(STORAGE_KEYS.NICKNAME).then((storedNickname) => {
-      setNicknameState(storedNickname || null);
-    });
-  }, []);
-
-  const setNickname = (newNickname) => {
-    setNicknameState(newNickname);
-
-    if (user && members.length > 0) {
-      const updateMembers = members.map(member =>
-        member.userId === user.sub
-        ? { ...member, nickname: newNickname }
-        : member
-      );
-      setMembers(updateMembers);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
     }
-  };
-
-  useEffect(() => {
-    if (user && members.length > 0) {
-      const userMember = members.find(member => member.userId === user.sub);
-      if (userMember) {
-        setNicknameState(userMember.nickname);
-      } else {
-        setNicknameState(null);
-      }
-    }
-  }, [user, members])
-
-  useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.USER, user ? JSON.stringify(user) : null);
   }, [user]);
 
+  //토큰을 받아오고, 저장하는 곳
   useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.JWT, jwt);
     if (jwt) {
-      handleSaveJwt(jwt);
-      setIsLogined(true);
-      setObjectToChromeStorage(STORAGE_KEYS.IS_LOGINED, true);
+      localStorage.setItem('jwt', jwt);
+      handleSave(jwt);
+      if(isChromeExtension()) {
+        setIsLogined(true); // 로그인 상태를 true로 설정
+        chrome.storage.local.set({ isLogined: true });
+
+        let value;
+        getObjectFromChromeStorage('Enable')
+          .then(result => {
+            value = result;
+            if((value == undefined) || value == true){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
+              console.log("로그인내부에서 enable세팅을 했습니다.");
+              setObjectToChromeStorage('Enable', true);
+            }
+          })
+          .catch(error => {
+            console.error('variable -value Error retrieving value:', error);
+          })
+        
+          
+        let showCharacter;
+        getObjectFromChromeStorage('showCharacter')
+          .then(result => {
+            value = result;
+            if((value == undefined) || showCharacter == true){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
+              console.log("로그인내부에서 showCharacter를 세팅했습니다.");
+              setObjectToChromeStorage('showCharacter', true);
+            }
+          })
+          .catch(error => {
+            console.error('variable-showCharacter Error retrieving value:', error);
+          })
+        const now = new Date();
+        console.log(now + "로그인햇음니다.");
+      } // 로그인 상태를 chrome.storage.local에 저장
+      
     } else {
-      handleDeleteJwt(STORAGE_KEYS.JWT);
-      setIsLogined(false);
-      removeObjectFromChromeStorage(STORAGE_KEYS.IS_LOGINED);
+      localStorage.removeItem('jwt');
+      handleDelete('jwt')
+      if(isChromeExtension()) {
+        setIsLogined(false); // 로그아웃 상태를 false로 설정
+      chrome.storage.local.set({ isLogined: false });
+      } // 로그아웃 상태를 chrome.storage.local에 저장
     }
   }, [jwt]);
 
-  const handleSaveJwt = (jwt) => {
+  //login시 indexdb의 토큰 넣기
+  const handleSave = (jwt) => {
     const request = indexedDB.open('MyDatabase', 1);
-
+  
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains('MyStore')) {
         db.createObjectStore('MyStore', { keyPath: 'id' });
       }
     };
-
+  
     request.onsuccess = (event) => {
       const db = event.target.result;
-
+  
       if (!db.objectStoreNames.contains('MyStore')) {
         db.close();
         indexedDB.deleteDatabase('MyDatabase');
-        handleSaveJwt(jwt); // 데이터베이스 재생성 후 재시도
+        console.error('Object store "MyStore" not found. Database will be recreated.');
+        handleSave(jwt); // 데이터베이스 재생성 후 재시도
         return;
       }
-
+  
       const transaction = db.transaction('MyStore', 'readwrite');
       const store = transaction.objectStore('MyStore');
-      store.put({ id: 'jwt', value: jwt }).onsuccess = () => {
+      const putRequest = store.put({ id: 'jwt', value: jwt });
+  
+      putRequest.onsuccess = () => {
         console.log('Token saved to IndexedDB');
+        if(isChromeExtension()) {
+        chrome.storage.local.set({ isLogined: true });
+        }
+      };
+  
+      putRequest.onerror = (event) => {
+        console.error('Error saving token to IndexedDB', event);
       };
     };
-
-    request.onerror = (event) => {
-      console.error('Error opening IndexedDB', event);
-    };
-  };
-
-  const handleDeleteJwt = (key) => {
-    const request = indexedDB.open('MyDatabase', 1);
-
-    request.onsuccess = (event) => {
-      const db = event.target.result;
-
-      if (!db.objectStoreNames.contains('MyStore')) {
-        db.close();
-        indexedDB.deleteDatabase('MyDatabase');
-        return;
-      }
-
-      const transaction = db.transaction('MyStore', 'readwrite');
-      transaction.objectStore('MyStore').delete(key).onsuccess = () => {
-        console.log('Token deleted from IndexedDB');
-      };
-    };
-
+  
     request.onerror = (event) => {
       console.error('Error opening IndexedDB', event);
     };
   };
   
+  //로그아웃시 indexdb의 토큰삭제
+  const handleDelete = (key) => {
+    const request = indexedDB.open('MyDatabase', 1);
+  
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+  
+      if (!db.objectStoreNames.contains('MyStore')) {
+        db.close();
+        indexedDB.deleteDatabase('MyDatabase');
+        console.error('Object store "MyStore" not found. Database will be recreated.');
+        return;
+      }
+  
+      const transaction = db.transaction('MyStore', 'readwrite');
+      const store = transaction.objectStore('MyStore');
+      const deleteRequest = store.delete(key);
+  
+      deleteRequest.onsuccess = () => {
+        console.log('Token deleted from IndexedDB');
+        // 로그아웃 상태를 저장
+        if(isChromeExtension()) {
+          chrome.storage.local.set({ isLogined: false });
+        }
+      };
+  
+      deleteRequest.onerror = (event) => {
+        console.error('Error deleting token from IndexedDB', event);
+        
+      };
+  
+      transaction.oncomplete = () => {
+        console.log('Transaction completed');
+      };
+  
+      transaction.onerror = (event) => {
+        console.error('Transaction error', event);
+      };
+    };
+  
+    request.onerror = (event) => {
+      console.error('Error opening IndexedDB', event);
+    };
+  };
+  
+
   useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.IS_LOGINED, isLogined);
+    localStorage.setItem('isLogined', isLogined);
   }, [isLogined]);
 
   useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.GROUP_ID, groupId);
+    if (groupId) {
+      localStorage.setItem('groupId', groupId);
+    } else {
+      localStorage.removeItem('groupId');
+    }
   }, [groupId]);
 
   useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.GROUP_INFO, groupInfo ? JSON.stringify(groupInfo) : null);
+    if (groupInfo) {
+      localStorage.setItem('groupInfo', JSON.stringify(groupInfo));
+    } else {
+      localStorage.removeItem('groupInfo');
+    }
   }, [groupInfo]);
 
-  useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.MEMBERS, members ? JSON.stringify(members) : null);
+  useEffect(() => { 
+    if (members) {
+      localStorage.setItem('members', JSON.stringify(members));
+    } else {
+      localStorage.removeItem('members');
+    }
   }, [members]);
-
-  useEffect(() => {
-    setObjectToChromeStorage(STORAGE_KEYS.NICKNAME, nickname);
-  }, [nickname]);
 
   //logout로직
   const signOut = () => {
@@ -211,7 +197,6 @@ export const AuthProvider = ({ children }) => {
     setGroupId(null);
     setGroupInfo(null);
     setMembers([]);
-    setNickname(null);
   };
 
   const fetchGroupInfo = async (jwt, groupId) => {
@@ -219,13 +204,13 @@ export const AuthProvider = ({ children }) => {
       console.warn('Invalid groupId or user not logged in');
       return;
     }
-
+    
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/${groupId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${jwt}`,
-        },
+          'Authorization': `Bearer ${jwt}`
+        }
       });
       if (!response.ok) {
         throw new Error('Failed to fetch group info');
@@ -248,7 +233,7 @@ export const AuthProvider = ({ children }) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt}`,
+          'Authorization': `Bearer ${jwt}`
         },
       });
 
@@ -262,30 +247,51 @@ export const AuthProvider = ({ children }) => {
       console.error('Error fetching members:', error);
     }
   };
+  
+// 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
+const getObjectFromChromeStorage = (key) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([key], (result) => {
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      resolve(result[key]);
+    });
+  });
+}
+
+// 로컬 스토리지에 객체 저장하기 (크롬 확장 프로그램용)
+const setObjectToChromeStorage = (key, value) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      resolve();
+    });
+  });
+}
+
+/*ToggleEnableButtons.js의 함수와 동일한 것을 사용 2024.08.08*/ 
+// 로컬 스토리지에서 객체 가져오기 (웹 애플리케이션용)
+const getObjectFromLocalStorage = (key) => {
+  return Promise.resolve(localStorage.getItem(key));
+}
+
+// 로컬 스토리지에 객체 저장하기 (웹 애플리케이션용)
+const setObjectToLocalStorage = (key, value) => {
+  localStorage.setItem(key, value);
+  return Promise.resolve();
+}
+/*ToggleEnableButtons.js의 함수와 동일한 것을 사용 2024.08.08*/ 
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      setUser,
-      jwt,
-      setJwt,
-      isLogined,
-      setIsLogined,
-      groupId,
-      setGroupId,
-      groupInfo,
-      setGroupInfo,
-      members,
-      setMembers,
-      nickname,
-      setNickname,
-      fetchGroupInfo,
-      fetchMembers,
-      signOut,
-    }}>
+    <AuthContext.Provider value={{ user, setUser, jwt, setJwt, isLogined, setIsLogined, groupId, setGroupId, groupInfo, setGroupInfo, members, fetchGroupInfo, fetchMembers, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+
 
 export const useAuth = () => useContext(AuthContext);
