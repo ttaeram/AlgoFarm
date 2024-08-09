@@ -76,7 +76,7 @@ public class SecurityConfig {
                                 "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
                                 "/css/**", "/js/**", "/images/**", "/fonts/**",
                                 "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
-                                "/*.svg", "/*.html", "/*.ico", "/static/**").permitAll()
+                                "/*.svg", "/*.html", "/*.ico", "/static/**", "/chat-websocket/**").permitAll()
                     .anyRequest().authenticated()
                 )
 
@@ -145,7 +145,7 @@ public class SecurityConfig {
                                     "/auth/**", "/", "/home", "/login", "/oauth2/**", "/oauth2-success",
                                     "/css/**", "/js/**", "/images/**", "/fonts/**",
                                     "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif",
-                                    "/*.svg", "/*.html", "/*.ico", "/static/**").permitAll()
+                                    "/*.svg", "/*.html", "/*.ico", "/static/**", "/chat-websocket/**").permitAll()
                             .anyRequest().authenticated()
                     )
                     .oauth2Login(oauth2 -> oauth2
