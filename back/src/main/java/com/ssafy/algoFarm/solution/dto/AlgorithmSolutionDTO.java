@@ -20,9 +20,6 @@ import java.util.List;
 @ToString
 @Schema(description = "풀었던 백준 문제 정보를 받기 위한 DTO")
 public class AlgorithmSolutionDTO {
-    @Schema(description = "문제고유Id", example = "0")
-    private Long id; //auto id
-
     @Schema(description = "문제에 대한 카테고리", example = "백준/Bronze/1000.A+B")
     private String directory;
 
@@ -74,7 +71,6 @@ public class AlgorithmSolutionDTO {
     public AlgorithmSolution toEntity() {
 
         return AlgorithmSolution.builder()
-                .id(id)
                 .directory(directory)
                 .code(code)
                 .codeLength(codeLength)

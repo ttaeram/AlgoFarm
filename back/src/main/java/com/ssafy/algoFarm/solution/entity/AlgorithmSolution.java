@@ -86,7 +86,6 @@ public class AlgorithmSolution {
     public static AlgorithmSolutionDTO toDto(AlgorithmSolution algorithmSolution) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return AlgorithmSolutionDTO.builder()
-                .id(algorithmSolution.getId())
                 .directory(algorithmSolution.getDirectory())
                 .code(algorithmSolution.getCode())
                 .codeLength(algorithmSolution.getCodeLength())
@@ -107,7 +106,6 @@ public class AlgorithmSolution {
 
     public static AlgorithmSolution toEntity(AlgorithmSolutionDTO algorithmSolutionDTO) {
         return AlgorithmSolution.builder()
-                .id(algorithmSolutionDTO.getId())
                 .directory(algorithmSolutionDTO.getDirectory())
                 .code(algorithmSolutionDTO.getCode())
                 .codeLength(algorithmSolutionDTO.getCodeLength())
