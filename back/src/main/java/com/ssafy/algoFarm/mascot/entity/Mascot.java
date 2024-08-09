@@ -21,6 +21,7 @@ public class Mascot {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Setter
     private MascotType type;
 
     @Setter

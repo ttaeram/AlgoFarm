@@ -59,7 +59,7 @@ function failedAni() {
 
   // 캐릭터 애니메이션 변경
   const event = new CustomEvent('playAnimation', {
-    detail: { animation: 'Death', duration: 6000 }
+    detail: { animation: 'Death', duration: 3000 }
   });
   document.dispatchEvent(event);
 }

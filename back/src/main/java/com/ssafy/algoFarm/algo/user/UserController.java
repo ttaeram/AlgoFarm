@@ -1,6 +1,7 @@
 package com.ssafy.algoFarm.algo.user;
 
 import com.ssafy.algoFarm.algo.auth.annotation.CurrentUser;
+import com.ssafy.algoFarm.algo.user.entity.User;
 import com.ssafy.global.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

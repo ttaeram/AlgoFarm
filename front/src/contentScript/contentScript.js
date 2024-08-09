@@ -19,7 +19,6 @@ function renderOverlay() {
     const root = ReactDOM.createRoot(rootElement);
     root.render(<CharacterOverlay />);
 }
-
 // 오버레이를 제거하는 함수
 function removeOverlay() {
     const rootElement = document.getElementById('chrome-extension-root');
