@@ -42,7 +42,21 @@ export const AuthProvider = ({ children }) => {
             }
           })
           .catch(error => {
-            console.error('Error retrieving value:', error);
+            console.error('variable -value Error retrieving value:', error);
+          })
+        
+          
+        let showCharacter;
+        getObjectFromChromeStorage('showCharacter')
+          .then(result => {
+            value = result;
+            if((value == undefined) || showCharacter == true){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
+              console.log("로그인내부에서 showCharacter를 세팅했습니다.");
+              setObjectToChromeStorage('showCharacter', true);
+            }
+          })
+          .catch(error => {
+            console.error('variable-showCharacter Error retrieving value:', error);
           })
         const now = new Date();
         console.log(now + "로그인햇음니다.");
