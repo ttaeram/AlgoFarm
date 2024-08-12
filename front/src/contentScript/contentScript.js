@@ -42,7 +42,7 @@ function applyShakeEffect() {
     var showCharacter
     chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
     showCharacter = response.showCharacter;
-    console.log('캐릭터 response=',showCharacter)
+    // console.log('캐릭터 response=',showCharacter)
     if(response.showCharacter === true){
         renderOverlay();
     }

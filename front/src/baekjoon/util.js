@@ -22,13 +22,10 @@ function successAni() {
   let elem = document.querySelector('.wrapper');
   let fixedComponent = document.querySelector('.fixed-component');
 
-  console.log("successAni가 실행됨.");
   // Confetti 효과를 위한 CustomEvent 발생
   document.dispatchEvent(new CustomEvent('baekjoonSuccess'));
   // 캐릭터 애니메이션 변경
   chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
-    console.log("inSuccessAni="+response)
-
     if(response.showCharacter === true){
 
       const event = new CustomEvent('playAnimation', {
@@ -62,7 +59,6 @@ function failedAni() {
   document.dispatchEvent(new CustomEvent('baekjoonFail'));
   // 캐릭터 애니메이션 변경
   chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
-    console.log(response)
     if(response.showCharacter === true){
       const event = new CustomEvent('playAnimation', {
         detail: { animation: 'Death', duration: 6000 }
@@ -86,7 +82,6 @@ function uploadJudgingAni() {
   document.dispatchEvent(new CustomEvent('baekjoonJudging'));
   // 캐릭터 애니메이션 변경
   chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
-    console.log("inuploadJudgingAni="+response)
     if(response.showCharacter === true){
       const event = new CustomEvent('playAnimation', {
         detail: { animation: 'Bounce', duration: 6000 }

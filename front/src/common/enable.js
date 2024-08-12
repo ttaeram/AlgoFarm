@@ -5,9 +5,9 @@
 async function checkEnable() {
   const enable = await getObjectFromLocalStorage('Enable');
   if (!enable) {
-    console.log("확장 off"); // 비활성화 시 콘솔 메시지 출력
+    // console.log("확장 off"); // 비활성화 시 콘솔 메시지 출력
   } else {
-    console.log("확장 on"); // 활성화 시 콘솔 메시지 출력
+    // console.log("확장 on"); // 활성화 시 콘솔 메시지 출력
   }
   return enable;
 }
