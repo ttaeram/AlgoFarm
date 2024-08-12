@@ -84,9 +84,9 @@ public class AuthController {
 
         JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(jwt);
         if (!validationResult.isValid()) {
-            logger.warn("Invalid token: {}", validationResult.getMessage());
+            logger.warn("Invalid token: {}", validationResult.message());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Invalid token: " + validationResult.getMessage()));
+                    .body(Map.of("error", "Invalid token: " + validationResult.message()));
         }
 
         try {

@@ -48,8 +48,14 @@ public class AlgorithmSolution {
     private List<String> problemTags;
 
     @Setter
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String problemDescription;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String problemInput;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String problemOutput;
 
     @Setter

@@ -44,18 +44,24 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
             throw new BadCredentialsException("No token found");
         }
 
-        JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(token);
-        if (!validationResult.isValid()) {
-            logger.error("Invalid token: {}", validationResult.getMessage());
-            throw new BadCredentialsException("Invalid token: " + validationResult.getMessage());
-        }
-
         String email;
         try {
-            email = jwtUtil.getEmailFromToken(token);
+            JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(token);
+            if (!validationResult.isValid()) {
+                if (validationResult.message().equals("Token is expired")) {
+                    // 토큰이 만료된 경우에도 이메일을 추출합니다.
+                    email = jwtUtil.getEmailFromToken(token);
+                    logger.warn("Token is expired, but email extracted: {}", email);
+                } else {
+                    logger.error("Invalid token: {}", validationResult.message());
+                    throw new BadCredentialsException("Invalid token: " + validationResult.message());
+                }
+            } else {
+                email = jwtUtil.getEmailFromToken(token);
+            }
         } catch (Exception e) {
-            logger.error("Failed to extract email from token", e);
-            throw new BadCredentialsException("Failed to extract email from token");
+            logger.error("Failed to process token", e);
+            throw new BadCredentialsException("Failed to process token");
         }
 
         if (email == null || email.isEmpty()) {

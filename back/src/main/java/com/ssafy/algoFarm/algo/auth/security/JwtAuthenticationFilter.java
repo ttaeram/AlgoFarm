@@ -1,7 +1,6 @@
 package com.ssafy.algoFarm.algo.auth.security;
 
 import com.ssafy.algoFarm.algo.auth.model.CustomOAuth2User;
-import com.ssafy.algoFarm.algo.auth.service.CustomOAuth2UserService;
 import com.ssafy.algoFarm.algo.auth.util.JwtUtil;
 import com.ssafy.algoFarm.algo.user.UserRepository;
 import com.ssafy.algoFarm.algo.user.entity.User;
@@ -24,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import io.jsonwebtoken.ExpiredJwtException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,35 +40,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String jwt = jwtUtil.extractTokenFromRequest(request);
+            final String jwt = jwtUtil.extractTokenFromRequest(request);
             log.debug("Extracted JWT from request: {}", jwt);
 
             if (StringUtils.hasText(jwt)) {
-                JwtUtil.TokenValidationResult validationResult = jwtUtil.validateToken(jwt);
-                if (validationResult.isValid()) {
-                    String email = jwtUtil.getEmailFromToken(jwt);
-                    log.debug("Email extracted from JWT: {}", email);
-
-                    User user = userRepository.findByEmail(email)
-                            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
-                    CustomOAuth2User oauth2User = new CustomOAuth2User(user, user.getAttributes());
-                    OAuth2AuthenticationToken authentication = new OAuth2AuthenticationToken(
-                            oauth2User, oauth2User.getAuthorities(), user.getProvider());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("Set authentication for user: {}", email);
-                } else {
-                    log.warn("Invalid token: {}", validationResult.getMessage());
-                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    response.getWriter().write("Invalid token: " + validationResult.getMessage());
-                    return;
+                String email;
+                String validJwt = jwt;
+                try {
+                    email = jwtUtil.getEmailFromToken(jwt);
+                } catch (ExpiredJwtException e) {
+                    log.info("Token expired. Generating new token...");
+                    email = e.getClaims().getSubject();
+                    validJwt = jwtUtil.generateToken(email, null);
+                    response.setHeader("Authorization", "Bearer " + validJwt);
                 }
+
+                final String finalEmail = email;
+                final String finalJwt = validJwt;
+
+                userRepository.findByEmail(finalEmail)
+                        .ifPresentOrElse(
+                                user -> {
+                                    log.debug("Email extracted from JWT: {}", finalEmail);
+                                    CustomOAuth2User oauth2User = new CustomOAuth2User(user, user.getAttributes());
+                                    OAuth2AuthenticationToken authentication = new OAuth2AuthenticationToken(
+                                            oauth2User, oauth2User.getAuthorities(), user.getProvider());
+                                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                                    log.debug("Set authentication for user: {}", finalEmail);
+                                },
+                                () -> {
+                                    log.warn("User not found with email: {}", finalEmail);
+                                    throw new UsernameNotFoundException("User not found with email: " + finalEmail);
+                                }
+                        );
             }
+        } catch (UsernameNotFoundException e) {
+            log.error("User not found", e);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write("Authentication error: " + e.getMessage());
+            return;
         } catch (Exception e) {
             log.error("Could not set user authentication in security context", e);
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.getWriter().write("Authentication error: " + e.getMessage());
             return;
         }
