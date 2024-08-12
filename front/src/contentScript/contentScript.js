@@ -5,20 +5,22 @@ import confetti from 'canvas-confetti';
 
 // React 컴포넌트를 렌더링하는 함수
 function renderOverlay() {
-    const rootElement = document.createElement('div');
-    rootElement.id = 'chrome-extension-root';
-    rootElement.style.position = 'fixed';
-    rootElement.style.top = '0';
-    rootElement.style.left = '0';
-    rootElement.style.width = '100%';
-    rootElement.style.height = '100%';
-    rootElement.style.zIndex = '9999';
-    rootElement.style.pointerEvents = 'none';
-    document.body.appendChild(rootElement);
-    console.log('Rendered overlay');
+    let rootElement = document.getElementById('chrome-extension-root');
+    if (!rootElement) {
+      rootElement = document.createElement('div');
+      rootElement.id = 'chrome-extension-root';
+      rootElement.style.position = 'fixed';
+      rootElement.style.top = '0';
+      rootElement.style.left = '0';
+      rootElement.style.width = '100%';
+      rootElement.style.height = '100%';
+      rootElement.style.zIndex = '9999';
+      rootElement.style.pointerEvents = 'none';
+      document.body.appendChild(rootElement);
+    }
     const root = ReactDOM.createRoot(rootElement);
     root.render(<CharacterOverlay />);
-}
+ }
 // 오버레이를 제거하는 함수
 function removeOverlay() {
     const rootElement = document.getElementById('chrome-extension-root');
@@ -114,4 +116,30 @@ style.textContent = `
         animation-iteration-count: 1;
     }
 `;
+
+// 탭의 활성화 여부를 감지한다.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'tabChanged') {
+        // console.log('Tab changed, executing necessary cleanup or actions');
+        removeOverlay();
+    } 
+    if (message.action === 'tabActivated') {
+        // console.log('Tab activated, executing specific functionality');
+        // 탭이 활성화될 때 실행할 로직, 캐릭터를 다시 띄운다.
+        activateFeature();
+    }
+});
+
+
+function activateFeature() {
+    console.log('Feature activated!');
+    var showCharacter
+    chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    showCharacter = response.showCharacter;
+    if(response.showCharacter === true){
+        renderOverlay();
+    }
+  });
+}
+
 document.head.appendChild(style);
