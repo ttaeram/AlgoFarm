@@ -46,6 +46,7 @@
     "animate.css": "^4.1.1",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^3.6.0",
+    "dompurify": "^3.1.6",
     "dotenv": "^16.4.5",
     "gapi-script": "^1.2.0",
     "marked": "^14.0.0",
