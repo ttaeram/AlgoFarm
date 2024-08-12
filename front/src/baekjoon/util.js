@@ -19,7 +19,9 @@ function startUpload() {
   startUploadCountDown();
 }
 function successAni() {
-
+  let elem = document.querySelector('.wrapper');
+  let fixedComponent = document.querySelector('.fixed-component');
+  
   console.log("successAni가 실행됨.");
   // Confetti 효과를 위한 CustomEvent 발생
   document.dispatchEvent(new CustomEvent('baekjoonSuccess'));
@@ -41,8 +43,8 @@ function successAni() {
   });
 }
 function failedAni() {
-  // let elem = document.querySelector('.wrapper');
-  // let fixedComponent = document.querySelector('.fixed-component');
+  let elem = document.querySelector('.wrapper');
+  let fixedComponent = document.querySelector('.fixed-component');
   //
   // if (elem !== null && !fixedComponent) {
   //   fixedComponent = document.createElement('div');
