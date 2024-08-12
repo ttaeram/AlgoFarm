@@ -34,7 +34,8 @@
     "https://level.goorm.io/"
   ],
   "background": {
-    "service_worker": "static/js/background.js"
+    "service_worker": "static/js/background.js",
+    "type": "module"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self'"

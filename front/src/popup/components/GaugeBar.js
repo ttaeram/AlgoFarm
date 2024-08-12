@@ -1,52 +1,34 @@
-// import React from 'react';
-// import * as styles from './GaugeBar.module.css';
-
-// const GaugeBar = ({ contribution, maxExperience }) => {
-//   const percentage = maxExperience > 0 
-//     ? Math.min(Math.max((contribution / maxExperience) * 100, 0), 100) 
-//     : 0;
-//   return (
-//     <div className={styles.gauge_bar}>
-//       <div className={styles.gauge_bar_container}>
-//         <div
-//           className={styles.gauge_bar_fill}
-//           style={{ width: `${percentage}%` }}
-//         ></div>
-//       </div>
-//       <div className={styles.gauge_bar_value}>{percentage.toFixed(2)}%</div>
-//     </div>
-//   );
-// };
-
-// export default GaugeBar;
-
 
 
 import React from 'react';
+import { ProgressBar as FancyProgressBar } from 'react-progressbar-fancy'; // 이름 변경
 import * as styles from './GaugeBar.module.css';
+import { Typography } from '@mui/material';
+import { height } from '@mui/system';
 
-const GaugeBar = ({ skillName, contribution, maxExperience }) => {
+const GaugeBar = ({ nickname, contribution, maxExperience }) => {
   const percentage = Math.min(Math.max((contribution / maxExperience) * 100, 0), 100);
 
   return (
     <div className={styles.gauge_bar}>
       <div className={styles.gauge_item}>
-        <p>
-          <span>{skillName}</span>
-          <span>{percentage.toFixed(2)}%</span>
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" style={{ fontSize: '16px', color: 'black' }}>
+            {nickname}
+          </Typography>
+          <Typography variant="h6" style={{ fontSize: '16px', color: 'black' }}>
+            {percentage.toFixed(2)}%
+          </Typography>
+        </div>
+        <div style={{ height: '15px', width: '100%', backgroundColor: 'transparent' }}></div>
         <div className={styles.gauge_progress}>
-          <div
-            className={styles.gauge_progress_level}
-            // style={{ width: `${percentage}%` }}
-            style={{
-              animationName: 'fillGauge',  // 애니메이션 이름
-              animationDuration: '5s',      // 애니메이션 지속 시간
-              animationTimingFunction: 'ease-in-out',
-              animationFillMode: 'forwards',
-              width: `${percentage}%`      // 최종 width를 동적으로 설정
-            }}
-          ></div>
+          <FancyProgressBar
+            score={percentage.toFixed(2)}
+            hideText={true}
+            progressColor="blue"
+            progressWidth={300} // 너비를 설정할 수 있습니다.
+            disableGlow={false} // 글로우 효과 비활성화
+          />
         </div>
       </div>
     </div>
