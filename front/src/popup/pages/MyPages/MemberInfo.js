@@ -68,15 +68,7 @@ const GroupContributions = () => {
       </Typography>
       {combinedData.map(member => (
         <Box key={member.nickname} className={styles.memberBox}>
-<<<<<<< HEAD
-          <GaugeBar nickname={member.nickname} contribution={member.individualContribution} maxExperience={mascotExperience} />
-=======
-          <Typography variant="h6">{member.nickname}</Typography>
-          <GaugeBar 
-            contribution={member.individualContribution} 
-            maxExperience={mascotExperience || 1}  // maxExperience가 0인 경우를 처리
-          />
->>>>>>> ffadc7854fd9008462f4f5a944e0cf08b7dda34d
+          <GaugeBar nickname={member.nickname} contribution={member.individualContribution} maxExperience={mascotExperience || 1} />
         </Box>
       ))}
     </Container>
