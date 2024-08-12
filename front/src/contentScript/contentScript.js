@@ -70,10 +70,10 @@ document.addEventListener('baekjoonFail', (event) => {
     applyShakeEffect();
 });
 
-//채점중
-document.addEventListener('baekjoonJudging', (event) => {
-    console.log('백준 문제 채점중!');
-});
+//채점중 확인용
+// document.addEventListener('baekjoonJudging', (event) => {
+//     console.log('백준 문제 채점중!');
+// });
 
 // 메시지 리스너 추가 (크롬 API 사용 부분 유지)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
