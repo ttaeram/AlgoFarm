@@ -42,7 +42,7 @@ function applyShakeEffect() {
     var showCharacter
     chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
     showCharacter = response.showCharacter;
-    console.log('캐릭터 response=',showCharacter)
+    // console.log('캐릭터 response=',showCharacter)
     if(response.showCharacter === true){
         renderOverlay();
     }
@@ -65,9 +65,15 @@ document.addEventListener('baekjoonSuccess', (event) => {
     });
 });
 
+//실패
 document.addEventListener('baekjoonFail', (event) => {
     applyShakeEffect();
 });
+
+//채점중 확인용
+// document.addEventListener('baekjoonJudging', (event) => {
+//     console.log('백준 문제 채점중!');
+// });
 
 // 메시지 리스너 추가 (크롬 API 사용 부분 유지)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
