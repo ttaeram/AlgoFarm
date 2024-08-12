@@ -19,19 +19,8 @@ function startUpload() {
   startUploadCountDown();
 }
 function successAni() {
-
-  console.log("successAni가 실행됨.");
-  // let elem = document.querySelector('.wrapper');
-  // let fixedComponent = document.querySelector('.fixed-component');
-
-  // if (elem !== null && !fixedComponent) {
-  //   fixedComponent = document.createElement('div');
-  //   fixedComponent.classList.add('fixed-component');
-  //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
-  //   elem.appendChild(fixedComponent);
-  // } else if (elem !== null && fixedComponent) {
-  //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
-  // }
+  let elem = document.querySelector('.wrapper');
+  let fixedComponent = document.querySelector('.fixed-component');
 
   // Confetti 효과를 위한 CustomEvent 발생
   document.dispatchEvent(new CustomEvent('baekjoonSuccess'));
@@ -53,8 +42,8 @@ function successAni() {
   });
 }
 function failedAni() {
-  // let elem = document.querySelector('.wrapper');
-  // let fixedComponent = document.querySelector('.fixed-component');
+  let elem = document.querySelector('.wrapper');
+  let fixedComponent = document.querySelector('.fixed-component');
   //
   // if (elem !== null && !fixedComponent) {
   //   fixedComponent = document.createElement('div');
@@ -70,8 +59,7 @@ function failedAni() {
   document.dispatchEvent(new CustomEvent('baekjoonFail'));
   // 캐릭터 애니메이션 변경
   chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
-    console.log(response)
-    if(response == true){
+    if(response.showCharacter === true){
       const event = new CustomEvent('playAnimation', {
         detail: { animation: 'Death', duration: 6000 }
       });
@@ -87,17 +75,27 @@ function failedAni() {
  
 }
 
-// function uploadJudgingAni() {
-//   let elem = document.querySelector('.wrapper');
-//   let fixedComponent = document.querySelector('.fixed-component');
-//
-//   if (elem !== null && !fixedComponent) {
-//     fixedComponent = document.createElement('div');
-//     fixedComponent.classList.add('fixed-component');
-//     fixedComponent.innerHTML = `<div>채점중</div>`;
-//     elem.appendChild(fixedComponent);
-//   }
-// }
+function uploadJudgingAni() {
+  let elem = document.querySelector('.wrapper');
+  let fixedComponent = document.querySelector('.fixed-component');
+  // Shake 효과를 위한 CustomEvent 발생
+  document.dispatchEvent(new CustomEvent('baekjoonJudging'));
+  // 캐릭터 애니메이션 변경
+  chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    if(response.showCharacter === true){
+      const event = new CustomEvent('playAnimation', {
+        detail: { animation: 'Bounce', duration: 6000 }
+      });
+      document.dispatchEvent(event);
+    
+      setTimeout(() => {
+        if (fixedComponent) {
+          elem.removeChild(fixedComponent);
+        }
+      }, 5000);
+    }
+  });
+}
 
 function errorTimeLimitAni() {
   let elem = document.querySelector('.wrapper');
