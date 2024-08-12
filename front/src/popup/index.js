@@ -32,8 +32,10 @@ function restorePopupState() {
     });
 }
 
+/*개발용, 배포시 주석처리*/
 // 팝업이 열릴 때 상태 저장
-window.addEventListener('load', savePopupState);
+// window.addEventListener('load', savePopupState);
 
 // 팝업 상태 복원
-restorePopupState();
+// restorePopupState();
+/*개발용, 배포시 주석처리*/
