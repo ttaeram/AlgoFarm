@@ -21,6 +21,7 @@ function renderOverlay() {
     const root = ReactDOM.createRoot(rootElement);
     root.render(<CharacterOverlay />);
  }
+
 // 오버레이를 제거하는 함수
 function removeOverlay() {
     const rootElement = document.getElementById('chrome-extension-root');
@@ -120,11 +121,11 @@ style.textContent = `
 // 탭의 활성화 여부를 감지한다.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'tabChanged') {
-        // console.log('Tab changed, executing necessary cleanup or actions');
+        console.log('Tab changed, executing necessary cleanup or actions');
         removeOverlay();
     } 
     if (message.action === 'tabActivated') {
-        // console.log('Tab activated, executing specific functionality');
+        console.log('Tab activated, executing specific functionality');
         // 탭이 활성화될 때 실행할 로직, 캐릭터를 다시 띄운다.
         activateFeature();
     }
