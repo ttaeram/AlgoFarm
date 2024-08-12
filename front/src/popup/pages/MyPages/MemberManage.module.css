@@ -1,6 +1,13 @@
 /* MemberManage.module.css */
 .container {
   padding: 24px;
+  overflow: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.container::-webkit-scrollbar {
+  display: none;
 }
 
 .generateCodeButton {
