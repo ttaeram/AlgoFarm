@@ -107,6 +107,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // 비동기 응답을 보내기 위해 true를 반환합니다.
     return true;
   }
+
+  if (message.action === 'getShowCharacter') {
+    chrome.storage.local.get('showCharacter', (result) => {
+      console.log("getShowCharacter에 요청이 들어왔습니다.", "result =" , result.showCharacter)
+    if(result.showCharacter === true) 
+      sendResponse({ showCharacter: true });
+    else
+      sendResponse({ showCharacter: false });
+  });
+}
 });
 
 //localstorage에서 jwt토큰을 가져오는 코드
@@ -158,15 +168,40 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 //chrome.storage.local에 showCharacter가 true인 경우에만 동작한다.
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("백그라운드의 characer함수가 실행됨")
-  if (message.action === 'getShowCharacter') {
-      chrome.storage.local.get('showCharacter', (result) => {
-        console.log("getShowCharacter에 요청이 들어왔습니다.", "result =" , result.showCharacter)
-      if(result.showCharacter === true) 
-        sendResponse({ showCharacter: true });
-      else
-        sendResponse({ showCharacter: false });
-    });
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   if (message.action === 'getShowCharacter') {
+//       chrome.storage.local.get('showCharacter', (result) => {
+//         console.log("getShowCharacter에 요청이 들어왔습니다.", "result =" , result.showCharacter)
+//       if(result.showCharacter === true) 
+//         sendResponse({ showCharacter: true });
+//       else
+//         sendResponse({ showCharacter: false });
+//     });
+//   }
+// });
+
+let lastActiveTabId = null;
+
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  if (lastActiveTabId !== null && lastActiveTabId !== activeInfo.tabId) {
+    // 이전 탭에서 활성화된 탭으로의 변경을 감지
+    chrome.tabs.sendMessage(lastActiveTabId, { action: 'tabChanged' });
   }
+
+  // 현재 탭 활성화
+  chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabActivated' });
+
+  // 현재 활성화된 탭 ID 업데이트
+  lastActiveTabId = activeInfo.tabId;
 });
+
+
+// //탭의 변경을 식별하기 위한 리스너, 탭이 비활성화되면 동작한다.
+// chrome.tabs.onActivated.addListener((activeInfo) => {
+//   chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabChanged' });
+// });
+
+// //탭의 변경을 식별하기 위한 리스너, 탭이 활성화되면 동작한다.
+// chrome.tabs.onActivated.addListener((activeInfo) => {
+//   chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabActivated' });
+// });
