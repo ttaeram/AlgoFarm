@@ -1,20 +1,81 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
-const useCharacter = (initialVisibility = true, size = 120) => {
-    const [isVisible, setIsVisible] = useState(initialVisibility);
-    const [model, setModel] = useState(null);
-    const [currentCharacter, setCurrentCharacter] = useState('Cat');
-    const [position, setPosition] = useState({ x: window.innerWidth - 220, y: window.innerHeight - 220 });
-    const [direction, setDirection] = useState(1);
-    const [speed, setSpeed] = useState(2);
-    const [isJumping, setIsJumping] = useState(false);
-    const [isDragging, setIsDragging] = useState(false);
-    const [animationConfig, setAnimationConfig] = useState({ name: 'Walk', pauseAtTime: null });
+const useCharacter = (size = 120) => {
+    const [characterState, setCharacterState] = useState({
+        isVisible: false,
+        model: null,
+        currentCharacter: null,
+        position: { x: window.innerWidth - 220, y: window.innerHeight - 220 },
+        direction: 1,
+        speed: 2,
+        isJumping: false,
+        isDragging: false,
+        animationConfig: { name: 'Walk', pauseAtTime: null }
+    });
 
     const animationRef = useRef();
     const moveIntervalRef = useRef();
     const jumpRef = useRef();
     const currentAnimationRef = useRef(null);
+    const isInitializedRef = useRef(false);
+
+    const loadCharacterData = useCallback(() => {
+        chrome.storage.local.get(['character'], (result) => {
+            if (result.character) {
+                const characterData = JSON.parse(result.character);
+                if (characterData.type) {
+                    setCharacterState(prev => ({
+                        ...prev,
+                        currentCharacter: characterData.type,
+                        isVisible: true
+                    }));
+                } else {
+                    setCharacterState(prev => ({ ...prev, isVisible: false }));
+                }
+            } else {
+                setCharacterState(prev => ({ ...prev, isVisible: false }));
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        if (!isInitializedRef.current) {
+            loadCharacterData();
+            isInitializedRef.current = true;
+        }
+
+        const handleStorageChange = (changes, area) => {
+            if (area === 'local' && changes.character) {
+                loadCharacterData();
+            }
+        };
+
+        chrome.storage.onChanged.addListener(handleStorageChange);
+
+        return () => {
+            chrome.storage.onChanged.removeListener(handleStorageChange);
+        };
+    }, [loadCharacterData]);
+
+    const loadModel = useCallback(() => {
+        if (!characterState.currentCharacter) return;
+
+        fetch(chrome.runtime.getURL(`assets/models/${characterState.currentCharacter}.glb`))
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+                setCharacterState(prev => ({ ...prev, model: arrayBuffer }));
+            })
+            .catch(error => {
+                console.error('Error loading model:', error);
+                setCharacterState(prev => ({ ...prev, isVisible: false }));
+            });
+    }, [characterState.currentCharacter]);
+
+    useEffect(() => {
+        if (characterState.currentCharacter) {
+            loadModel();
+        }
+    }, [loadModel, characterState.currentCharacter]);
 
     const cancelCurrentMovement = useCallback(() => {
         clearTimeout(animationRef.current);
@@ -22,7 +83,7 @@ const useCharacter = (initialVisibility = true, size = 120) => {
     }, []);
 
     const moveCharacter = useCallback(() => {
-        if (isDragging || currentAnimationRef.current) return;
+        if (characterState.isDragging || currentAnimationRef.current) return;
 
         cancelCurrentMovement();
 
@@ -31,20 +92,23 @@ const useCharacter = (initialVisibility = true, size = 120) => {
         const newAnimation = Math.random() < 0.6 ? 'Walk' : Math.random() < 0.8 ? 'Run' : 'Sit';
         const newSpeed = newAnimation === 'Run' ? 4 : 2;
 
-        setDirection(newDirection);
-        setAnimationConfig({ name: newAnimation, pauseAtTime: null });
-        setSpeed(newSpeed);
+        setCharacterState(prev => ({
+            ...prev,
+            direction: newDirection,
+            animationConfig: { name: newAnimation, pauseAtTime: null },
+            speed: newSpeed
+        }));
 
         moveIntervalRef.current = setInterval(() => {
-            if (!isJumping && newAnimation !== 'Sit' && !isDragging && !currentAnimationRef.current) {
-                setPosition(prevPos => {
-                    let newX = prevPos.x + newDirection * newSpeed;
+            if (!characterState.isJumping && newAnimation !== 'Sit' && !characterState.isDragging && !currentAnimationRef.current) {
+                setCharacterState(prev => {
+                    let newX = prev.position.x + newDirection * newSpeed;
                     if (newX <= 0 || newX >= window.innerWidth - size) {
                         cancelCurrentMovement();
                         moveCharacter();
-                        return prevPos;
+                        return prev;
                     }
-                    return { ...prevPos, x: newX };
+                    return { ...prev, position: { ...prev.position, x: newX } };
                 });
             }
         }, 16);
@@ -54,12 +118,16 @@ const useCharacter = (initialVisibility = true, size = 120) => {
         }
 
         animationRef.current = setTimeout(moveCharacter, duration);
-    }, [size, isJumping, isDragging, cancelCurrentMovement]);
+    }, [characterState.isDragging, characterState.isJumping, cancelCurrentMovement, size]);
 
     const performJump = useCallback(() => {
-        if (isJumping || isDragging || currentAnimationRef.current) return;
-        setIsJumping(true);
-        setAnimationConfig({ name: 'Jump', pauseAtTime: null });
+        if (characterState.isJumping || characterState.isDragging || currentAnimationRef.current) return;
+
+        setCharacterState(prev => ({
+            ...prev,
+            isJumping: true,
+            animationConfig: { name: 'Jump', pauseAtTime: null }
+        }));
 
         const jumpHeight = 50;
         const jumpDuration = 500;
@@ -71,41 +139,33 @@ const useCharacter = (initialVisibility = true, size = 120) => {
             const progress = Math.min(elapsedTime / jumpDuration, 1);
 
             const jumpProgress = Math.sin(progress * Math.PI);
-            const newY = position.y - jumpHeight * jumpProgress;
+            const newY = characterState.position.y - jumpHeight * jumpProgress;
 
-            setPosition(prevPos => ({ ...prevPos, y: newY }));
+            setCharacterState(prev => ({
+                ...prev,
+                position: { ...prev.position, y: newY }
+            }));
 
             if (progress < 1) {
                 jumpRef.current = requestAnimationFrame(animateJump);
             } else {
-                setIsJumping(false);
-                setAnimationConfig({ name: speed === 4 ? 'Run' : 'Walk', pauseAtTime: null });
+                setCharacterState(prev => ({
+                    ...prev,
+                    isJumping: false,
+                    animationConfig: { name: prev.speed === 4 ? 'Run' : 'Walk', pauseAtTime: null }
+                }));
             }
         };
 
         jumpRef.current = requestAnimationFrame(animateJump);
-    }, [position.y, speed, isDragging]);
+    }, [characterState.isJumping, characterState.isDragging, characterState.position.y]);
 
     useEffect(() => {
-        if (!currentAnimationRef.current) {
+        if (!currentAnimationRef.current && characterState.isVisible) {
             moveCharacter();
         }
         return cancelCurrentMovement;
-    }, [moveCharacter, cancelCurrentMovement]);
-
-    const startDragging = useCallback(() => {
-        setIsDragging(true);
-        cancelCurrentMovement();
-        setAnimationConfig({ name: 'Roll', pauseAtTime: null });
-    }, [cancelCurrentMovement]);
-
-    const stopDragging = useCallback(() => {
-        setIsDragging(false);
-        if (!currentAnimationRef.current) {
-            setAnimationConfig({ name: 'Walk', pauseAtTime: null });
-            moveCharacter();
-        }
-    }, [moveCharacter]);
+    }, [moveCharacter, cancelCurrentMovement, characterState.isVisible]);
 
     const handleMouseDown = useCallback((e) => {
         if (currentAnimationRef.current) return;
@@ -114,104 +174,105 @@ const useCharacter = (initialVisibility = true, size = 120) => {
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
 
-        setIsDragging(true);
-        startDragging();
+        setCharacterState(prev => ({
+            ...prev,
+            isDragging: true,
+            animationConfig: { name: 'Roll', pauseAtTime: null }
+        }));
 
         const handleMouseMove = (e) => {
             const newX = Math.max(0, Math.min(e.clientX - offsetX, window.innerWidth - size));
             const newY = Math.max(0, Math.min(e.clientY - offsetY, window.innerHeight - size));
-            setPosition({ x: newX, y: newY });
+            setCharacterState(prev => ({
+                ...prev,
+                position: { x: newX, y: newY }
+            }));
         };
 
         const handleMouseUp = () => {
-            setIsDragging(false);
-            stopDragging();
+            setCharacterState(prev => ({
+                ...prev,
+                isDragging: false,
+                animationConfig: { name: 'Walk', pauseAtTime: null }
+            }));
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
+            moveCharacter();
         };
 
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
-    }, [size, startDragging, stopDragging]);
+    }, [size, moveCharacter]);
 
     const handleAnimationComplete = useCallback(() => {
         if (currentAnimationRef.current) {
             clearTimeout(currentAnimationRef.current.timeout);
             currentAnimationRef.current = null;
         }
-        if (animationConfig.name === 'Death') {
-            setTimeout(() => setAnimationConfig({ name: 'Walk', pauseAtTime: null }), 2000);
-        } else if (!isDragging) {
-            setAnimationConfig({ name: 'Walk', pauseAtTime: null });
+        if (characterState.animationConfig.name === 'Death') {
+            setTimeout(() => setCharacterState(prev => ({
+                ...prev,
+                animationConfig: { name: 'Walk', pauseAtTime: null }
+            })), 2000);
+        } else if (!characterState.isDragging) {
+            setCharacterState(prev => ({
+                ...prev,
+                animationConfig: { name: 'Walk', pauseAtTime: null }
+            }));
             moveCharacter();
         }
-    }, [animationConfig.name, isDragging, moveCharacter]);
-
-    const loadModel = useCallback((character) => {
-        fetch(chrome.runtime.getURL(`assets/models/${character}_Animations.glb`))
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => {
-                setModel(arrayBuffer);
-            });
-    }, []);
-
-    useEffect(() => {
-        loadModel(currentCharacter);
-    }, [currentCharacter, loadModel]);
+    }, [characterState.animationConfig.name, characterState.isDragging, moveCharacter]);
 
     const playAnimation = useCallback((newAnimation, duration = 3000, pauseTime = null) => {
         if (currentAnimationRef.current) {
             clearTimeout(currentAnimationRef.current.timeout);
         }
 
-        setAnimationConfig({ name: newAnimation, pauseAtTime: pauseTime });
+        setCharacterState(prev => ({
+            ...prev,
+            animationConfig: { name: newAnimation, pauseAtTime: pauseTime }
+        }));
 
         currentAnimationRef.current = {
             animation: newAnimation,
             timeout: setTimeout(() => {
                 currentAnimationRef.current = null;
-                if (!isDragging) {
-                    setAnimationConfig({ name: 'Walk', pauseAtTime: null });
+                if (!characterState.isDragging) {
+                    setCharacterState(prev => ({
+                        ...prev,
+                        animationConfig: { name: 'Walk', pauseAtTime: null }
+                    }));
                     moveCharacter();
                 }
             }, duration)
         };
-    }, [isDragging, moveCharacter]);
+    }, [characterState.isDragging, moveCharacter]);
 
-    const handleCustomPlayAnimation = useCallback((event) => {
-        const { animation, duration } = event.detail;
-        let pauseTime = null;
-
-        if (animation === 'Death') {
-            pauseTime = 0.3; // Death 애니메이션을 0.3초에 멈춤
-        }
-
-        playAnimation(animation, duration, pauseTime);
-    }, [playAnimation]);
-
-    useEffect(() => {
-        document.addEventListener('playAnimation', handleCustomPlayAnimation);
-        return () => document.removeEventListener('playAnimation', handleCustomPlayAnimation);
-    }, [handleCustomPlayAnimation]);
-
-    const changeCharacter = useCallback((character) => {
-        setCurrentCharacter(character);
-        loadModel(character);
-    }, [loadModel]);
-
-    const toggleVisibility = useCallback((visibility) => {
-        setIsVisible(visibility);
+    const changeCharacter = useCallback((newCharacter) => {
+        chrome.storage.local.set({ character: JSON.stringify({ type: newCharacter }) });
     }, []);
 
+    const toggleVisibility = useCallback((visibility) => {
+        if (!visibility) {
+            chrome.storage.local.remove('character');
+        } else {
+            loadCharacterData();
+        }
+    }, [loadCharacterData]);
+
+    const memoizedState = useMemo(() => ({
+        isVisible: characterState.isVisible,
+        model: characterState.model,
+        currentCharacter: characterState.currentCharacter,
+        position: characterState.position,
+        direction: characterState.direction,
+        animationConfig: characterState.animationConfig,
+        speed: characterState.speed,
+        isDragging: characterState.isDragging,
+    }), [characterState]);
+
     return {
-        isVisible,
-        model,
-        currentCharacter,
-        position,
-        direction,
-        animationConfig,
-        speed,
-        isDragging,
+        ...memoizedState,
         handleMouseDown,
         handleAnimationComplete,
         playAnimation,

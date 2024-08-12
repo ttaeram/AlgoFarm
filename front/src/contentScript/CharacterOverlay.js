@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import ModelViewer from './ModelViewer';
@@ -6,7 +6,7 @@ import useCharacter from './useCharacter';
 
 const SIZE = 120;
 
-const CharacterOverlay = () => {
+const CharacterOverlay = React.memo(() => {
     const {
         isVisible,
         model,
@@ -21,25 +21,20 @@ const CharacterOverlay = () => {
         handleAnimationComplete,
         playAnimation,
         changeCharacter,
-    } = useCharacter(true, SIZE);
+    } = useCharacter(SIZE);
 
     const canvasRef = useRef(null);
 
+    const handleCustomPlayAnimation = useCallback((event) => {
+        const { animation, duration } = event.detail;
+        let pauseTime = animation === 'Death' ? 0.40 : null;
+        playAnimation(animation, duration, pauseTime);
+    }, [playAnimation]);
+
     useEffect(() => {
-        const handleCustomPlayAnimation = (event) => {
-            const { animation, duration } = event.detail;
-            let pauseTime = null;
-            // 'Death' 애니메이션의 경우 0.3초에 멈춤
-            if (animation === 'Death') {
-                pauseTime = 0.40;
-            }
-
-            playAnimation(animation, duration, pauseTime);
-        };
-
         document.addEventListener('playAnimation', handleCustomPlayAnimation);
         return () => document.removeEventListener('playAnimation', handleCustomPlayAnimation);
-    }, [playAnimation]);
+    }, [handleCustomPlayAnimation]);
 
     useEffect(() => {
         const messageListener = (request, sender, sendResponse) => {
@@ -54,7 +49,7 @@ const CharacterOverlay = () => {
         return () => chrome.runtime.onMessage.removeListener(messageListener);
     }, [playAnimation, changeCharacter]);
 
-    if (!isVisible) return null;
+    if (!isVisible || !currentCharacter) return null;
 
     return (
         <div
@@ -77,7 +72,7 @@ const CharacterOverlay = () => {
                 <OrbitControls enabled={false} />
                 <ambientLight intensity={2} />
                 <directionalLight color={0xffffff} intensity={3} position={[5, 5, 5]} />
-                {model && (
+                {model && currentCharacter && (
                     <ModelViewer
                         modelData={model}
                         animationConfig={animationConfig}
@@ -91,6 +86,6 @@ const CharacterOverlay = () => {
             </Canvas>
         </div>
     );
-};
+});
 
 export default CharacterOverlay;

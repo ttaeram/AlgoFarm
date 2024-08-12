@@ -3,35 +3,39 @@ import ReactDOM from 'react-dom';
 import CharacterOverlay from './CharacterOverlay';
 import confetti from 'canvas-confetti';
 
-// React 컴포넌트를 렌더링하는 함수
+let root = null;
+
 function renderOverlay() {
     let rootElement = document.getElementById('chrome-extension-root');
     if (!rootElement) {
-      rootElement = document.createElement('div');
-      rootElement.id = 'chrome-extension-root';
-      rootElement.style.position = 'fixed';
-      rootElement.style.top = '0';
-      rootElement.style.left = '0';
-      rootElement.style.width = '100%';
-      rootElement.style.height = '100%';
-      rootElement.style.zIndex = '9999';
-      rootElement.style.pointerEvents = 'none';
-      document.body.appendChild(rootElement);
+        rootElement = document.createElement('div');
+        rootElement.id = 'chrome-extension-root';
+        rootElement.style.position = 'fixed';
+        rootElement.style.top = '0';
+        rootElement.style.left = '0';
+        rootElement.style.width = '100%';
+        rootElement.style.height = '100%';
+        rootElement.style.zIndex = '9999';
+        rootElement.style.pointerEvents = 'none';
+        document.body.appendChild(rootElement);
     }
-    const root = ReactDOM.createRoot(rootElement);
+    if (!root) {
+        root = ReactDOM.createRoot(rootElement);
+    }
     root.render(<CharacterOverlay />);
- }
+}
 
-// 오버레이를 제거하는 함수
 function removeOverlay() {
+    if (root) {
+        root.unmount();
+        root = null;
+    }
     const rootElement = document.getElementById('chrome-extension-root');
     if (rootElement) {
-        ReactDOM.unmountComponentAtNode(rootElement);
         rootElement.remove();
     }
 }
 
-// Shake 효과를 적용하는 함수
 function applyShakeEffect() {
     document.body.classList.add('shake');
     setTimeout(() => {
@@ -39,26 +43,14 @@ function applyShakeEffect() {
     }, 500);
 }
 
-// 초기 실행
 (async function init() {
-
-    var showCharacter
-    chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
-    showCharacter = response.showCharacter;
-    // console.log('캐릭터 response=',showCharacter)
-    if(response.showCharacter === true){
-        renderOverlay();
-    }
-  });
-
-    // const showCharacter = false;
-    // if (showCharacter) {
-    //     renderOverlay();
-    // }
-    // console.log('Content script loaded, character visibility:', showCharacter);
+    chrome.storage.local.get(['showCharacter', 'character'], (result) => {
+        if (result.showCharacter === true && result.character) {
+            renderOverlay();
+        }
+    });
 })();
 
-// CustomEvent 리스너 추가
 document.addEventListener('baekjoonSuccess', (event) => {
     console.log('백준 문제 풀이 성공!');
     confetti({
@@ -68,17 +60,10 @@ document.addEventListener('baekjoonSuccess', (event) => {
     });
 });
 
-//실패
 document.addEventListener('baekjoonFail', (event) => {
     applyShakeEffect();
 });
 
-//채점중 확인용
-// document.addEventListener('baekjoonJudging', (event) => {
-//     console.log('백준 문제 채점중!');
-// });
-
-// 메시지 리스너 추가 (크롬 API 사용 부분 유지)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.action) {
         case "toggleCharacterVisibility":
@@ -93,10 +78,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             renderOverlay();
             sendResponse({status: "reloaded"});
             break;
+        case "leaveGroup":
+            removeOverlay();
+            break;
+        case "joinGroup":
+            renderOverlay();
+            break;
     }
 });
 
-// CSS for shake effect
 const style = document.createElement('style');
 style.textContent = `
     @keyframes shake {
@@ -118,29 +108,24 @@ style.textContent = `
     }
 `;
 
-// 탭의 활성화 여부를 감지한다.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'tabChanged') {
         console.log('Tab changed, executing necessary cleanup or actions');
         removeOverlay();
-    } 
+    }
     if (message.action === 'tabActivated') {
         console.log('Tab activated, executing specific functionality');
-        // 탭이 활성화될 때 실행할 로직, 캐릭터를 다시 띄운다.
         activateFeature();
     }
 });
 
-
 function activateFeature() {
     console.log('Feature activated!');
-    var showCharacter
-    chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
-    showCharacter = response.showCharacter;
-    if(response.showCharacter === true){
-        renderOverlay();
-    }
-  });
+    chrome.storage.local.get(['showCharacter', 'character'], (result) => {
+        if (result.showCharacter === true && result.character) {
+            renderOverlay();
+        }
+    });
 }
 
 document.head.appendChild(style);
