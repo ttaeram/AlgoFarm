@@ -77,13 +77,13 @@ chrome.storage.local.get('isLogined', (result) => {
             const bojData = await findData()
             // console.log("username=" , bojData.username);
             bojData.username += `_${bojData.problemId}`
-            console.log("전송데이터 (JSON):", JSON.stringify(bojData, null, 2));
+            // console.log("전송데이터 (JSON):", JSON.stringify(bojData, null, 2));
             
   
             //Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
             chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
               if (response && response.token) {
-                console.log("토큰을 가져왔습니다.")
+                // console.log("토큰을 가져왔습니다.")
                 // console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
                 // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
                 // fetch("http:localhost:8080/api/commits", {
@@ -96,10 +96,10 @@ chrome.storage.local.get('isLogined', (result) => {
                   body: JSON.stringify(bojData) // 여기에 bojData를 대체
                 })
                 .then((res) => {
-                  console.log("응답 : ", res);
+                  // console.log("응답 : ", res);
                 });
               } else {
-                console.error('Token not found in response');
+                // console.error('Token not found in response');
               }
             });
           }
