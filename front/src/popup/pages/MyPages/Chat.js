@@ -38,11 +38,14 @@ const StyledDialogContent = styled(DialogContent)`
   overflow-y: auto;
   scrollbar-width: none;
   ms-overflow-style: none;
+  min-height: 250px; /* 최소 높이 설정 */
 
   &::-webkit-scrollbar {
     display: none;
   }
 `;
+
+const MAX_MESSAGE_LENGTH = 255;
 
 const ChatPopup = ({ onClose }) => {
   const { jwt, groupId, user, groupInfo, nickname } = useAuth();
@@ -51,6 +54,7 @@ const ChatPopup = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const client = useRef(null);
   const chatEndRef = useRef(null);
+  const messageRef = useRef(null);
 
   useEffect(() => {
     fetchChatHistory();
@@ -170,6 +174,20 @@ const ChatPopup = ({ onClose }) => {
     setMessage("");
   };
 
+  const validateMessageLength = () => {
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      messageRef.current.setCustomValidity(`메시지는 최대 ${MAX_MESSAGE_LENGTH}자까지 입력할 수 있습니다.`);
+      messageRef.current.reportValidity();
+    } else {
+      messageRef.current.setCustomValidity("");
+    }
+  };
+
+  const handleChangeMessage = (e) => {
+    setMessage(e.target.value);
+    validateMessageLength();
+  };
+
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -200,46 +218,61 @@ const ChatPopup = ({ onClose }) => {
       </DialogTitle>
       <StyledDialogContent dividers>
         <List>
-          {previousChatMessages.map((_chatMessage, index) => (
-            <ListItem 
-              key={index} 
-              disableGutters 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
-              }}>
-              <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
-                <CardContent>
-                  <Typography variant="body2" color="textSecondary">
-                    {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
-                  </Typography>
-                  <Typography variant="body1">
-                    {_chatMessage.content}
-                  </Typography>
-                </CardContent>
-              </StyledCard>
+          <ListItem disableGutters>
+            <Typography variant="body2" color="textPrimary" align="center" sx={{ width: '100%' }}>
+              채팅이 시작되었습니다. 자유롭게 대화해 주세요.
+            </Typography>
+          </ListItem>
+          {previousChatMessages.length === 0 && chatMessages.length === 0 ? (
+            <ListItem disableGutters>
+              <Typography variant="body2" color="textSecondary" align="center" sx={{ width: '100%' }}>
+                채팅 기록이 없습니다.
+              </Typography>
             </ListItem>
-          ))}
-          {chatMessages.map((_chatMessage, index) => (
-            <ListItem 
-              key={index} 
-              disableGutters 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
-              }}>
-              <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
-                <CardContent>
-                  <Typography variant="body2" color="textSecondary">
-                    {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
-                  </Typography>
-                  <Typography variant="body1">
-                    {_chatMessage.content}
-                  </Typography>
-                </CardContent>
-              </StyledCard>
-            </ListItem>
-          ))}
+          ) : (
+            <>
+              {previousChatMessages.map((_chatMessage, index) => (
+                <ListItem 
+                  key={index} 
+                  disableGutters 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
+                  }}>
+                  <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
+                    <CardContent>
+                      <Typography variant="body2" color="textSecondary">
+                        {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
+                      </Typography>
+                      <Typography variant="body1">
+                        {_chatMessage.content}
+                      </Typography>
+                    </CardContent>
+                  </StyledCard>
+                </ListItem>
+              ))}
+              {chatMessages.map((_chatMessage, index) => (
+                <ListItem 
+                  key={index} 
+                  disableGutters 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
+                  }}>
+                  <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
+                    <CardContent>
+                      <Typography variant="body2" color="textSecondary">
+                        {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
+                      </Typography>
+                      <Typography variant="body1">
+                        {_chatMessage.content}
+                      </Typography>
+                    </CardContent>
+                  </StyledCard>
+                </ListItem>
+              ))}
+            </>
+          )}
           <div ref={chatEndRef} />
         </List>
       </StyledDialogContent>
@@ -250,8 +283,10 @@ const ChatPopup = ({ onClose }) => {
             variant="outlined"
             placeholder="메시지를 입력하세요..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleChangeMessage}
             onKeyPress={(e) => e.which === 13 && publish(message)}
+            inputRef={messageRef}
+            inputProps={{ maxLength: MAX_MESSAGE_LENGTH, required: true }}
           />
           <StyledButton variant="contained" onClick={() => publish(message)}>전송</StyledButton>
         </Box>

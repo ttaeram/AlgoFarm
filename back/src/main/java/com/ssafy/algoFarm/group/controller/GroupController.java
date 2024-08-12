@@ -2,10 +2,15 @@ package com.ssafy.algoFarm.group.controller;
 
 import com.ssafy.algoFarm.algo.auth.annotation.CurrentUser;
 import com.ssafy.algoFarm.algo.user.entity.User;
+import com.ssafy.algoFarm.exception.BusinessException;
+import com.ssafy.algoFarm.exception.ErrorCode;
 import com.ssafy.algoFarm.group.dto.request.*;
 import com.ssafy.algoFarm.group.dto.response.*;
-import com.ssafy.algoFarm.group.entity.Member;
 import com.ssafy.algoFarm.group.service.GroupService;
+import com.ssafy.algoFarm.mascot.entity.Mascot;
+import com.ssafy.algoFarm.mascot.entity.MascotDataDto;
+import com.ssafy.algoFarm.mascot.repository.MascotRepository;
+import com.ssafy.algoFarm.mascot.service.MascotService;
 import com.ssafy.global.response.DataResponse;
 import com.ssafy.global.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +31,8 @@ import java.util.List;
 public class GroupController {
 
     private final GroupService groupService;
+    private final MascotService mascotService;
+    private final MascotRepository mascotRepository;
 
     @PatchMapping("api/groups")
     @Operation(summary = "그룹명을 수정하는 api")
@@ -190,4 +197,14 @@ public class GroupController {
         return new ResponseEntity<>(MessageResponse.of(HttpStatus.OK, "닉네임이 변경되었습니다."), HttpStatus.OK);
     }
 
+
+    @GetMapping("api/groups/{groupId}/character")
+    @Operation(summary = "그룹 캐릭터 정보 요청", description = "그룹의 캐릭터 정보를 가져오는 API")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<DataResponse<MascotDataDto>> getCharacterInfo(@PathVariable Long groupId, @Parameter(hidden = true) @CurrentUser User user){
+        Mascot mascot = mascotService.getMascotByGroupId(groupId).orElseThrow(()-> new BusinessException(ErrorCode.MASCOT_NOT_FOUND));
+        MascotDataDto mascotDataDto = new MascotDataDto(mascot.getCurrentExp(), mascot.getMaxExp(), mascot.getLevel(), mascot.getType());
+
+        return new ResponseEntity<>(DataResponse.of(HttpStatus.OK, "캐릭터 데이터를 가져오는데 성공했습니다,", mascotDataDto), HttpStatus.OK);
+    }
 }

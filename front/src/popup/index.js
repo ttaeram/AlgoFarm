@@ -31,9 +31,10 @@ function restorePopupState() {
         }
     });
 }
+chrome.runtime.sendMessage({action: 'clearBadge'});
 
 // 팝업이 열릴 때 상태 저장
-window.addEventListener('load', savePopupState);
+//window.addEventListener('load', savePopupState);
 
 // 팝업 상태 복원
-restorePopupState();
+//restorePopupState();

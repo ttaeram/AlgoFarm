@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { marked } from 'marked';
-import './AICodeReview.css';
+import DOMPurify from 'dompurify';
 
 /**
  * escape된 문자열을 unescape하여 반환합니다.
@@ -108,6 +108,7 @@ async function saveSolveDetailsToLocal() {
   const submitBtn = document.querySelector('#submit_button');
   if (submitBtn) {
     submitBtn.addEventListener('click', async (event) => {
+      // 테스트 할 때는 아래 주석 해제
       // event.preventDefault()
       const solveData = await getSolveDetails();
       console.log('제출 코드 데이터:', solveData);
@@ -134,9 +135,16 @@ async function loadSolveDetailsFromLocal() {
 // 문제 데이터를 가져와서 팝업 화면에 표시하는 컴포넌트
 const ProblemPopup = ({ problemData, solveData }) => {
   if (!problemData || !solveData || problemData.problemId !== solveData.solveId) {
-    return <h2>문제 내용을 다시 확인하고<br/>새로운 코드를 제출해주세요.</h2>;
+    return (
+      <div style={{ margin: '45px' }}>
+        <div>
+          <p>문제 내용을 다시 확인하고<br/>새로운 코드를 제출해주세요.</p>
+        </div>
+      </div>
+    );
   }
 
+  // AI 답변 관련 로직
   const [answerFromAI, setAnswerFromAI] = useState(null);
 
   useEffect(() => {
@@ -210,7 +218,18 @@ const ProblemPopup = ({ problemData, solveData }) => {
         const result = await chat.sendMessage(msg);
         const answer = await result.response.text();
         console.log('AI의 답변:', answer);
-        setAnswerFromAI(answer);
+
+        // 보안 이슈 1 : 마크다운을 HTML로 변환 후, DOMPurify로 정화
+        //   dangerouslySetInnerHTML를 사용하기 때문에, XSS 공격의 위험이 있음.
+        //     XSS 공격 (Cross Site Scripting):
+        //     공격자가 상대방의 브라우저에 스크립트가 실행되도록 하여
+        //     사용자의 세션을 가로채거나,
+        //     웹사이트를 변조하거나,
+        //     악의적 콘텐츠를 삽입하거나,
+        //     피싱 공격을 진행하는 것
+        const dirtyHtml = marked(answer);
+        const cleanHtml = DOMPurify.sanitize(dirtyHtml);
+        setAnswerFromAI(cleanHtml);
       }
 
       run();
@@ -219,15 +238,28 @@ const ProblemPopup = ({ problemData, solveData }) => {
     }
   }, [problemData, solveData]);
 
+  // 로딩 텍스트 변경 로직
+  const [loadingDots, setLoadingDots] = useState('');
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setLoadingDots(prev => {
+        if (prev === '...') return '';
+        return prev + '.';
+      });
+    }, 500); // 0.5초 간격으로 점 추가
+    return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 인터벌 클리어
+  }, []);
+
   return (
-    <div className="problem-popup">
+    <div style={{ margin: '45px' }}>
       {answerFromAI ? (
         <div
-          dangerouslySetInnerHTML={{ __html: marked(answerFromAI) }} // 마크다운을 HTML로 변환하여 출력
+          dangerouslySetInnerHTML={{ __html: answerFromAI }} // 마크다운을 HTML로 변환 후, 안전하게 정화된 HTML로 출력
       />
       ) : (
         <div>
-          <p>AI의 코드 리뷰를 로딩 중입니다.</p>
+          <p>AI의 코드 리뷰를 로딩 중입니다{loadingDots}</p>
         </div>
       )}
     </div>
@@ -239,7 +271,30 @@ function renderOverlay(problemData, solveData) {
   const popup = window.open('', 'AI Code Review', 'width=600,height=800');
   if (popup) {
     popup.document.write('<div id="ai-code-root"></div>');
-    popup.document.write('<link rel="stylesheet" href="' + chrome.runtime.getURL('AICodeReview.css') + '">');
+
+    // 깃허브 마크다운 CSS
+    //   크롬 익스텐션에서는 팝업 윈도우가 부모 페이지와 다른 컨텍스트에서 실행되기 때문에,
+    //   크롬 익스텐션 외부의 팝업 윈도우가 CSS 파일에 접근하지 못하는 문제가 발생했다.
+    //   이에 CDNJS 서비스를 사용하여 깃허브 마크다운 CSS를 적용했다.
+    // 보안 이슈 2 : CDN 방식은 위험하다
+    //   최근 카카오 사태에서 경험했듯이,
+    //   다수가 사용하는 CDN에 장애가 발생하거나 해커가 공격할 경우 문제가 발생할 여지가 있다.
+    //   이에 github-markdown-css 라이브러리를 설치하여 사용하는 것으로 권장하나,
+    //   익스텐션 외부에서 CSS 파일에 접근할 수 없기 때문에 사용할 수 없다.
+    //   추후 보안 이슈 관련하여 대책을 마련하고 적용할 예정이다.
+    // 해결 방법 1 : 팝업 대신 모달 사용
+    //   팝업 창 대신 모달 창을 사용하면,
+    //   모달 창은 부모 페이지와 동일한 컨텍스트에서 실행되기 때문에, CSS 파일에 접근할 수 있다.
+    //   하지만 팝업 창의 경우, 코드 리뷰 팝업 창을 켠 상태로 다른 창을 동시에 비교할 수 있다는 장점이 있다.
+    //   UX 관점에서 팝업 창이 더 좋다고 판단하여, 기존대로 팝업 창으로 진행하되 보안 문제를 해결할 방법을 모색하고 있다.
+    // 해결 방법 2 : 인라인 CSS
+    //   하지만 이 경우 코드가 복잡해지기 때문에, 최후의 방법으로 남겨둘 예정이다.
+    const externalCss = popup.document.createElement('link');
+    externalCss.rel = 'stylesheet';
+    externalCss.href = 'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.6.1/github-markdown-dark.css';
+    popup.document.head.appendChild(externalCss);
+    popup.document.body.classList.add('markdown-body');
+
     popup.document.close();
     const root = ReactDOM.createRoot(popup.document.getElementById('ai-code-root'));
     root.render(<ProblemPopup problemData={problemData} solveData={solveData} />);

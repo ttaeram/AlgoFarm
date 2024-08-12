@@ -29,6 +29,9 @@ public class MascotService {
         return mascotRepository.findById(id);
     }
 
+    // 마스코트 조회 (groupId로)
+    public Optional<Mascot> getMascotByGroupId(Long groupId) { return mascotRepository.getMascotByGroupId(groupId); }
+
     // 모든 마스코트 조회
     public List<Mascot> getAllMascots() {
         return mascotRepository.findAll();
