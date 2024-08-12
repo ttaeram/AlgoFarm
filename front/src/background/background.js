@@ -196,12 +196,12 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 });
 
 
-// //탭의 변경을 식별하기 위한 리스너, 탭이 비활성화되면 동작한다.
-// chrome.tabs.onActivated.addListener((activeInfo) => {
-//   chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabChanged' });
-// });
+//탭의 변경을 식별하기 위한 리스너, 탭이 비활성화되면 동작한다.
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabChanged' });
+});
 
-// //탭의 변경을 식별하기 위한 리스너, 탭이 활성화되면 동작한다.
-// chrome.tabs.onActivated.addListener((activeInfo) => {
-//   chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabActivated' });
-// });
+//탭의 변경을 식별하기 위한 리스너, 탭이 활성화되면 동작한다.
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  chrome.tabs.sendMessage(activeInfo.tabId, { action: 'tabActivated' });
+});
