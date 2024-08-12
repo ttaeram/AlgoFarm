@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   GROUP_INFO: 'groupInfo',
   MEMBERS: 'members',
   NICKNAME: 'nickname',
+  CHARACTER: 'character',
 };
 
 // 로컬 스토리지에서 객체 가져오기 (크롬 확장 프로그램용)
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }) => {
   const [groupInfo, setGroupInfo] = useState(null);
   const [members, setMembers] = useState([]);
   const [nickname, setNicknameState] = useState(null);
+  const [character, setCharacter] = useState(null);
 
   useEffect(() => {
     getObjectFromChromeStorage(STORAGE_KEYS.USER).then((storedUser) => {
@@ -85,6 +87,10 @@ export const AuthProvider = ({ children }) => {
     getObjectFromChromeStorage(STORAGE_KEYS.NICKNAME).then((storedNickname) => {
       setNicknameState(storedNickname || null);
     });
+
+    getObjectFromChromeStorage(STORAGE_KEYS.CHARACTER).then((storedCharacter) => {
+      setCharacter(storedCharacter || null);
+    })
   }, []);
 
   const setNickname = (newNickname) => {
@@ -232,15 +238,37 @@ export const AuthProvider = ({ children }) => {
     setObjectToChromeStorage(STORAGE_KEYS.NICKNAME, nickname);
   }, [nickname]);
 
+  useEffect(() => {
+    setObjectToChromeStorage(STORAGE_KEYS.CHARACTER, character ? JSON.stringify(character) : null);
+  })
+
   //logout로직
-  const signOut = () => {
-    setUser(null);
-    setJwt(null);
-    setIsLogined(false);
-    setGroupId(null);
-    setGroupInfo(null);
-    setMembers([]);
-    setNickname(null);
+  const signOut = async () => {
+    try {
+      await removeObjectFromChromeStorage(STORAGE_KEYS.USER);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.JWT);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.IS_LOGINED);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.GROUP_ID);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.GROUP_INFO);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.MEMBERS);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.NICKNAME);
+      await removeObjectFromChromeStorage(STORAGE_KEYS.CHARACTER);
+      await removeObjectFromChromeStorage('Enable');
+      await removeObjectFromChromeStorage('showCharacter');
+  
+      setUser(null);
+      setJwt(null);
+      setIsLogined(false);
+      setGroupId(null);
+      setGroupInfo(null);
+      setMembers([]);
+      setNickname(null);
+      setCharacter(null);
+  
+      console.log('Logged out and cleared storage.');
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    }
   };
 
   const fetchGroupInfo = async (jwt, groupId) => {
@@ -292,6 +320,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchCharacter = async (jwt, groupId) => {
+    if (!isLogined || !groupId || groupId === -1) {
+      console.warn('Invalid groupId or user not logged in');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/${groupId}/character`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch character');
+    }
+
+    const data = await response.json();
+    setCharacter(data.data);
+    } catch (error) {
+      console.log('Error fetching character:', error)
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -308,8 +362,11 @@ export const AuthProvider = ({ children }) => {
       setMembers,
       nickname,
       setNickname,
+      character,
+      setCharacter,
       fetchGroupInfo,
       fetchMembers,
+      fetchCharacter,
       signOut,
     }}>
       {children}
