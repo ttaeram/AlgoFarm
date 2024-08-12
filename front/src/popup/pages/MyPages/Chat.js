@@ -38,6 +38,7 @@ const StyledDialogContent = styled(DialogContent)`
   overflow-y: auto;
   scrollbar-width: none;
   ms-overflow-style: none;
+  min-height: 250px; /* 최소 높이 설정 */
 
   &::-webkit-scrollbar {
     display: none;
@@ -200,46 +201,61 @@ const ChatPopup = ({ onClose }) => {
       </DialogTitle>
       <StyledDialogContent dividers>
         <List>
-          {previousChatMessages.map((_chatMessage, index) => (
-            <ListItem 
-              key={index} 
-              disableGutters 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
-              }}>
-              <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
-                <CardContent>
-                  <Typography variant="body2" color="textSecondary">
-                    {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
-                  </Typography>
-                  <Typography variant="body1">
-                    {_chatMessage.content}
-                  </Typography>
-                </CardContent>
-              </StyledCard>
+          <ListItem disableGutters>
+            <Typography variant="body2" color="textPrimary" align="center" sx={{ width: '100%' }}>
+              채팅이 시작되었습니다. 자유롭게 대화해 주세요.
+            </Typography>
+          </ListItem>
+          {previousChatMessages.length === 0 && chatMessages.length === 0 ? (
+            <ListItem disableGutters>
+              <Typography variant="body2" color="textSecondary" align="center" sx={{ width: '100%' }}>
+                채팅 기록이 없습니다.
+              </Typography>
             </ListItem>
-          ))}
-          {chatMessages.map((_chatMessage, index) => (
-            <ListItem 
-              key={index} 
-              disableGutters 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
-              }}>
-              <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
-                <CardContent>
-                  <Typography variant="body2" color="textSecondary">
-                    {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
-                  </Typography>
-                  <Typography variant="body1">
-                    {_chatMessage.content}
-                  </Typography>
-                </CardContent>
-              </StyledCard>
-            </ListItem>
-          ))}
+          ) : (
+            <>
+              {previousChatMessages.map((_chatMessage, index) => (
+                <ListItem 
+                  key={index} 
+                  disableGutters 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
+                  }}>
+                  <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
+                    <CardContent>
+                      <Typography variant="body2" color="textSecondary">
+                        {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
+                      </Typography>
+                      <Typography variant="body1">
+                        {_chatMessage.content}
+                      </Typography>
+                    </CardContent>
+                  </StyledCard>
+                </ListItem>
+              ))}
+              {chatMessages.map((_chatMessage, index) => (
+                <ListItem 
+                  key={index} 
+                  disableGutters 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: _chatMessage.userId === user.sub ? 'flex-end' : 'flex-start' 
+                  }}>
+                  <StyledCard isOwnMessage={_chatMessage.userId === user.sub}>
+                    <CardContent>
+                      <Typography variant="body2" color="textSecondary">
+                        {_chatMessage.nickname} - {formatDate(_chatMessage.createAt)}
+                      </Typography>
+                      <Typography variant="body1">
+                        {_chatMessage.content}
+                      </Typography>
+                    </CardContent>
+                  </StyledCard>
+                </ListItem>
+              ))}
+            </>
+          )}
           <div ref={chatEndRef} />
         </List>
       </StyledDialogContent>
