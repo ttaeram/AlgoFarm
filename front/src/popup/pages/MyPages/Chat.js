@@ -45,6 +45,8 @@ const StyledDialogContent = styled(DialogContent)`
   }
 `;
 
+const MAX_MESSAGE_LENGTH = 255;
+
 const ChatPopup = ({ onClose }) => {
   const { jwt, groupId, user, groupInfo, nickname } = useAuth();
   const [chatMessages, setChatMessages] = useState([]);
@@ -52,6 +54,7 @@ const ChatPopup = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const client = useRef(null);
   const chatEndRef = useRef(null);
+  const messageRef = useRef(null);
 
   useEffect(() => {
     fetchChatHistory();
@@ -171,6 +174,20 @@ const ChatPopup = ({ onClose }) => {
     setMessage("");
   };
 
+  const validateMessageLength = () => {
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      messageRef.current.setCustomValidity(`메시지는 최대 ${MAX_MESSAGE_LENGTH}자까지 입력할 수 있습니다.`);
+      messageRef.current.reportValidity();
+    } else {
+      messageRef.current.setCustomValidity("");
+    }
+  };
+
+  const handleChangeMessage = (e) => {
+    setMessage(e.target.value);
+    validateMessageLength();
+  };
+
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -266,8 +283,10 @@ const ChatPopup = ({ onClose }) => {
             variant="outlined"
             placeholder="메시지를 입력하세요..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleChangeMessage}
             onKeyPress={(e) => e.which === 13 && publish(message)}
+            inputRef={messageRef}
+            inputProps={{ maxLength: MAX_MESSAGE_LENGTH, required: true }}
           />
           <StyledButton variant="contained" onClick={() => publish(message)}>전송</StyledButton>
         </Box>
