@@ -3,9 +3,9 @@ import { Paper, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import * as styles from './CalendarCell.module.css';
 
-const BaseCalendarCell = styled(Paper)(({ theme, isCurrentMonth, isToday }) => ({
-  backgroundColor: isCurrentMonth ? '' : '#f0f0f0',
-  border: isToday ? '2px solid red' : '1px solid #ccc',
+const BaseCalendarCell = styled(Paper)(({ theme, iscurrentmonth, istoday }) => ({
+  backgroundColor: iscurrentmonth ? '' : '#f0f0f0',
+  border: istoday ? '2px solid red' : '1px solid #ccc',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

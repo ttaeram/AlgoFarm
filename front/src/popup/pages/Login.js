@@ -10,7 +10,7 @@ import Button from '@mui/material/Button';
 
 
 const Popup = () => {
-  const { user, setIsLogined, setUser, setJwt, isLogined, jwt, setGroupId, setGroupInfo, fetchGroupInfo } = useAuth();
+  const { user, setIsLogined, setUser, setJwt, isLogined, jwt, setGroupId, setGroupInfo, fetchGroupInfo, setCharacter, fetchCharacter } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
@@ -23,22 +23,25 @@ const Popup = () => {
           if (groupIdResponse !== -1 && groupIdResponse !== null) {
             setGroupId(groupIdResponse);
             await fetchGroupInfo(jwt, groupIdResponse);
+            await fetchCharacter(jwt, groupIdResponse);
             navigate('/my-page/group-info');
           } else {
             setGroupId(null);
             setGroupInfo(null);
+            setCharacter(null);
             navigate('/select-group');
           }
         } catch (error) {
           setGroupId(null);
           setGroupInfo(null);
+          setCharacter(null);
           navigate('/select-group');
         }
       }
     };
 
     checkUserGroupStatus();
-  }, [isLogined, jwt, user, setGroupId, fetchGroupInfo, navigate]);
+  }, [isLogined, jwt, user, setGroupId, fetchGroupInfo, fetchCharacter, navigate]);
 
   const handleSignIn = async () => {
     if (isLoading) {
@@ -59,15 +62,18 @@ const Popup = () => {
       if (groupIdResponse !== -1 && groupIdResponse !== null) {
         setGroupId(groupIdResponse);
         await fetchGroupInfo(serverJwt, groupIdResponse);
+        await fetchCharacter(serverJwt, groupIdResponse);
         navigate('/my-page/group-info');
       } else {
         setGroupId(null);
         setGroupInfo(null);
+        setCharacter(null);
         navigate('/select-group');
       }
     } catch (error) {
       setGroupId(null);
       setGroupInfo(null);
+      setCharacter(null);
       navigate('/select-group');
     } finally {
       setIsLoading(false);
