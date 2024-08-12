@@ -21,18 +21,6 @@ function startUpload() {
 function successAni() {
 
   console.log("successAni가 실행됨.");
-  // let elem = document.querySelector('.wrapper');
-  // let fixedComponent = document.querySelector('.fixed-component');
-
-  // if (elem !== null && !fixedComponent) {
-  //   fixedComponent = document.createElement('div');
-  //   fixedComponent.classList.add('fixed-component');
-  //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
-  //   elem.appendChild(fixedComponent);
-  // } else if (elem !== null && fixedComponent) {
-  //   fixedComponent.innerHTML = `<div>맞았습니다.!! 테스트!!!</div>`;
-  // }
-
   // Confetti 효과를 위한 CustomEvent 발생
   document.dispatchEvent(new CustomEvent('baekjoonSuccess'));
   // 캐릭터 애니메이션 변경
@@ -71,7 +59,7 @@ function failedAni() {
   // 캐릭터 애니메이션 변경
   chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
     console.log(response)
-    if(response == true){
+    if(response === true){
       const event = new CustomEvent('playAnimation', {
         detail: { animation: 'Death', duration: 6000 }
       });
@@ -87,17 +75,26 @@ function failedAni() {
  
 }
 
-// function uploadJudgingAni() {
-//   let elem = document.querySelector('.wrapper');
-//   let fixedComponent = document.querySelector('.fixed-component');
-//
-//   if (elem !== null && !fixedComponent) {
-//     fixedComponent = document.createElement('div');
-//     fixedComponent.classList.add('fixed-component');
-//     fixedComponent.innerHTML = `<div>채점중</div>`;
-//     elem.appendChild(fixedComponent);
-//   }
-// }
+function uploadJudgingAni() {
+  // Shake 효과를 위한 CustomEvent 발생
+  document.dispatchEvent(new CustomEvent('baekjoonJudging'));
+  // 캐릭터 애니메이션 변경
+  chrome.runtime.sendMessage({ action: 'getShowCharacter' }, (response) => {
+    console.log(response)
+    if(response === true){
+      const event = new CustomEvent('playAnimation', {
+        detail: { animation: 'Fly', duration: 6000 }
+      });
+      document.dispatchEvent(event);
+    
+      setTimeout(() => {
+        if (fixedComponent) {
+          elem.removeChild(fixedComponent);
+        }
+      }, 5000);
+    }
+  });
+}
 
 function errorTimeLimitAni() {
   let elem = document.querySelector('.wrapper');

@@ -29,7 +29,7 @@ const CharacterOverlay = () => {
         const handleCustomPlayAnimation = (event) => {
             const { animation, duration } = event.detail;
             let pauseTime = null;
-
+            console.log('anim=',animation);
             // 'Death' 애니메이션의 경우 0.3초에 멈춤
             if (animation === 'Death') {
                 pauseTime = 0.40;
