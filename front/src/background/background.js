@@ -1,30 +1,18 @@
-
 /**
- * solvedac 문제 데이터를 파싱해오는 함수.
- * @param {int} problemId
+ * background.js
+ *
+ * 이 파일은 Chrome 확장 프로그램의 주요 백그라운드 스크립트
+ * 메시지 전달을 처리하고, 확장 프로그램을 초기화하며, 전반적인 기능을 관리
  */
-console.log('Background script loaded');
 
-async function SolvedApiCall(problemId) {
-  return fetch(`https://solved.ac/api/v3/problem/show?problemId=${problemId}`, { method: 'GET' })
-      .then((query) => query.json());
-}
-// 팝업 상태를 저장하는 함수
-function savePopupState() {
-  chrome.storage.local.set({popupOpen: true});
-}
+import { solvedApiCall } from './api.js';
+import { getDataFromIndexedDB, saveToStorage } from './storage.js';
+import { savePopupState, restorePopupState, clearBadge } from './popupHandler.js';
+import { reloadContentScripts } from './contentScriptHandler.js';
 
-// 팝업 상태를 복원하는 함수
-function restorePopupState() {
-  chrome.storage.local.get(['popupOpen'], (result) => {
-    if (result.popupOpen) {
-      chrome.action.openPopup();
-      chrome.storage.local.set({popupOpen: false});
-    }
-  });
-}
+console.log('백그라운드 스크립트가 로드되었습니다.');
 
-// 변경 사항을 감지하여 익스텐션을 새로고침
+// 개발을 위한 핫 모듈 리로딩
 if (module.hot) {
   module.hot.accept(() => {
     savePopupState();
@@ -32,141 +20,62 @@ if (module.hot) {
     reloadContentScripts();
   });
 }
-// 컨텐츠 스크립트 새로고침 함수
-function reloadContentScripts() {
-  chrome.tabs.query({}, (tabs) => {
-    for (let tab of tabs) {
-      if (tab.url.includes('chrome://')) continue; // chrome:// URLs에서는 스크립트를 실행할 수 없습니다.
-      chrome.tabs.sendMessage(tab.id, { action: "reloadContentScript" }, (response) => {
-        if (chrome.runtime.lastError) {
-          // 에러가 발생하면 탭을 새로고침합니다.
-          chrome.tabs.reload(tab.id);
-        } else {
-          console.log(`Content script reloaded in tab ${tab.id}`);
-        }
-      });
-    }
-  });
-}
 
-// 확장 프로그램이 시작될 때 팝업 상태 복원
 restorePopupState();
 
-function handleMessage(request, sender, sendResponse) {
-  if (request && request.closeWebPage === true && request.isSuccess === true) {
-    /* Set username */
-    chrome.storage.local.set(
-        { BaekjoonHub_username: request.username } /* , () => {
-      window.localStorage.BaekjoonHub_username = request.username;
-    } */,
-    );
-
-    /* Set token */
-    chrome.storage.local.set(
-        { BaekjoonHub_token: request.token } /* , () => {
-      window.localStorage[request.KEY] = request.token;
-    } */,
-    );
-
-    /* Close pipe */
-    chrome.storage.local.set({ pipe_BaekjoonHub: false }, () => {
-      console.log('Closed pipe.');
-    });
-
-    // chrome.tabs.getSelected(null, function (tab) {
-    //   chrome.tabs.remove(tab.id);
-    // });
-
-    /* Go to onboarding for UX */
-    const urlOnboarding = `chrome-extension://${chrome.runtime.id}/welcome.html`;
-    chrome.tabs.create({ url: urlOnboarding, selected: true }); // creates new tab
-  } else if (request && request.closeWebPage === true && request.isSuccess === false) {
-    alert('Something went wrong while trying to authenticate your profile!');
-    chrome.tabs.getSelected(null, function (tab) {
-      chrome.tabs.remove(tab.id);
-    });
-  } else if (request && request.sender == "baekjoon" && request.task == "SolvedApiCall") {
-    SolvedApiCall(request.problemId).then((res) => sendResponse(res));
-    //sendResponse(SolvedApiCall(request.problemId))
+/**
+ * 콘텐츠 스크립트와 팝업에서 오는 메시지를 처리합니다.
+ * @param {Object} request - 요청 객체
+ * @param {Object} sender - 발신자 객체
+ * @param {function} sendResponse - 응답을 보내는 함수
+ */
+async function handleMessage(request, sender, sendResponse) {
+  if (request.closeWebPage === true) {
+    if (request.isSuccess === true) {
+      saveToStorage({
+        BaekjoonHub_username: request.username,
+        BaekjoonHub_token: request.token,
+        pipe_BaekjoonHub: false
+      });
+      chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/welcome.html`, active: true });
+    } else {
+      console.error('인증 실패!');
+      if (sender.tab && sender.tab.id) {
+        chrome.tabs.remove(sender.tab.id);
+      }
+    }
+  } else if (request.sender === "baekjoon" && request.task === "SolvedApiCall") {
+    const result = await solvedApiCall(request.problemId);
+    sendResponse(result);
+  } else if (request.action === 'clearBadge') {
+    clearBadge();
   }
-  return true;
 }
-chrome.runtime.onMessage.addListener(handleMessage);
 
-
-/* 커밋 요청시 헤더에 Authorization 토큰을 넣기 위한 background*/
-/* 커밋 요청시 헤더에 토큰을 넣기 위한 background*/
+// 메시지 리스너 설정
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getToken') {
-    getDataFromIndexedDB().then(token => {
-      // getDataFromLocalStorage().then(token => {
-      sendResponse({ token: token });
-    }).catch(error => {
-      sendResponse({ token: null });
+    getDataFromIndexedDB()
+        .then(token => sendResponse({ token }))
+        .catch(() => sendResponse({ token: null }));
+    return true;
+  } else if (message.action === 'getShowCharacter') {
+    chrome.storage.local.get('showCharacter', (result) => {
+      sendResponse({ showCharacter: result.showCharacter === true });
     });
-    // 비동기 응답을 보내기 위해 true를 반환합니다.
     return true;
   }
+  handleMessage(message, sender, sendResponse);
+  return true;
 });
 
-//localstorage에서 jwt토큰을 가져오는 코드
-function getDataFromLocalStorage() {
-  return new Promise((resolve, reject) => {
-    try {
-      const token = localStorage.getItem('jwt');
-      if (token !== null) {
-        resolve(token);
-      } else {
-        reject('No token found in localStorage');
-      }
-    } catch (error) {
-      reject('Error accessing localStorage');
-    }
-  });
-}
-
-function getDataFromIndexedDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('MyDatabase', 1);
-
-    request.onsuccess = (event) => {
-      const db = event.target.result;
-      const transaction = db.transaction('MyStore', 'readonly');
-      const store = transaction.objectStore('MyStore');
-      const getRequest = store.get('jwt');
-
-      getRequest.onsuccess = (event) => {
-        resolve(event.target.result?.value);
-      };
-
-      getRequest.onerror = (event) => {
-        reject('Error getting data from IndexedDB');
-      };
-    };
-
-    request.onerror = (event) => {
-      reject('Error opening IndexedDB');
-    };
-  });
-}
+// 확장 프로그램 설치 시 리스너
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Extension installed');
-  // 서버 URL 환경 변수를 저장
-  chrome.storage.local.set({ serverUrl: `${process.env.REACT_APP_SERVER_URL}` }, () => {
-    console.log('Server URL is set.');
-  });
+  console.log('확장 프로그램이 설치되었습니다.');
+  saveToStorage({ serverUrl: `${process.env.REACT_APP_SERVER_URL}` });
 });
 
-//chrome.storage.local에 showCharacter가 true인 경우에만 동작한다.
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("백그라운드의 characer함수가 실행됨")
-  if (message.action === 'getShowCharacter') {
-      chrome.storage.local.get('showCharacter', (result) => {
-        console.log("getShowCharacter에 요청이 들어왔습니다.", "result =" , result.showCharacter)
-      if(result.showCharacter === true) 
-        sendResponse({ showCharacter: true });
-      else
-        sendResponse({ showCharacter: false });
-    });
-  }
+// 팝업이 열릴 때 리스너
+chrome.action.onClicked.addListener((tab) => {
+  clearBadge();
 });
