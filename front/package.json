@@ -53,6 +53,7 @@
     "react": "^18.3.1",
     "react-calendar": "^5.0.0",
     "react-dom": "^18.3.1",
+    "react-progressbar-fancy": "^1.1.4",
     "react-router-dom": "^6.25.1",
     "sockjs-client": "^1.6.1",
     "stompjs": "^2.3.3",
