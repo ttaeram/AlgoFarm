@@ -11,6 +11,14 @@ import * as styles from './settings.module.css';
 
 const Container = styled(Box)`
   padding: 20px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  ms-overflow-style: none;
+  min-height: 250px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const GroupNameBox = styled(Box)`
