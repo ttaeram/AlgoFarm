@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import ModelViewer from '../../contentScript/ModelViewer';
 import { isChromeExtension } from "../auth/auth";
 import CharacterLevel from './CharacterLevel';
+import { useAuth } from '../context/context'; // Import useAuth hook
 
 const PopupCharacter = () => {
     const containerRef = useRef(null);
@@ -11,6 +12,8 @@ const PopupCharacter = () => {
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const [model, setModel] = useState(null);
     const [animationConfig, setAnimationConfig] = useState({ name: 'Idle_A', pauseAtTime: null });
+
+    const { character } = useAuth(); // Get character from AuthContext
 
     useEffect(() => {
         const updateSize = () => {
@@ -26,14 +29,14 @@ const PopupCharacter = () => {
     }, []);
 
     useEffect(() => {
-        if (isChromeExtension()) {
-            fetch(chrome.runtime.getURL(`assets/models/Cat_Animations.glb`))
+        if (isChromeExtension() && character && character.type) {
+            fetch(chrome.runtime.getURL(`assets/models/${character.type}.glb`))
                 .then(response => response.arrayBuffer())
                 .then(arrayBuffer => {
                     setModel(arrayBuffer);
                 });
         }
-    }, []);
+    }, [character]);
 
     const handleControlsUpdate = () => {
         if (controlsRef.current) {
@@ -60,24 +63,23 @@ const PopupCharacter = () => {
                 backgroundRepeat: 'no-repeat',
             }}
         >
-            {/* CharacterLevel 컴포넌트를 왼쪽 상단에 위치 */}
-            <CharacterLevel 
+            <CharacterLevel
                 style={{
                     position: 'absolute',
                     top: '10px',
                     left: '10px',
-                    zIndex: 10, // z-index를 높여서 배경 위에 표시되도록 설정
+                    zIndex: 10,
                 }}
             />
-            
+
             <Canvas
                 style={{
-                    position: 'absolute', // Canvas를 절대 위치로 설정하여 겹치도록 설정
+                    position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    zIndex: 5, // z-index를 낮게 설정하여 CharacterLevel보다 뒤에 위치
+                    zIndex: 5,
                 }}
             >
                 <OrbitControls

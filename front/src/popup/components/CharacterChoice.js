@@ -4,7 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import ModelViewer from '../../contentScript/ModelViewer';
 import { Box, Button } from '@mui/material';
 
-const characters = ['Cat', 'Dog'];
+const characters = ['CAT', 'DOG'];
 
 const CharacterChoice = ({ onCharacterSelect }) => {
     const [currentCharacter, setCurrentCharacter] = useState(characters[0]);
@@ -13,7 +13,7 @@ const CharacterChoice = ({ onCharacterSelect }) => {
 
     useEffect(() => {
         const loadModel = async () => {
-            const response = await fetch(chrome.runtime.getURL(`assets/models/${currentCharacter}_Animations.glb`));
+            const response = await fetch(chrome.runtime.getURL(`assets/models/${currentCharacter}.glb`));
             const arrayBuffer = await response.arrayBuffer();
             setModel(arrayBuffer);
         };
