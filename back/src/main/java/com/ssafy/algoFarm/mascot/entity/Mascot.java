@@ -52,7 +52,6 @@ public class Mascot {
     private Integer accuracy = 100;
 
     @OneToOne(mappedBy = "mascot")
-    @JoinColumn(name = "group_id")
     private Group group;
 
     public void setGroup(Group group) {
