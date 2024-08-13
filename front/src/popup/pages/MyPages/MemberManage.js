@@ -7,27 +7,14 @@ import * as styles from './MemberManage.module.css';
 
 const CustomButton = styled(Button)(({ theme }) => ({
   marginTop: '16px',
-  backgroundColor: '#76ff03',
-  color: 'white',
-  '&:hover': {
-    backgroundColor: '#64dd17',
-  },
-}));
-
-
-const CustomButton2 = styled(Button)(({ theme }) => ({
-  marginTop: '16px',
   backgroundColor: '#f19cac',  // 기본 배경색 (핑크)
   color: 'white',
   borderRadius: '6px',
-  padding: '12px 24px',
-  boxShadow: '0px 6px 0px #d17f8b', // 기본 그림자 색상
   textShadow: '0 1px 0 rgba(0, 0, 0, 0.15)', // 텍스트에 가벼운 그림자
   transition: 'top 0.1s linear, box-shadow .1s linear, background-color 0.3s ease',
 
   '&:hover': {
     backgroundColor: '#e08394', // 호버 시 배경색
-    boxShadow: '0px 6px 0px #b26873', // 호버 시 그림자 색상 변경, 크기 동일
   },
 
   '&:active': {
@@ -55,36 +42,6 @@ function MemberManage() {
     };
     loadMembers();
   }, [groupId, jwt]);
-
-  // const handleGenerateInviteCode = async () => {
-  //   if (!groupId) {
-  //     console.error('Group ID is missing');
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/code/${groupId}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': `Bearer ${jwt}`
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to generate invite code');
-  //     }
-
-  //     const data = await response.json();
-  //     setInviteCode(data.data.inviteCode);
-  //     setShowSuccess(true);
-  //     setTimeout(() => {
-  //       setShowSuccess(false);
-  //     }, 3000);
-  //   } catch (error) {
-  //     console.error('Error generating invite code:', error);
-  //   }
-  // };
 
   const handleGenerateInviteCode = async () => {
     if (!groupId) {
@@ -173,12 +130,12 @@ function MemberManage() {
       </List>
       {groupInfo?.isLeader && (
         <Box>
-          <CustomButton2
+          <CustomButton
             variant="contained"
             onClick={handleGenerateInviteCode}
           >
             초대 코드 생성
-          </CustomButton2>
+          </CustomButton>
             {/* 10px 높이의 빈 공간 */}
             <Box sx={{ height: '20px' }} />
           {inviteCode && (

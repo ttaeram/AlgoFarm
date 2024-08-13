@@ -53,6 +53,10 @@ const CancelButton = styled(Button)`
 const EditButton = styled(Button)`
   background-color: #f19cac;
   color: white;
+
+  &:hover {
+    background-color: #e08394;
+  }
 `;
 
 const SectionTitle = styled(Typography)`
@@ -155,7 +159,7 @@ function Settings() {
   
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>계정 정보</Typography>
+      <SectionTitle variant="h6" gutterBottom>계정 정보</SectionTitle>
 
       {user ? (
         <Box mb={3}>
@@ -220,11 +224,11 @@ function Settings() {
       <Box mt={3} mb={3}>
         <SectionTitle variant="h6" gutterBottom>기능 On/Off</SectionTitle>
         <SwitchItem>
-          <Typography variant='body2'>백준 기능</Typography>
+          <Typography variant="body1">백준 기능</Typography>
           <ToggleEnableButton />
         </SwitchItem>
         <SwitchItem>
-          <Typography variant='body2'>캐릭터</Typography>
+          <Typography variant="body1">캐릭터</Typography>
           <ToggleCharacterButton />
         </SwitchItem>
       </Box>
