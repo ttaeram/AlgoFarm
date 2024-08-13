@@ -109,7 +109,7 @@ async function saveSolveDetailsToLocal() {
   if (submitBtn) {
     submitBtn.addEventListener('click', async (event) => {
       // 테스트 할 때는 아래 주석 해제
-      // event.preventDefault()
+      event.preventDefault()
       const solveData = await getSolveDetails();
       console.log('제출 코드 데이터:', solveData);
       sessionStorage.setItem('solveData', JSON.stringify(solveData));
@@ -132,13 +132,57 @@ async function loadSolveDetailsFromLocal() {
   });
 }
 
+// 팝업 화면에 언어 표시 추가
+function addLanguageToCodeBlocks(popupDocument) {
+  const codeBlocks = popupDocument.querySelectorAll('pre code');
+
+  if (codeBlocks) {
+    codeBlocks.forEach((block) => {
+      // 부모 <pre> 요소
+      const pre = block.parentNode;
+      pre.style.position = 'relative';
+      pre.style.paddingTop = '30px';
+
+      // 언어 표시를 위한 <div> 생성
+      const languageLabel = popupDocument.createElement('div');
+      const language = block.className.replace('language-', '') || 'plaintext';
+      languageLabel.textContent = language;
+      languageLabel.style.position = 'absolute';
+      languageLabel.style.top = '5px';
+      languageLabel.style.left = '10px';
+      languageLabel.style.background = '#333';
+      languageLabel.style.color = '#fff';
+      languageLabel.style.padding = '2px 8px';
+      languageLabel.style.fontSize = '12px';
+      languageLabel.style.borderRadius = '3px';
+
+      // <pre> 요소에 언어 표시와 복사 버튼 추가
+      pre.appendChild(languageLabel);
+    });
+  };
+}
+
 // 문제 데이터를 가져와서 팝업 화면에 표시하는 컴포넌트
-const ProblemPopup = ({ problemData, solveData }) => {
+const ProblemPopup = ({ problemData, solveData, onRenderComplete }) => {
   if (!problemData || !solveData || problemData.problemId !== solveData.solveId) {
     return (
       <div style={{ margin: '45px' }}>
         <div>
-          <p>문제 내용을 다시 확인하고<br/>새로운 코드를 제출해주세요.</p>
+          <h2>안내사항</h2>
+          <div>
+            <p>혹시 코드를 제출하지 않으셨습니까?</p>
+            <ul>
+              <li>
+                새로운 코드를 제출해주시길 바랍니다.
+              </li>
+            </ul>
+            <p>혹시 '내 제출' - '수정' 을 통해 코드를 제출하셨습니까?</p>
+            <ul>
+              <li>
+                문제 페이지에서 내용을 다시 확인한 후,<br/>'AI 코드 리뷰' 버튼을 클릭해주시길 바랍니다.
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -216,7 +260,7 @@ const ProblemPopup = ({ problemData, solveData }) => {
         });
         const msg = "문제 내용을 바탕으로 내 풀이 코드에서 보완할 점을 알려줘.";
         const result = await chat.sendMessage(msg);
-        const answer = await result.response.text();
+        const answer = result.response.text();
         console.log('AI의 답변:', answer);
 
         // 보안 이슈 1 : 마크다운을 HTML로 변환 후, DOMPurify로 정화
@@ -238,6 +282,13 @@ const ProblemPopup = ({ problemData, solveData }) => {
     }
   }, [problemData, solveData]);
 
+  // 언어 표시 추가
+  useEffect(() => {
+    if (answerFromAI && onRenderComplete) {
+      onRenderComplete();
+    }
+  }, [answerFromAI, onRenderComplete]);
+
   // 로딩 텍스트 변경 로직
   const [loadingDots, setLoadingDots] = useState('');
 
@@ -254,12 +305,18 @@ const ProblemPopup = ({ problemData, solveData }) => {
   return (
     <div style={{ margin: '45px' }}>
       {answerFromAI ? (
-        <div
-          dangerouslySetInnerHTML={{ __html: answerFromAI }} // 마크다운을 HTML로 변환 후, 안전하게 정화된 HTML로 출력
-      />
+        <div>
+          <h2>{problemData.problemId}: {problemData.problemTitle}</h2>
+          <div
+            dangerouslySetInnerHTML={{ __html: answerFromAI }} // 마크다운을 HTML로 변환 후, 안전하게 정화된 HTML로 출력
+          />
+        </div>
       ) : (
         <div>
-          <p>AI의 코드 리뷰를 로딩 중입니다{loadingDots}</p>
+          <h2>{problemData.problemId}: {problemData.problemTitle}</h2>
+          <div>
+            <p>AI의 코드 리뷰를 로딩 중입니다{loadingDots}</p>
+          </div>
         </div>
       )}
     </div>
@@ -293,11 +350,16 @@ function renderOverlay(problemData, solveData) {
     externalCss.rel = 'stylesheet';
     externalCss.href = 'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.6.1/github-markdown-dark.css';
     popup.document.head.appendChild(externalCss);
-    popup.document.body.classList.add('markdown-body');
 
+    popup.document.body.classList.add('markdown-body');
     popup.document.close();
+
     const root = ReactDOM.createRoot(popup.document.getElementById('ai-code-root'));
-    root.render(<ProblemPopup problemData={problemData} solveData={solveData} />);
+    root.render(<ProblemPopup
+      problemData={problemData}
+      solveData={solveData}
+      onRenderComplete={() => addLanguageToCodeBlocks(popup.document)}
+    />);
   } else {
     console.error('Popup blocked');
   }
