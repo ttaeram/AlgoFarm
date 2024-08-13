@@ -125,7 +125,7 @@ const JoinGroup = () => {
 
         navigate('/my-page/group-info');
       } catch (error) {
-        console.error('Error joining group:', error);
+        // console.error('Error joining group:', error);
         setShowWarning(true);
         setTimeout(() => {
           setShowWarning(false);

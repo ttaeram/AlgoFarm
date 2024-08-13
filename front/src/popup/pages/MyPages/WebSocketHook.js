@@ -21,25 +21,25 @@ export const useWebSocket = () => {
     const setupWebSocket = (wsInstance) => {
       wsInstance.onopen = () => {
         retryCount.current = 0;
-        console.log('WebSocket 연결 성공');
+        // console.log('WebSocket 연결 성공');
       };
 
       wsInstance.onmessage = (event) => {
         if (isMounted.current && isWebSocketOpen(wsInstance)) {
           const resData = JSON.parse(event.data);
           setWebSocketData(resData);
-          console.log('메시지 수신:', resData);
+          // console.log('메시지 수신:', resData);
         }
       };
 
       wsInstance.onerror = (event) => {
-        console.error('WebSocket 오류:', event);
+        // console.error('WebSocket 오류:', event);
         wsInstance.close(4000); // 명시적 close 실행
       };
 
       wsInstance.onclose = (event) => {
         if (isMounted.current) {
-          console.log(`WebSocket 닫힘: 코드(${event.code}), 이유(${event.reason})`);
+          // console.log(`WebSocket 닫힘: 코드(${event.code}), 이유(${event.reason})`);
           if (event.code !== 1000) { // 정상적인 종료가 아닌 경우
             retryWebSocketConnection();
           }
@@ -65,7 +65,7 @@ export const useWebSocket = () => {
 
     return () => {
       if (ws.current && isWebSocketOpen(ws.current)) {
-        console.info('WebSocket 연결 끊기');
+        // console.info('WebSocket 연결 끊기');
         isMounted.current = false;
         ws.current.close();
       }

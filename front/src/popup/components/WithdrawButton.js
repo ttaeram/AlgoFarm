@@ -49,10 +49,10 @@ const WithdrawButton = () => {
         setIsLogined(false);
         navigate('/');
       } else {
-        console.log("회원탈퇴 중 오류가 발생했습니다:", response.status);
+        // console.log("회원탈퇴 중 오류가 발생했습니다:", response.status);
       }
     } catch (error) {
-      console.log("회원탈퇴 중 네트워크 오류가 발생했습니다:", error);
+      // console.log("회원탈퇴 중 네트워크 오류가 발생했습니다:", error);
     } finally {
       handleClose(); // 팝업 닫기
     }

@@ -133,7 +133,7 @@ const Popup = () => {
 
       return data.data.length > 0 ? data.data[0] : '-1';
     } catch (error) {
-      console.error('Error fetching group ID:', error);
+      // console.error('Error fetching group ID:', error);
       return '-1';
     }
   };

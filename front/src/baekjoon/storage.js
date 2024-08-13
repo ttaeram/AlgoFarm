@@ -26,7 +26,7 @@ class TTLCacheStats {
     }
     this.saveTimer = setTimeout(async () => {
       const clone = this.stats[this.name]; // 얇은 복사
-      console.log('Saving stats...', clone);
+      // console.log('Saving stats...', clone);
       await this.forceLoad(); // 최신화
       this.stats[this.name] = clone; // 업데이트
       await saveStats(this.stats);

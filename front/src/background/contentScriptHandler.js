@@ -15,7 +15,7 @@ export function reloadContentScripts() {
                 if (chrome.runtime.lastError) {
                     chrome.tabs.reload(tab.id);
                 } else {
-                    console.log(`Content script reloaded in tab ${tab.id}`);
+                    // console.log(`Content script reloaded in tab ${tab.id}`);
                 }
             });
         }

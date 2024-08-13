@@ -64,7 +64,7 @@ const ToggleButton = () => {
     const fetchEnable = async () => {
       const enable = isChromeExtension() ? await getObjectFromChromeStorage('Enable') : await getObjectFromLocalStorage('Enable');
       setEnabled(enable);
-      console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
+      // console.log(enable ? "on" : "off"); // 초기 로드 시 콘솔 메시지 출력
     };
 
     fetchEnable();
@@ -79,7 +79,7 @@ const ToggleButton = () => {
       await setObjectToLocalStorage('Enable', newEnabled);
     }
     setEnabled(newEnabled);
-    console.log(newEnabled ? "on" : "off");
+    // console.log(newEnabled ? "on" : "off");
   };
 
   return (

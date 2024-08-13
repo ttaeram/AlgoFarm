@@ -128,7 +128,7 @@ const CreateGroup = () => {
 
         navigate('/my-page/group-info');
       } catch (error) {
-        console.error('Error creating group:', error);
+        // console.error('Error creating group:', error);
         setShowWarning(true);
         setTimeout(() => {
           setShowWarning(false);

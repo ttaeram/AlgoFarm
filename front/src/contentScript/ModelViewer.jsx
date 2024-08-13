@@ -65,7 +65,7 @@ const ModelViewer = ({
                 modelLoadedRef.current = true;
             },
             (error) => {
-                console.error('An error occurred while loading the model:', error);
+                // console.error('An error occurred while loading the model:', error);
             }
         );
 

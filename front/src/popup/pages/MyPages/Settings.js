@@ -139,7 +139,7 @@ function Settings() {
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error updating group name:', error);
+      // console.error('Error updating group name:', error);
       setSnackbarMessage('그룹 이름 변경에 실패했습니다.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
@@ -177,7 +177,7 @@ function Settings() {
 
       await fetchMembers();
     } catch (error) {
-      console.error('Error updating nickname:', error);
+      // console.error('Error updating nickname:', error);
       setSnackbarMessage('닉네임 변경에 실패했습니다.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);

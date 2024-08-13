@@ -10,7 +10,7 @@ import { getDataFromIndexedDB, saveToStorage } from './storage.js';
 import { savePopupState, restorePopupState, clearBadge } from './popupHandler.js';
 import { reloadContentScripts } from './contentScriptHandler.js';
 
-console.log('백그라운드 스크립트가 로드되었습니다.');
+// console.log('백그라운드 스크립트가 로드되었습니다.');
 
 // 개발을 위한 핫 모듈 리로딩
 if (module.hot) {
@@ -39,7 +39,7 @@ async function handleMessage(request, sender, sendResponse) {
       });
       chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/welcome.html`, active: true });
     } else {
-      console.error('인증 실패!');
+      // console.error('인증 실패!');
       if (sender.tab && sender.tab.id) {
         chrome.tabs.remove(sender.tab.id);
       }
@@ -71,7 +71,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // 확장 프로그램 설치 시 리스너
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('확장 프로그램이 설치되었습니다.');
+  // console.log('확장 프로그램이 설치되었습니다.');
   saveToStorage({ serverUrl: `${process.env.REACT_APP_SERVER_URL}` });
 });
 

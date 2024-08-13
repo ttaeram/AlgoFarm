@@ -42,13 +42,13 @@ const Character = () => {
 
     // 애니메이션 변경 처리
     const handleAnimationChange = useCallback((newAnimation) => {
-        console.log('Character animation changed:', newAnimation);
+        // console.log('Character animation changed:', newAnimation);
         // 필요한 경우 여기에 추가 로직 구현
     }, []);
 
     // 캐릭터 변경 처리
     const handleCharacterChange = useCallback((newCharacter) => {
-        console.log('Character changed:', newCharacter);
+        // console.log('Character changed:', newCharacter);
         // 필요한 경우 여기에 추가 로직 구현
     }, []);
 

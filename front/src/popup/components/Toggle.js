@@ -28,12 +28,12 @@ const Toggle = () => {
             store.put({ id: 'myData', value: data });
 
             transaction.oncomplete = () => {
-                console.log('Data saved to IndexedDB');
+                // console.log('Data saved to IndexedDB');
             };
         };
 
         request.onerror = (event) => {
-            console.error('Error opening IndexedDB', event);
+            // console.error('Error opening IndexedDB', event);
         };
     };
 

@@ -133,12 +133,12 @@ export const AuthProvider = ({ children }) => {
           .then(result => {
             value = result;
             if((value == undefined) || value == true){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
-              console.log("로그인내부에서 enable세팅을 했습니다.");
+              // console.log("로그인내부에서 enable세팅을 했습니다.");
               setObjectToChromeStorage('Enable', true);
             }
           })
           .catch(error => {
-            console.error('variable -value Error retrieving value:', error);
+            // console.error('variable -value Error retrieving value:', error);
           })
 
       let showCharacter;
@@ -146,15 +146,15 @@ export const AuthProvider = ({ children }) => {
         .then(result => {
           value = result;
           if((value == undefined) || showCharacter == true){//로그인했을때, chromelocalstorage에 해당 키가 없으면, true로 기본설정함.
-            console.log("로그인내부에서 showCharacter를 세팅했습니다.");
+            // console.log("로그인내부에서 showCharacter를 세팅했습니다.");
             setObjectToChromeStorage('showCharacter', true);
           }
         })
         .catch(error => {
-          console.error('variable-showCharacter Error retrieving value:', error);
+          // console.error('variable-showCharacter Error retrieving value:', error);
         })
       const now = new Date();
-      console.log(now + "로그인햇음니다.");
+      // console.log(now + "로그인햇음니다.");
     } else {
       handleDeleteJwt(STORAGE_KEYS.JWT);
       setIsLogined(false);
@@ -185,12 +185,12 @@ export const AuthProvider = ({ children }) => {
       const transaction = db.transaction('MyStore', 'readwrite');
       const store = transaction.objectStore('MyStore');
       store.put({ id: 'jwt', value: jwt }).onsuccess = () => {
-        console.log('Token saved to IndexedDB');
+        // console.log('Token saved to IndexedDB');
       };
     };
 
     request.onerror = (event) => {
-      console.error('Error opening IndexedDB', event);
+      // console.error('Error opening IndexedDB', event);
     };
   };
 
@@ -208,12 +208,12 @@ export const AuthProvider = ({ children }) => {
 
       const transaction = db.transaction('MyStore', 'readwrite');
       transaction.objectStore('MyStore').delete(key).onsuccess = () => {
-        console.log('Token deleted from IndexedDB');
+        // console.log('Token deleted from IndexedDB');
       };
     };
 
     request.onerror = (event) => {
-      console.error('Error opening IndexedDB', event);
+      // console.error('Error opening IndexedDB', event);
     };
   };
   
@@ -285,15 +285,15 @@ export const AuthProvider = ({ children }) => {
       setNickname(null);
       setCharacter(null);
   
-      console.log('Logged out and cleared storage.');
+      // console.log('Logged out and cleared storage.');
     } catch (error) {
-      console.error('Error during sign out:', error);
+      // console.error('Error during sign out:', error);
     }
   };
 
   const fetchGroupInfo = async (jwt, groupId) => {
     if (!isLogined || !groupId || groupId === -1) {
-      console.warn('Invalid groupId or user not logged in');
+      // console.warn('Invalid groupId or user not logged in');
       return;
     }
 
@@ -310,13 +310,13 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       setGroupInfo(data.data);
     } catch (error) {
-      console.error('Failed to fetch group info:', error);
+      // console.error('Failed to fetch group info:', error);
     }
   };
 
   const fetchMembers = async (jwt, groupId) => {
     if (!isLogined || !groupId || groupId === -1) {
-      console.warn('Invalid groupId or user not logged in');
+      // console.warn('Invalid groupId or user not logged in');
       return;
     }
 
@@ -336,13 +336,13 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       setMembers(data.data);
     } catch (error) {
-      console.error('Error fetching members:', error);
+      // console.error('Error fetching members:', error);
     }
   };
 
   const fetchCharacter = async (jwt, groupId) => {
     if (!isLogined || !groupId || groupId === -1) {
-      console.warn('Invalid groupId or user not logged in');
+      // console.warn('Invalid groupId or user not logged in');
       return;
     }
 
@@ -362,7 +362,7 @@ export const AuthProvider = ({ children }) => {
     const data = await response.json();
     setCharacter(data.data);
     } catch (error) {
-      console.log('Error fetching character:', error)
+      // console.log('Error fetching character:', error)
     }
   };
 

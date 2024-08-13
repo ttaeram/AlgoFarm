@@ -36,7 +36,7 @@ const GroupLeaveButton = () => {
 
   const handleLeaveGroup = async () => {
     try {
-      console.log('Attempting to leave group with ID:', groupId);
+      // console.log('Attempting to leave group with ID:', groupId);
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members`, {
         method: 'DELETE',
         headers: {
@@ -48,18 +48,18 @@ const GroupLeaveButton = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Failed to leave group, server response:', errorData);
+        // console.error('Failed to leave group, server response:', errorData);
         throw new Error('Failed to leave group');
       }
 
       const data = await response.json();
-      console.log('Group left successfully, server response:', data);
+      // console.log('Group left successfully, server response:', data);
 
       // 그룹 ID를 초기화
       setGroupId('-1');
       navigate('/select-group');
     } catch (error) {
-      console.error('Error leaving group:', error);
+      // console.error('Error leaving group:', error);
     } finally {
       handleClose(); // 팝업 닫기
     }

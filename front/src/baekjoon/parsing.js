@@ -52,7 +52,7 @@ async function findData(data) {
     
     return { ...data, ...detail }; // detail 만 반환해도 되나, 확장성을 위해 모든 데이터를 반환합니다.
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
   return null;
 }
@@ -231,9 +231,9 @@ function parseProblemDescription(doc = document) {
 async function fetchProblemDescriptionById(problemId) {
   return fetch(`https://www.acmicpc.net/problem/${problemId}`)
     .then((res) => {
-      console.log('res : ', res); // 상태 코드 출력
-      console.log('Status:', res.status); // 상태 코드 출력
-      console.log('Headers:', res.headers); // 헤더 출력
+      // console.log('res : ', res); // 상태 코드 출력
+      // console.log('Status:', res.status); // 상태 코드 출력
+      // console.log('Headers:', res.headers); // 헤더 출력
       return res.text();
     })
     .then((html) => {
@@ -298,7 +298,7 @@ async function findProblemInfoAndSubmissionCode(problemId, submissionId) {
         return { problemId, submissionId, title, level, code, problemDescription: problemDescription, problemInput: problemInput, problemOutput: problemOutput, problemTags: problem_tags };
       })
       .catch((err) => {
-        console.log('error ocurred: ', err);
+        // console.log('error ocurred: ', err);
         uploadState.uploading = false;
         markUploadFailedCSS();
       });

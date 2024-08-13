@@ -53,24 +53,24 @@ function startLoader() {
           successAni();
           stopLoader();
 
-          console.log('풀이가 맞았습니다. 업로드를 시작합니다.');
+          // console.log('풀이가 맞았습니다. 업로드를 시작합니다.');
           chrome.storage.local.get('bjhEnable', (result) => {
-            console.log('bjhEnable:', result.bjhEnable);
+            // console.log('bjhEnable:', result.bjhEnable);
           });
 
           //startUpload();이거 뭔가요...?
           const bojData = await findData()
           bojData.username += `_${bojData.problemId}`
-          console.log("전송데이터 (JSON):", JSON.stringify(bojData, null, 2));
+          // console.log("전송데이터 (JSON):", JSON.stringify(bojData, null, 2));
           
           //헤더에 넣을 토큰 정보 가져오기
           // const data = await getDataFromIndexedDB();
-          console.log("data="+data);
+          // console.log("data="+data);
 
         //Background script에 메시지를 보내고, IndexedDB에서 데이터를 가져옵니다.
           chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
             if (response && response.token) {
-              console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
+              // console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
               // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
               fetch("http://localhost:8080/api/commits", {
                 method: "POST",
@@ -81,10 +81,10 @@ function startLoader() {
                 body: JSON.stringify(bojData) // 여기에 bojData를 대체
               })
               .then((res) => {
-                console.log("응답 : ", res);
+                // console.log("응답 : ", res);
               });
             } else {
-              console.error('Token not found in response');
+              // console.error('Token not found in response');
             }
           });
 
@@ -138,7 +138,7 @@ async function beginUpload(bojData) {
 
     if (cachedSHA == calcSHA) {
       markUploadedCSS(stats.branches, bojData.directory);
-      console.log(`현재 제출번호를 업로드한 기록이 있습니다.` /* submissionID ${bojData.submissionId}` */);
+      // console.log(`현재 제출번호를 업로드한 기록이 있습니다.` /* submissionID ${bojData.submissionId}` */);
       return;
     }
     /*신규 제출 번호라면 새롭게 커밋  */

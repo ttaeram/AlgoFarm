@@ -84,7 +84,7 @@ const ChatPopup = ({ onClose }) => {
         setPreviousChatMessages([]);
       }
     } catch (error) {
-      console.error("Failed to fetch chat history", error);
+      // console.error("Failed to fetch chat history", error);
     }
   };
 
@@ -95,17 +95,17 @@ const ChatPopup = ({ onClose }) => {
         "auth-token": `Bearer ${jwt}`,
       },
       debug: function (str) {
-        console.log(str);
+        // console.log(str);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       onConnect: () => {
-        console.log('Connected to WebSocket');
+        // console.log('Connected to WebSocket');
         subscribe();
       },
       onStompError: (frame) => {
-        console.error(frame);
+        // console.error(frame);
       },
     });
     client.current.activate();
@@ -119,12 +119,12 @@ const ChatPopup = ({ onClose }) => {
 
   const subscribe = () => {
     client.current.subscribe(`/chat/${groupId}`, ({ body }) => {
-      console.log('Received message:', body);
+      // console.log('Received message:', body);
       try {
         const message = JSON.parse(body);
         setChatMessages((_chatMessages) => [..._chatMessages, message]);
       } catch (error) {
-        console.error('Failed to parse message as JSON:', error);
+        // console.error('Failed to parse message as JSON:', error);
         setChatMessages((_chatMessages) => [..._chatMessages, { userId: body.userId, content: body.content, nickname: body.nickname, createAt: body.createAt }]);
       }
     });
@@ -132,7 +132,7 @@ const ChatPopup = ({ onClose }) => {
 
   const publish = async (message) => {
     if (!client.current.connected) {
-      console.error('WebSocket is not connected');
+      // console.error('WebSocket is not connected');
       return;
     }
     const newMessage = {
@@ -170,7 +170,7 @@ const ChatPopup = ({ onClose }) => {
         throw new Error('Failed to log message to server');
       }
     } catch (error) {
-      console.error('Error logging message to server:', error);
+      // console.error('Error logging message to server:', error);
     }
 
     setMessage("");

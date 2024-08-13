@@ -9,13 +9,13 @@ chrome.storage.local.get('isSync', (data) => {
     });
     chrome.storage.local.set({ isSync: true }, (data) => {
       // if (debug)
-      console.log('BaekjoonHub Synced to local values');
+      // console.log('BaekjoonHub Synced to local values');
     });
   } else {
     // if (debug)
     // console.log('Upload Completed. Local Storage status:', data);
     // if (debug)
-    console.log('BaekjoonHub Local storage already synced!');
+    // console.log('BaekjoonHub Local storage already synced!');
   }
 });
 
@@ -157,7 +157,7 @@ async function getOrgOption() {
   try {
     return await getObjectFromLocalStorage('BaekjoonHub_OrgOption');
   } catch (ex) {
-    console.log('The way it works has changed with updates. Update your storage. ');
+    // console.log('The way it works has changed with updates. Update your storage. ');
     chrome.storage.local.set({ BaekjoonHub_OrgOption: "platform" }, () => {});
     return "platform";
   }

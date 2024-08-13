@@ -57,7 +57,7 @@ async function getProblemDetails() {
   const sampleInput = unescapeHtml(document.getElementById('sample-input-1')?.innerText || 'Empty');
   const sampleOutput = unescapeHtml(document.getElementById('sample-output-1')?.innerText || 'Empty');
   if (problemId && problemDescription) {
-    console.log(`AI 코드 리뷰: 문제 내용을 조회합니다.`);
+    // console.log(`AI 코드 리뷰: 문제 내용을 조회합니다.`);
     return { problemId, problemTitle, problemDescription, problemInput, problemOutput, sampleInput, sampleOutput };
   }
   return {};
@@ -66,9 +66,9 @@ async function getProblemDetails() {
 // sessionStorage에 problemData 저장
 async function saveProblemDetailsToLocal() {
   const problemData = await getProblemDetails();
-  console.log('문제 내용 데이터:', problemData);
+  // console.log('문제 내용 데이터:', problemData);
   sessionStorage.setItem('problemData', JSON.stringify(problemData));
-  console.log('AI 코드 리뷰: 세션 스토리지에 문제 내용을 저장했습니다.');
+  // console.log('AI 코드 리뷰: 세션 스토리지에 문제 내용을 저장했습니다.');
 }
 
 // sessionStorage에서 problemData 로드
@@ -76,10 +76,10 @@ async function loadProblemDetailsFromLocal() {
   return new Promise((resolve) => {
     const problemData = sessionStorage.getItem('problemData');
     if (problemData) {
-      console.log('AI 코드 리뷰: 세션 스토리지에서 문제 내용 불러오기에 성공했습니다.');
+      // console.log('AI 코드 리뷰: 세션 스토리지에서 문제 내용 불러오기에 성공했습니다.');
       resolve(JSON.parse(problemData));
     } else {
-      console.log('AI 코드 리뷰: 세션 스토리지에서 문제 내용 불러오기에 실패했습니다.');
+      // console.log('AI 코드 리뷰: 세션 스토리지에서 문제 내용 불러오기에 실패했습니다.');
       resolve(null);
     }
   });
@@ -97,7 +97,7 @@ async function getSolveDetails() {
   const solveLan = unescapeHtml(document.querySelector('.chosen-single')?.innerText || 'No language available.');
   const solveCode = getCleanedCode();
   if (solveId && solveCode) {
-    console.log('AI 코드 리뷰: 제출 코드을 조회합니다.');
+    // console.log('AI 코드 리뷰: 제출 코드을 조회합니다.');
     return { solveId, solveLan, solveCode };
   }
   return {};
@@ -111,9 +111,9 @@ async function saveSolveDetailsToLocal() {
       // 테스트 할 때는 아래 주석 해제
       // event.preventDefault()
       const solveData = await getSolveDetails();
-      console.log('제출 코드 데이터:', solveData);
+      // console.log('제출 코드 데이터:', solveData);
       sessionStorage.setItem('solveData', JSON.stringify(solveData));
-      console.log('AI 코드 리뷰: 세션 스토리지에 제출 코드를 저장했습니다.');
+      // console.log('AI 코드 리뷰: 세션 스토리지에 제출 코드를 저장했습니다.');
     });
   }
 }
@@ -123,10 +123,10 @@ async function loadSolveDetailsFromLocal() {
   return new Promise((resolve) => {
     const solveData = sessionStorage.getItem('solveData');
     if (solveData) {
-      console.log('AI 코드 리뷰: 세션 스토리지에서 제출 코드 불러오기에 성공했습니다.');
+      // console.log('AI 코드 리뷰: 세션 스토리지에서 제출 코드 불러오기에 성공했습니다.');
       resolve(JSON.parse(solveData));
     } else {
-      console.log('AI 코드 리뷰: 세션 스토리지에서 제출 코드 불러오기에 실패했습니다.');
+      // console.log('AI 코드 리뷰: 세션 스토리지에서 제출 코드 불러오기에 실패했습니다.');
       resolve(null);
     }
   });
@@ -198,7 +198,7 @@ const ProblemPopup = ({ problemData, solveData, onRenderComplete }) => {
     // - 제출 코드의 문제 번호 (solveData.solveId)
     // url에 따라 현재 페이지의 문제 번호를 불러오는 로직이 다르기 때문에, 하드 코딩 필요
     if (problemData.problemId === solveData.solveId) {
-      console.log('AI의 답변: 로드를 시작합니다.');
+      // console.log('AI의 답변: 로드를 시작합니다.');
       const { GoogleGenerativeAI } = require("@google/generative-ai");
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
@@ -261,7 +261,7 @@ const ProblemPopup = ({ problemData, solveData, onRenderComplete }) => {
         const msg = "문제 내용을 바탕으로 내 풀이 코드에서 보완할 점을 알려줘.";
         const result = await chat.sendMessage(msg);
         const answer = result.response.text();
-        console.log('AI의 답변:', answer);
+        // console.log('AI의 답변:', answer);
 
         // 보안 이슈 1 : 마크다운을 HTML로 변환 후, DOMPurify로 정화
         //   dangerouslySetInnerHTML를 사용하기 때문에, XSS 공격의 위험이 있음.
@@ -361,7 +361,7 @@ function renderOverlay(problemData, solveData) {
       onRenderComplete={() => addLanguageToCodeBlocks(popup.document)}
     />);
   } else {
-    console.error('Popup blocked');
+    // console.error('Popup blocked');
   }
 }
 
@@ -382,21 +382,21 @@ async function addButton() {
     };
     li.appendChild(a);
     problemMenu.appendChild(li);
-    console.log('AI 코드 리뷰: 코드 리뷰 버튼이 추가되었습니다.');
+    // console.log('AI 코드 리뷰: 코드 리뷰 버튼이 추가되었습니다.');
   } else {
-    console.log('AI 코드 리뷰: 문제 정보를 찾을 수 없습니다.');
+    // console.log('AI 코드 리뷰: 문제 정보를 찾을 수 없습니다.');
   }
 }
 
 // 공통 로직 실행
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('AI 코드 리뷰: AI 코드 리뷰가 시작되었습니다.');
+  // console.log('AI 코드 리뷰: AI 코드 리뷰가 시작되었습니다.');
   await addButton();
   if (/https:\/\/www\.acmicpc\.net\/problem\/\d+/.test(window.location.href)) {
-    console.log('AI 코드 리뷰: 새 문제가 감지되었습니다.');
+    // console.log('AI 코드 리뷰: 새 문제가 감지되었습니다.');
     await saveProblemDetailsToLocal();
   } else if (/^https:\/\/www\.acmicpc\.net\/submit\/\d+(\/\d+)?$/.test(window.location.href)) {
-    console.log('AI 코드 리뷰: 문제 풀이를 시작합니다.')
+    // console.log('AI 코드 리뷰: 문제 풀이를 시작합니다.')
     await saveSolveDetailsToLocal();
   }
 });
