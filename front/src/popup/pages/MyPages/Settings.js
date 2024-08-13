@@ -4,7 +4,7 @@ import LogoutButton from "../../components/LogoutButton";
 import GroupLeaveButton from '../../components/GroupLeaveButton';
 import WithdrawButton from '../../components/WithdrawButton';
 import ToggleEnableButton from '../../components/ToggleEnableButton';
-import { TextField, Button, Box, Typography, Divider, Switch } from '@mui/material';
+import { TextField, Button, Box, Typography, Divider, Switch, Snackbar, Alert } from '@mui/material';
 import ToggleCharacterButton from '../../components/ToggleCharacterButton';
 import { styled } from '@mui/system';
 import * as styles from './settings.module.css';
@@ -84,6 +84,9 @@ function Settings() {
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [newGroupName, setNewGroupName] = useState(groupInfo?.name || '');
   const [newNickname, setNewNickname] = useState(nickname || '');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
     setNewGroupName(groupInfo?.name || '');
@@ -108,6 +111,13 @@ function Settings() {
 
   const handleGroupNameSubmit = async (e) => {
     e.preventDefault();
+    if (!newGroupName.trim()) {
+      setSnackbarMessage('그룹 이름을 입력하세요.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups`, {
         method: 'PATCH',
@@ -125,13 +135,26 @@ function Settings() {
       const data = await response.json();
       setGroupInfo(prevGroupInfo => ({ ...prevGroupInfo, name: data.data.newName }));
       setIsEditingGroupName(false);
+      setSnackbarMessage('그룹 이름이 성공적으로 변경되었습니다.');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error updating group name:', error);
+      setSnackbarMessage('그룹 이름 변경에 실패했습니다.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   };
 
   const handleNicknameSubmit = async (e) => {
     e.preventDefault();
+    if (!newNickname.trim()) {
+      setSnackbarMessage('닉네임을 입력하세요.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      return;
+    }
+
     try {
       const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/groups/members/nickname`, {
         method: 'POST',
@@ -141,22 +164,30 @@ function Settings() {
         },
         body: JSON.stringify({ newNickname: newNickname, groupId: groupId })
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to update nickname');
       }
-  
-      // 서버 응답을 받은 후 즉시 닉네임 상태를 업데이트
+
       setNickname(newNickname);
       setIsEditingNickname(false);
+      setSnackbarMessage('닉네임이 성공적으로 변경되었습니다.');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
 
-      // members를 다시 가져오는 부분은 필요에 따라 유지
       await fetchMembers();
     } catch (error) {
       console.error('Error updating nickname:', error);
+      setSnackbarMessage('닉네임 변경에 실패했습니다.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   };
-  
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
     <Container>
       <SectionTitle variant="h6" gutterBottom>계정 정보</SectionTitle>
@@ -224,7 +255,7 @@ function Settings() {
       <Box mt={3} mb={3}>
         <SectionTitle variant="h6" gutterBottom>기능 On/Off</SectionTitle>
         <SwitchItem>
-          <Typography variant="body1">백준 기능</Typography>
+          <Typography variant="body1">풀이 기록</Typography>
           <ToggleEnableButton />
         </SwitchItem>
         <SwitchItem>
@@ -246,6 +277,17 @@ function Settings() {
         <SectionTitle variant="h6">회원 탈퇴</SectionTitle>
         <WithdrawButton />
       </SettingItem>
+
+      <Snackbar 
+        open={snackbarOpen} 
+        autoHideDuration={6000} 
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

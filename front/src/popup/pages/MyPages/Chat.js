@@ -28,7 +28,9 @@ const StyledButton = styled(Button)`
   }
 `;
 
-const StyledCard = styled(Card)`
+const StyledCard = styled(({ isOwnMessage, ...otherProps }) => (
+  <Card {...otherProps} />
+))`
   max-width: 80%;
   margin-bottom: 1rem;
   background-color: ${({ isOwnMessage }) => (isOwnMessage ? '#FCE6E0' : 'white')};

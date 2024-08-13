@@ -3,14 +3,17 @@ import { Paper, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import * as styles from './CalendarCell.module.css';
 
-const BaseCalendarCell = styled(Paper)(({ theme, iscurrentmonth, istoday }) => ({
-  backgroundColor: iscurrentmonth ? '' : '#f0f0f0',
-  border: istoday ? '2px solid red' : '1px solid #ccc',
+// DOM으로 전달되지 않도록 prop을 필터링합니다.
+const BaseCalendarCell = styled(({ isCurrentMonth, isToday, ...otherProps }) => (
+  <Paper {...otherProps} />
+))(({ theme, isCurrentMonth, isToday }) => ({
+  backgroundColor: isCurrentMonth ? '' : '#f0f0f0',
+  border: isToday ? '2px solid red' : '1px solid #ccc',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   height: '50px',
-  borderRadius: '10px', /* 모서리가 둥근 사각형으로 변경 */
+  borderRadius: '10px',
   transition: 'background-color 0.3s',
 }));
 
