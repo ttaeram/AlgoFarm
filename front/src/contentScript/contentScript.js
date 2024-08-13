@@ -51,6 +51,17 @@ function applyShakeEffect() {
     });
 })();
 
+// storage 변경 사항을 감지하여 오버레이를 렌더링하거나 제거합니다.
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.showCharacter) {
+        if (changes.showCharacter.newValue === true) {
+            renderOverlay();
+        } else {
+            removeOverlay();
+        }
+    }
+});
+
 document.addEventListener('baekjoonSuccess', (event) => {
     console.log('백준 문제 풀이 성공!');
     confetti({
@@ -110,17 +121,14 @@ style.textContent = `
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'tabChanged') {
-        console.log('Tab changed, executing necessary cleanup or actions');
         removeOverlay();
     }
     if (message.action === 'tabActivated') {
-        console.log('Tab activated, executing specific functionality');
         activateFeature();
     }
 });
 
 function activateFeature() {
-    console.log('Feature activated!');
     chrome.storage.local.get(['showCharacter', 'character'], (result) => {
         if (result.showCharacter === true && result.character) {
             renderOverlay();
