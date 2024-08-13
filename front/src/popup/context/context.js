@@ -242,6 +242,11 @@ export const AuthProvider = ({ children }) => {
     setObjectToChromeStorage(STORAGE_KEYS.CHARACTER, character ? JSON.stringify(character) : null);
   })
 
+  //
+  const disapearCharacter = async() => {
+    await setObjectToChromeStorage('showCharacter', false);
+  }
+
   //logout로직
   const signOut = async () => {
     try {
@@ -368,6 +373,7 @@ export const AuthProvider = ({ children }) => {
       fetchMembers,
       fetchCharacter,
       signOut,
+      disapearCharacter
     }}>
       {children}
     </AuthContext.Provider>

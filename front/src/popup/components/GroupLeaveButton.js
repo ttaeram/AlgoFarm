@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import * as styles from './GroupLeaveButton.module.css';
 
 const GroupLeaveButton = () => {
-  const { jwt, setGroupId, groupId } = useAuth();
+  const { jwt, setGroupId, groupId, disapearCharacter} = useAuth();
   const navigate = useNavigate();
 
   const handleLeaveGroup = async () => {
@@ -32,6 +32,7 @@ const GroupLeaveButton = () => {
       setGroupId('-1');
       // 로그아웃을 원하지 않는다면 아래 줄을 주석 처리
       // signOut();
+      disapearCharacter();
       navigate('/select-group');
     } catch (error) {
       console.error('Error leaving group:', error);
