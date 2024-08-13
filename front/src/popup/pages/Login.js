@@ -2,18 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, getServerUserInfo, exchangeTokenForJwt } from '../auth/auth';
 import { useAuth } from '../context/context';
-import * as styles from "./Login.module.css";
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import { styled } from '@mui/system';
+import { Box, Paper, Typography, Button } from '@mui/material';
+import * as styles from './Login.module.css'; // Assuming you have a CSS file for custom styles
 
+const BackgroundContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+  backgroundImage: `url(${chrome.runtime.getURL('images/AlgoFarmBackground.png')})`, // 여기에 원하는 이미지 경로를 입력하세요
+  backgroundSize: 'cover', // 이미지를 화면에 꽉 차게 설정
+  backgroundPosition: 'center', // 이미지를 화면의 중앙에 배치
+  backgroundRepeat: 'no-repeat', // 이미지 반복을 방지
+});
+
+const StyledPaper = styled(Paper)({
+  padding: 16,
+  maxWidth: 400,
+  width: '100%',
+  textAlign: 'center',
+  backgroundColor: 'transparent',
+  boxShadow: 'none', // 그림자 제거
+});
+
+const LoadingMessage = styled(Typography)({
+  color: '#7c6a6a',
+});
+
+const StyledTitle = styled(Typography)({
+  color: '#6b4f4f',
+  fontWeight: 'bold',
+  marginBottom: 16,
+});
+
+const StyledDescription = styled(Typography)({
+  color: '#6b4f4f',
+  marginBottom: 16,
+});
 
 const Popup = () => {
   const { user, setIsLogined, setUser, setJwt, isLogined, jwt, setGroupId, setGroupInfo, fetchGroupInfo, setCharacter, fetchCharacter } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const checkUserGroupStatus = async () => {
       if (isLogined && jwt) {
@@ -107,28 +139,20 @@ const Popup = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#f0f0f0',
-      }}
-    >
-      <Paper elevation={3} sx={{ padding: 4, maxWidth: 400, width: '100%', textAlign: 'center' }}>
+    <BackgroundContainer>
+      <StyledPaper elevation={0}>
         {isLogined && user ? (
-          <div className={styles.loading}>
-            <Typography variant="h6">로딩 중...</Typography>
+          <div className="loading">
+            <LoadingMessage variant="h6">로딩 중...</LoadingMessage>
           </div>
         ) : (
-          <div className={styles.login}>
-            <Typography variant="h4" component="h1" gutterBottom className={styles.title} sx={{color :'#FD88A0'}}>
-              알고팜
-            </Typography>
-            <div className={styles.algoFarm}>
-              <img src='/images/logo.jpeg' alt='algoFarm' />
-            </div>
+          <div className="login">
+            <StyledTitle variant="h4" component="h1" gutterBottom>
+              반가워요!
+            </StyledTitle>
+            <StyledDescription variant="body1">
+              알고팜과 함께 해요
+            </StyledDescription>
             <Button color="success" variant="outlined" onClick={handleSignIn} disabled={isLoading} className={styles.oauthButton}>
             <svg className={styles.icon} viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
@@ -141,8 +165,8 @@ const Popup = () => {
            </Button>
           </div>
         )}
-      </Paper>
-    </Box>
+      </StyledPaper>
+    </BackgroundContainer>
   );
 };
 
