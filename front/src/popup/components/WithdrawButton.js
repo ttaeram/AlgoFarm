@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import * as styles from './WithdrawButton.module.css';
 
 const WithdrawButton = () => {
-  const { setIsLogined, jwt } = useAuth();
+  const { setIsLogined, jwt, deleteShowCharacterFromChromeLocalStorage} = useAuth();
   const navigate = useNavigate();
 
   const handleWithdraw = async () => {
@@ -18,6 +18,7 @@ const WithdrawButton = () => {
       });
 
       if (response.ok) {
+        deleteShowCharacterFromChromeLocalStorage();
         setIsLogined(false);
         navigate('/');
       } else {
