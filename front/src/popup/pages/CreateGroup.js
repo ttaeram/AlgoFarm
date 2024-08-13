@@ -11,34 +11,48 @@ const StyledContainer = styled(Box)({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '100%',          
-  maxWidth: 500,          
-  height: 500,
-  backgroundColor: '#f5f5f5',
+  width: '100%', // 전체 너비를 유지하려면 이 값을 유지합니다.
+  maxWidth: '500px', // 최대 너비를 500px로 고정합니다.
+  minHeight: '500px', // 최소 높이를 500px로 설정해 크기 변경을 막습니다.
+  height: 'auto', // 높이를 자동으로 설정해 maxWidth에 맞게 조정될 수 있게 합니다.
   borderRadius: 8,
   boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.16)',
-  margin: '0 auto',       
+  margin: '0 auto',
+  backgroundImage: `url(${chrome.runtime.getURL('images/AlgoFarmNoCharacter.png')})`, // 여기에 원하는 이미지 경로를 입력하세요
+  backgroundSize: 'cover', // 이미지를 화면에 꽉 차게 설정
+  backgroundPosition: 'center', // 이미지를 화면의 중앙에 배치
+  backgroundRepeat: 'no-repeat', // 이미지 반복을 방지
 });
 
+
 const HeaderContainer = styled(Box)({
-  position: 'relative',   // 상대 위치 지정
+  position: 'relative', // 부모 컨테이너가 상대 위치를 가지도록 설정
   display: 'flex',
   alignItems: 'center',
   width: '100%',
+  position: 'absolute', // 제목을 절대 위치로 고정
+  top: '16px', // 상단으로부터 16px
+  left: '50%', // 수평으로 중앙 정렬
+  transform: 'translateX(-50%)', // 중앙 정렬 보정
   marginBottom: 24,
+  padding: '16px 0', // 패딩 추가
 });
 
 const StyledTitle = styled(Typography)({
-  position: 'absolute',   // 절대 위치 지정
-  left: '50%',            // 좌측 기준 50%
-  transform: 'translateX(-50%)', // 중앙 정렬
+  position: 'absolute', // 제목을 절대 위치로 고정
+  top: '16px', // 상단으로부터 16px
+  left: '50%', // 수평으로 중앙 정렬
+  transform: 'translateX(-50%)', // 중앙 정렬 보정
   fontWeight: 'bold',
   color: '#FD88A0',
+  zIndex: 1, // 뒤로가기 버튼 위에 위치하도록 설정
 });
 
 const BackButtonContainer = styled(Box)({
   position: 'absolute',
-  left: 0,               // 왼쪽에 배치
+  top: '16px', // 상단으로부터 16px
+  left: '16px', // 왼쪽으로부터 16px
+  zIndex: 2, // 다른 요소들 위에 위치하도록 설정
 });
 
 const StyledForm = styled('form')({
