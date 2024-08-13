@@ -45,7 +45,7 @@ function MemberManage() {
 
   const handleGenerateInviteCode = async () => {
     if (!groupId) {
-      console.error('Group ID is missing');
+      // console.error('Group ID is missing');
       return;
     }
   
@@ -68,14 +68,14 @@ function MemberManage() {
   
       // 클립보드에 초대코드 복사
       await navigator.clipboard.writeText(inviteCode);
-      console.log('Invite code copied to clipboard:', inviteCode);
+      // console.log('Invite code copied to clipboard:', inviteCode);
   
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
       }, 3000);
     } catch (error) {
-      console.error('Error generating invite code:', error);
+      // console.error('Error generating invite code:', error);
     }
   };
 
@@ -96,7 +96,7 @@ function MemberManage() {
 
       await originalFetchMembers(jwt, groupId);
     } catch (error) {
-      console.error('Error kicking member:', error);
+      // console.error('Error kicking member:', error);
     }
   };
 

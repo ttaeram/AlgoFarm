@@ -44,7 +44,7 @@ function applyShakeEffect() {
 }
 
 (async function init() {
-    console.log("Initializing content script");
+    // console.log("Initializing content script");
     chrome.storage.local.get(['showCharacter', 'character'], (result) => {
         if (result.showCharacter === true && result.character) {
             renderOverlay();
@@ -55,7 +55,7 @@ function applyShakeEffect() {
 // storage 변경 사항을 감지하여 오버레이를 렌더링하거나 제거합니다.
 chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local' && changes.showCharacter) {
-        console.log("entry")
+        // console.log("entry")
         if (changes.showCharacter.newValue === true) {
             renderOverlay();
         } else {
@@ -65,7 +65,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 });
 
 document.addEventListener('baekjoonSuccess', (event) => {
-    console.log('백준 문제 풀이 성공!');
+    // console.log('백준 문제 풀이 성공!');
     confetti({
         particleCount: 100,
         spread: 70,

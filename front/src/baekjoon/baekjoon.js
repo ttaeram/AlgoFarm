@@ -9,7 +9,7 @@ const debug = false;
 let loader;
 
 const currentUrl = window.location.href;
-console.log("currentUrl=",currentUrl)
+// console.log("currentUrl=",currentUrl)
 
 // 문제 제출 사이트의 경우에는 로더를 실행하고, 유저 페이지의 경우에는 버튼을 생성한다.
 // 백준 사이트 로그인 상태이면 username이 있으며, 아니면 없다.
@@ -29,7 +29,7 @@ chrome.storage.local.get('isLogined', (result) => {
       else if (currentUrl.match(/\.net\/problem\/\d+/) !== null) parseProblemDescription();
     }
   } else {
-    console.log('사용자가 로그인되지 않았습니다. startLoader를 실행하지 않습니다.');
+    // console.log('사용자가 로그인되지 않았습니다. startLoader를 실행하지 않습니다.');
   }
 });
 
@@ -68,9 +68,9 @@ chrome.storage.local.get('isLogined', (result) => {
             successAni();
             stopLoader();
   
-            console.log('풀이가 맞았습니다. 업로드를 시작합니다.');
+            // console.log('풀이가 맞았습니다. 업로드를 시작합니다.');
             chrome.storage.local.get('Enable', (result) => {
-              console.log('Enable:', result.bjhEnable);
+              // console.log('Enable:', result.bjhEnable);
             });
   
             //startUpload();이거 뭔가요...?
@@ -141,7 +141,7 @@ async function beginUpload(bojData) {
 
     if (cachedSHA == calcSHA) {
       markUploadedCSS(stats.branches, bojData.directory);
-      console.log(`현재 제출번호를 업로드한 기록이 있습니다.` /* submissionID ${bojData.submissionId}` */);
+      // console.log(`현재 제출번호를 업로드한 기록이 있습니다.` /* submissionID ${bojData.submissionId}` */);
       return;
     }
     /*신규 제출 번호라면 새롭게 커밋  */

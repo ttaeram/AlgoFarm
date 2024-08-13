@@ -34,14 +34,14 @@ const GroupContributions = () => {
           }
 
           const data = await response.json();
-          console.log('API 응답 데이터', data);
+          // console.log('API 응답 데이터', data);
           if (data.status === 'OK') {
             setContributions(data.data);
             const maxExperience = Math.max(...data.data.map(c => c.mascotExperience));
             setMascotExperience(maxExperience);
           }
         } catch (error) {
-          console.error('Error fetching contributions:', error);
+          // console.error('Error fetching contributions:', error);
         }
       }
     };

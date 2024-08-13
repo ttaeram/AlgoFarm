@@ -66,7 +66,7 @@ const useCharacter = (size = 120) => {
                 setCharacterState(prev => ({ ...prev, model: arrayBuffer }));
             })
             .catch(error => {
-                console.error('Error loading model:', error);
+                // console.error('Error loading model:', error);
                 setCharacterState(prev => ({ ...prev, isVisible: false }));
             });
     }, [characterState.currentCharacter]);

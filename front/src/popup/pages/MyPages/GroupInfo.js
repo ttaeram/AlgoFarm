@@ -35,7 +35,7 @@ function GroupInfo() {
           const data = await response.json();
           setGrassData(data.data);
         } catch (error) {
-          console.error('Error fetching grass data:', error);
+          // console.error('Error fetching grass data:', error);
         }
       }
     };
