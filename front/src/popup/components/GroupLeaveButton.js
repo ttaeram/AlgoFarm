@@ -22,7 +22,7 @@ const CustomLeaveButton = styled(Button)({
 });
 
 const GroupLeaveButton = () => {
-  const { jwt, setGroupId, groupId } = useAuth();
+  const { jwt, setGroupId, groupId, disappearCharacter} = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 

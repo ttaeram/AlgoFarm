@@ -22,7 +22,7 @@ const CustomWithdrawButton = styled(Button)({
 });
 
 const WithdrawButton = () => {
-  const { setIsLogined, jwt } = useAuth();
+  const { setIsLogined, jwt, deleteShowCharacterFromChromeLocalStorage} = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -45,6 +45,7 @@ const WithdrawButton = () => {
       });
 
       if (response.ok) {
+        deleteShowCharacterFromChromeLocalStorage();
         setIsLogined(false);
         navigate('/');
       } else {
