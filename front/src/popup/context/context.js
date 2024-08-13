@@ -242,6 +242,26 @@ export const AuthProvider = ({ children }) => {
     setObjectToChromeStorage(STORAGE_KEYS.CHARACTER, character ? JSON.stringify(character) : null);
   })
 
+  //회원탈퇴시, 캐릭터 감춤
+  const deleteShowCharacterFromChromeLocalStorage = async() =>{
+    await removeObjectFromChromeStorage('showCharacter');
+  }
+  //그룹탈퇴시, 캐릭터 감춤
+  const disappearCharacter = async() => {
+    await setObjectToChromeStorage('showCharacter', false);
+  }
+
+  const appearCharacter = async() => {
+    let showCharacter;
+    getObjectFromChromeStorage('showCharacter')
+      .then(result => {
+        showCharacter = result;
+        if((showCharacter == undefined) || showCharacter === false){
+          setObjectToChromeStorage('showCharacter', true);
+        }
+      })
+  }
+
   //logout로직
   const signOut = async () => {
     try {
@@ -368,6 +388,9 @@ export const AuthProvider = ({ children }) => {
       fetchMembers,
       fetchCharacter,
       signOut,
+      disappearCharacter,
+      appearCharacter,
+      deleteShowCharacterFromChromeLocalStorage
     }}>
       {children}
     </AuthContext.Provider>
