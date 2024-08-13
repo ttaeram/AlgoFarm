@@ -109,7 +109,7 @@ async function saveSolveDetailsToLocal() {
   if (submitBtn) {
     submitBtn.addEventListener('click', async (event) => {
       // 테스트 할 때는 아래 주석 해제
-      event.preventDefault()
+      // event.preventDefault()
       const solveData = await getSolveDetails();
       console.log('제출 코드 데이터:', solveData);
       sessionStorage.setItem('solveData', JSON.stringify(solveData));
