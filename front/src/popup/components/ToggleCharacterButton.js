@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Switch, FormControlLabel } from '@mui/material';
 import { styled } from '@mui/system';
+import * as styles from './ToggleCharacterButton.module.css';
 
 const GreenSwitch = styled(Switch)(({ theme }) => ({
     '& .MuiSwitch-switchBase.Mui-checked': {
-        color: '#76ff03',
+        color: '#FFC8C6',
         '&:hover': {
             backgroundColor: 'rgba(118, 255, 3, 0.08)',
         },
     },
     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-        backgroundColor: '#76ff03',
+        backgroundColor: '#FFC8C6',
     },
 }));
 
@@ -48,10 +49,13 @@ const ToggleCharacterButton = () => {
     };
 
     return (
-        <FormControlLabel
-            control={<GreenSwitch checked={showCharacter} onChange={handleToggle} />}
-            label={showCharacter ? '캐릭터 표시' : '캐릭터 숨김'}
-        />
+        <div className={styles.button}>
+            <FormControlLabel
+                control={<GreenSwitch checked={showCharacter} onChange={handleToggle} />}
+                label={showCharacter ? '캐릭터 표시' : '캐릭터 숨김'}
+                className={showCharacter ? styles.active : ''}
+            />
+        </div>
     );
 }
 

@@ -47,13 +47,13 @@ const isChromeExtension = () => {
 // 커스터마이징한 스위치 컴포넌트
 const GreenSwitch = styled(Switch)(({ theme }) => ({
   '& .MuiSwitch-switchBase.Mui-checked': {
-    color: '#76ff03',
+    color: '#FFC8C6',
     '&:hover': {
       backgroundColor: 'rgba(118, 255, 3, 0.08)',
     },
   },
   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-    backgroundColor: '#76ff03',
+    backgroundColor: '#FFC8C6',
   },
 }));
 
@@ -86,7 +86,7 @@ const ToggleButton = () => {
     <div className={styles.button}>
       <FormControlLabel
         control={<GreenSwitch checked={enabled} onChange={handleToggle} />}
-        label={enabled ? 'Enable' : 'Disable'}
+        label={enabled ? '기능 사용' : '사용 해제'}
         className={enabled ? styles.active : ''}
       />
     </div>
