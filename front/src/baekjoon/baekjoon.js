@@ -85,7 +85,7 @@ chrome.storage.local.get('isLogined', (result) => {
               if (response && response.token) {
                 // console.log("토큰을 가져왔습니다.")
                 // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
-                fetch(process.env.REACT_APP_SERVER_URL, {
+                fetch(process.env.REACT_APP_SERVER_URL+'/api/commits', {
 
                   method: "POST",
                   headers: {
