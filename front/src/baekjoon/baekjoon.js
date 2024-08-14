@@ -84,10 +84,9 @@ chrome.storage.local.get('isLogined', (result) => {
             chrome.runtime.sendMessage({ action: 'getToken' }, (response) => {
               if (response && response.token) {
                 // console.log("토큰을 가져왔습니다.")
-                // console.log(`indexDB에서 가져온 토큰은? = ${response.token}`);
                 // Fetch 요청을 수행하고, 응답을 콘솔에 출력합니다.
-                // fetch("http:localhost:8080/api/commits", {
-                fetch("https://i11a302.p.ssafy.io/api/commits", {
+                fetch(process.env.REACT_APP_SERVER_URL, {
+
                   method: "POST",
                   headers: {
                     'Content-Type': 'application/json',
