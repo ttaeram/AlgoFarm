@@ -66,7 +66,7 @@
     <tr>
       <td style="text-align: center;">Full-stack</td>
       <td style="text-align: center;">Full-stack / DevOps</td>
-      <td style="text-align: center;">Backend</td>
+      <td style="text-align: center;">Full-stack</td>
       <td style="text-align: center;">Frontend</td>
       <td style="text-align: center;">Frontend / AI</td>
       <td style="text-align: center;">Full-stack</td>
